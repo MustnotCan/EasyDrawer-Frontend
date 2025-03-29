@@ -1,0 +1,20 @@
+.divPdfs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  align-items: center;
+  padding: 10px;
+  justify-content: space-evenly;
+}
+
+.thumbnailPdf {
+  align-content: center;
+}
+.tagFilteringForm {
+  display: flex;
+  width: 100px;
+}
+.tagFilteringFieldSet {
+  width: 100px;
+  max-width: 100px;
+}
