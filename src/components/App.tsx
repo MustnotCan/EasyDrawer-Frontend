@@ -1,40 +1,49 @@
-import { reqBody } from "../utils/queries/booksApi";
-import { tagType } from "../utils/queries/tagsApi";
-import ListItemView from "./CC/CC1/ListItemView";
-import ItemSize from "./CC/CC3/ItemSize";
-import TagFilter from "./CC/CC2/TagFilter";
-import Paginator from "./CC/CC4/Paginator";
-import AddTag from "./CC/CC2/AddTag";
-import type { Route } from "../../.react-router/types/src/+types/root";
-import getData from "../utils/queries/ListItemViewQueries";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-const queryClient = new QueryClient();
-// eslint-disable-next-line react-refresh/only-export-components
-export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  console.log("loader executing", request);
-  return await queryClient.fetchQuery({
-    queryKey: ["books"],
-    queryFn: () => getData({ url: request }),
+import ListItemView from "./ListItemView";
+import ItemSize from "./ItemSize";
+import TagFilter from "./TagFilter";
+import Paginator from "./Paginator";
+import AddTag from "./AddTag";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { getBooks } from "../utils/queries/booksApi";
+import { getTags } from "../utils/queries/tagsApi";
+export default function View() {
+  const [pn, setPn] = useState(1);
+  const [take, setTake] = useState(10);
+  const [tagsFilterBy, setTFB] = useState<string[]>([]);
+  const [searchName, setSearchName] = useState<string>("");
+  const books = useQuery({
+    queryKey: [
+      "books",
+      pn,
+      take,
+      [...tagsFilterBy].sort().join(","),
+      searchName,
+    ],
+    queryFn: ({ queryKey }) => {
+      return getBooks({
+        spp: queryKey[1] as number,
+        spt: queryKey[2] as number,
+        tfb: tagsFilterBy,
+        searchName: queryKey[4] as string,
+      });
+    },
   });
-}
-
-export default function View({ loaderData }: Route.ComponentProps) {
-  const data: { books: reqBody; tags: tagType[] } = loaderData as unknown as {
-    books: reqBody;
-    tags: tagType[];
-  };
+  const tags = useQuery({ queryKey: ["tags"], queryFn: getTags });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <TagFilter tags={data.tags} />
-        <AddTag />
-        <div style={{ flex: 1 }}>
-          <ItemSize />
-          <ListItemView books={data.books.data} tags={data.tags} />
-          <Paginator count={data.books.count} take={data.books.take} />
-        </div>
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <TagFilter tags={tags.data || []} setTFB={setTFB} />
+      <AddTag />
+      <div style={{ flex: 1 }}>
+        <ItemSize setTake={setTake} />
+        <ListItemView
+          books={books.data?.data || []}
+          tags={tags.data || []}
+          setSearchInput={setSearchName}
+        />
+        <Paginator setPn={setPn} count={books.data?.count || 0} />
       </div>
-    </QueryClientProvider>
+    </div>
   );
 }

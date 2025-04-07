@@ -1,12 +1,11 @@
 import { useState } from "react";
-import ItemView, { itemViewProps } from "./CC/CC1/ItemView.tsx";
-import { FileType } from "../../../types/pdfFile.ts";
-import { tagType } from "../../../utils/queries/tagsApi.ts";
-import SearchBar from "./CC/CC2/SearchBar.tsx";
-
+import ItemView from "./ItemView.tsx";
+import { itemViewProps, tagType } from "../types/types.ts";
+import SearchBar from "./SearchBar.tsx";
 export default function ListItemView(args: {
-  books: FileType[];
+  books: itemViewProps[];
   tags: tagType[];
+  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
 
@@ -22,7 +21,7 @@ export default function ListItemView(args: {
         </button>
       </div>
       <div>
-        <SearchBar />
+        <SearchBar setSearchInput={args.setSearchInput} />
         <div className="divPdfs">
           {args.books.map((IV: itemViewProps) => {
             return (

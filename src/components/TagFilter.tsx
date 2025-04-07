@@ -1,9 +1,12 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { removeTag, tagType } from "../../../utils/queries/tagsApi.ts";
+import { removeTag } from "../utils/queries/tagsApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRevalidator } from "react-router-dom";
-
-export default function TagFilter(props: { tags: tagType[] }) {
+import { tagType } from "../types/types";
+export default function TagFilter(props: {
+  tags: tagType[];
+  setTFB: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
   const queryClient = useQueryClient();
   const { revalidate } = useRevalidator();
 
@@ -19,12 +22,12 @@ export default function TagFilter(props: { tags: tagType[] }) {
   };
   const formAction = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(cBoxes);
+    props.setTFB(cBoxes);
   };
   const { mutate } = useMutation({
     mutationFn: (tag: { name: string }) => removeTag(tag),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["books"] });
+      queryClient.refetchQueries({ queryKey: ["tags"] });
       revalidate();
     },
     onError: (err) => {
@@ -43,6 +46,7 @@ export default function TagFilter(props: { tags: tagType[] }) {
                 id={tag.name}
                 name={tag.name}
                 onChange={onChangeHandler}
+                checked={cBoxes.includes(tag.name)}
               />
               {tag.name}
               <button onClick={() => mutate({ name: tag.name })}>rm</button>
@@ -50,6 +54,9 @@ export default function TagFilter(props: { tags: tagType[] }) {
           </div>
         ))}
         <button type="submit">Filter</button>
+        <button type="submit" onClick={() => setCBoxes([])}>
+          Clear Filters
+        </button>
       </form>
     </>
   );

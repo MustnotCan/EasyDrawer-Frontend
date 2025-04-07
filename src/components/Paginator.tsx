@@ -1,6 +1,7 @@
-import { NavLink } from "react-router-dom";
-
-export default function Paginator(props: { count: number; take: number }) {
+export default function Paginator(props: {
+  setPn: React.Dispatch<React.SetStateAction<number>>;
+  count: number;
+}) {
   return (
     <div
       className="pageIndex"
@@ -12,13 +13,9 @@ export default function Paginator(props: { count: number; take: number }) {
     >
       {" "}
       {[...Array(props.count)].map((_, index) => (
-        <NavLink
-          key={index}
-          to={`/books/?take=${props.take}&pn=${index + 1}`}
-          reloadDocument
-        >
+        <h1 key={index} onClick={() => props.setPn(index + 1)}>
           {index + 1}
-        </NavLink>
+        </h1>
       ))}
     </div>
   );

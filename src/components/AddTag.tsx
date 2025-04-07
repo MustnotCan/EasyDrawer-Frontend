@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent } from "react";
-import { addTag } from "../../../utils/queries/tagsApi";
+import { addTag } from "../utils/queries/tagsApi";
 import { useRevalidator } from "react-router-dom";
 
 export default function AddTag() {
@@ -9,7 +9,7 @@ export default function AddTag() {
   const { mutate } = useMutation({
     mutationFn: (tag: { name: string }) => addTag(tag),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
       revalidate();
     },
     onError: (err) => {
