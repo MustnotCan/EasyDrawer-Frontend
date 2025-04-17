@@ -8,9 +8,25 @@ export default function ListItemView(args: {
   setSearchInput: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
-
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const addToSelected = (item: string) => {
+    if (selectedItems.includes(item)) {
+      return;
+    }
+    setSelectedItems((previousItems) => [...previousItems, item]);
+  };
+  const clearSelected = () => setSelectedItems(() => []);
+  const removeFromSelected = (item: string) => {
+    setSelectedItems((previousItems) => [
+      ...previousItems.filter((si) => si != item),
+    ]);
+  };
   return (
     <>
+      <div>
+        Selected:{selectedItems.length}
+        <button onClick={clearSelected}>clear Selected</button>
+      </div>
       <div>
         <button
           onClick={() => {
@@ -24,14 +40,28 @@ export default function ListItemView(args: {
         <SearchBar setSearchInput={args.setSearchInput} />
         <div className="divPdfs">
           {args.books.map((IV: itemViewProps) => {
+            const selected = selectedItems.includes(IV.title);
             return (
-              <ItemView
-                key={IV.path}
-                prop={IV}
-                showFullName={showFullname}
-                existingTags={args.tags}
-                itemTags={IV.tags}
-              />
+              <div key={IV.path}>
+                {selected ? (
+                  <button onClick={() => removeFromSelected(IV.title)}>
+                    Unselect
+                  </button>
+                ) : (
+                  <></>
+                )}
+                <ItemView
+                  addToSelected={addToSelected}
+                  removeFromSelected={removeFromSelected}
+                  itemView={{
+                    prop: IV,
+                    showFullName: showFullname,
+                    existingTags: args.tags,
+                    itemTags: IV.tags,
+                  }}
+                  selected={selected}
+                />
+              </div>
             );
           })}
         </div>

@@ -1,6 +1,7 @@
 export default function Paginator(props: {
   setPn: React.Dispatch<React.SetStateAction<number>>;
   count: number;
+  pn: number;
 }) {
   return (
     <div
@@ -12,11 +13,23 @@ export default function Paginator(props: {
       }}
     >
       {" "}
-      {[...Array(props.count)].map((_, index) => (
-        <h1 key={index} onClick={() => props.setPn(index + 1)}>
-          {index + 1}
-        </h1>
-      ))}
+      {[...Array(props.count)].map((_, index) => {
+        const updatedIndex = index + 1;
+        return (
+          <span
+            key={updatedIndex}
+            hidden={
+              updatedIndex > props.pn + 5 || updatedIndex < props.pn
+                ? true
+                : false
+            }
+            className={updatedIndex == props.pn ? "IsPn" : "NotPn"}
+            onClick={() => props.setPn(updatedIndex)}
+          >
+            {updatedIndex}
+          </span>
+        );
+      })}
     </div>
   );
 }

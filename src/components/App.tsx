@@ -42,7 +42,7 @@ export default function View() {
           tags={tags.data || []}
           setSearchInput={setSearchName}
         />
-        <Paginator setPn={setPn} count={books.data?.count || 0} />
+        <Paginator pn={pn} setPn={setPn} count={books.data?.count || 0} />
       </div>
     </div>
   );

@@ -47,6 +47,7 @@ export default function Menu(props: menuProps) {
       <button onClick={() => removeBooksByNameMutation.mutate(props.name)}>
         remove all books with this name
       </button>
+      <button onClick={() => {}}>download this book</button>
     </div>
   );
 }

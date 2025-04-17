@@ -16,3 +16,13 @@
   width: 100px;
   max-width: 100px;
 }
+.IsPn {
+  color: red;
+}
+.NotPn {
+  color: blue;
+}
+.NotPn:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}

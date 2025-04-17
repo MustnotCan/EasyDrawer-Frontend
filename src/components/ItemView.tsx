@@ -1,33 +1,52 @@
 import Menu from "./Menu";
 import { itemView } from "../types/types";
-export default function ItemView(props: itemView) {
+export default function ItemView(props: {
+  itemView: itemView;
+  addToSelected: (item: string) => void;
+  removeFromSelected: (item: string) => void;
+  selected: boolean;
+}) {
+  let timer = 0;
   return (
-    <div className="divItemView">
+    <div
+      className="divItemView"
+      onMouseDown={() => {
+        timer = Date.now();
+      }}
+      onMouseUp={() => {
+        if (Date.now() - timer > 100) {
+          console.log("test");
+          props.addToSelected(props.itemView.prop.title);
+          timer = 0;
+        }
+      }}
+    >
       {
         <img
           className="thumbnailPdf"
-          src={import.meta.env.VITE_API_IMAGES + props.prop.thumbnail}
-          alt={props.prop.title}
+          src={import.meta.env.VITE_API_IMAGES + props.itemView.prop.thumbnail}
+          alt={props.itemView.prop.title}
         />
       }
       <div>
-        {props.showFullName && (
-          <div className="titlePdf">{props.prop.title}</div>
+        {props.itemView.showFullName && (
+          <div className="titlePdf">{props.itemView.prop.title}</div>
         )}
         <span>
           Liked?:{" "}
-          {props.prop.tags
+          {props.itemView.prop.tags
             .map((tag) => tag.name.toLowerCase())
             .includes("favorite")
             ? "Yes !"
             : "NO !"}
         </span>
+        <span>Am I selected? {props.selected == true ? "SIii" : "Nooo"}</span>
         <Menu
-          name={props.prop.title}
-          tags={props.existingTags}
-          itemTags={props.itemTags}
-          id={props.prop.id}
-          markForLater={props.prop.markForLater}
+          name={props.itemView.prop.title}
+          tags={props.itemView.existingTags}
+          itemTags={props.itemView.itemTags}
+          id={props.itemView.prop.id}
+          markForLater={props.itemView.prop.markForLater}
         />
       </div>
     </div>
