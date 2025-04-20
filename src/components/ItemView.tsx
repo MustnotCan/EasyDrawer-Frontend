@@ -8,27 +8,25 @@ export default function ItemView(props: {
 }) {
   let timer = 0;
   return (
-    <div
-      className="divItemView"
-      onMouseDown={() => {
-        timer = Date.now();
-      }}
-      onMouseUp={() => {
-        if (Date.now() - timer > 100) {
-          console.log("test");
-          props.addToSelected(props.itemView.prop.title);
-          timer = 0;
-        }
-      }}
-    >
+    <div className="menu-container">
       {
         <img
           className="thumbnailPdf"
           src={import.meta.env.VITE_API_IMAGES + props.itemView.prop.thumbnail}
           alt={props.itemView.prop.title}
+          onMouseDown={() => {
+            timer = Date.now();
+          }}
+          onMouseUp={() => {
+            if (Date.now() - timer > 500) {
+              console.log("test");
+              props.addToSelected(props.itemView.prop.title);
+              timer = 0;
+            }
+          }}
         />
       }
-      <div>
+      <div className="overlay">
         {props.itemView.showFullName && (
           <div className="titlePdf">{props.itemView.prop.title}</div>
         )}
@@ -41,6 +39,7 @@ export default function ItemView(props: {
             : "NO !"}
         </span>
         <span>Am I selected? {props.selected == true ? "SIii" : "Nooo"}</span>
+        <button className="menu_button">reveal menu</button>
         <Menu
           name={props.itemView.prop.title}
           tags={props.itemView.existingTags}

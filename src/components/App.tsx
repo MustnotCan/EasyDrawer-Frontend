@@ -30,19 +30,46 @@ export default function View() {
     },
   });
   const tags = useQuery({ queryKey: ["tags"], queryFn: getTags });
+  const alteredSetTFB = (newTfb: string[]) => {
+    const setA = new Set(newTfb);
+    const setB = new Set(tagsFilterBy);
 
+    const noDiff =
+      setA.size === setB.size && [...setA].every((tag) => setB.has(tag));
+
+    if (!noDiff) {
+      setTFB(newTfb);
+      setPn(1);
+    }
+  };
+  const alteredSetTake = (newTake: number) => {
+    if (newTake != take) {
+      setTake(newTake);
+      setPn(1);
+    }
+  };
+  const alteredSetSearchName = (newSearchName: string) => {
+    if (newSearchName != searchName) {
+      setSearchName(newSearchName);
+      setPn(1);
+    }
+  };
   return (
-    <div style={{ display: "flex", flexDirection: "row" }}>
-      <TagFilter tags={tags.data || []} setTFB={setTFB} />
-      <AddTag />
-      <div style={{ flex: 1 }}>
-        <ItemSize setTake={setTake} />
+    <div className="MainView">
+      <div>
+        <TagFilter tags={tags.data || []} setTFB={alteredSetTFB} />
+        <AddTag />
+      </div>
+      <div className="booksView">
+        <ItemSize setTake={alteredSetTake} />
         <ListItemView
           books={books.data?.data || []}
           tags={tags.data || []}
-          setSearchInput={setSearchName}
+          setSearchInput={alteredSetSearchName}
         />
-        <Paginator pn={pn} setPn={setPn} count={books.data?.count || 0} />
+        {books.data?.data.length != 0 && (
+          <Paginator pn={pn} setPn={setPn} count={books.data?.count || 0} />
+        )}
       </div>
     </div>
   );

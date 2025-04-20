@@ -3,7 +3,7 @@ import { FormEvent } from "react";
 export default function SearchBar({
   setSearchInput,
 }: {
-  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
+  setSearchInput: (arg0: string) => void;
 }) {
   const handleSearchByName = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

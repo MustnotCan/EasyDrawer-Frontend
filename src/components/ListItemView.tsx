@@ -1,26 +1,25 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import ItemView from "./ItemView.tsx";
 import { itemViewProps, tagType } from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
 export default function ListItemView(args: {
   books: itemViewProps[];
   tags: tagType[];
-  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
+  setSearchInput: (arg0: string) => void;
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const addToSelected = (item: string) => {
-    if (selectedItems.includes(item)) {
-      return;
-    }
-    setSelectedItems((previousItems) => [...previousItems, item]);
-  };
-  const clearSelected = () => setSelectedItems(() => []);
-  const removeFromSelected = (item: string) => {
-    setSelectedItems((previousItems) => [
-      ...previousItems.filter((si) => si != item),
-    ]);
-  };
+  const addToSelected = useCallback((item: string) => {
+    setSelectedItems((prev) => (prev.includes(item) ? prev : [...prev, item]));
+  }, []);
+
+  const clearSelected = useCallback(() => {
+    setSelectedItems([]);
+  }, []);
+
+  const removeFromSelected = useCallback((item: string) => {
+    setSelectedItems((prev) => prev.filter((si) => si !== item));
+  }, []);
   return (
     <>
       <div>

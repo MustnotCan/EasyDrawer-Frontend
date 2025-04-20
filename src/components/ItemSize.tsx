@@ -1,6 +1,4 @@
-export default function ItemSize(props: {
-  setTake: React.Dispatch<React.SetStateAction<number>>;
-}) {
+export default function ItemSize(props: { setTake: (arg0: number) => void }) {
   return (
     <form>
       <fieldset>

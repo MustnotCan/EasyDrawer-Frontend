@@ -33,9 +33,9 @@ export default function Menu(props: menuProps) {
         borderColor: "red",
         borderStyle: "solid",
       }}
+      className="menu"
     >
       {" "}
-      <TagAdder tags={props.tags} name={props.name} itemTags={props.itemTags} />
       <button
         onClick={() => {
           removeBookByIdMutation.mutate(props.id);
@@ -48,6 +48,7 @@ export default function Menu(props: menuProps) {
         remove all books with this name
       </button>
       <button onClick={() => {}}>download this book</button>
+      <TagAdder tags={props.tags} name={props.name} itemTags={props.itemTags} />
     </div>
   );
 }
