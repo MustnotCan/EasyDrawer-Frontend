@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
-import "./css/index.scss";
+import "./css/index.css";
 ReactDOM.hydrateRoot(
   document,
   <React.StrictMode>

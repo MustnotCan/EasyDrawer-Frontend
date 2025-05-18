@@ -1,3 +1,4 @@
+import { Box, Button, Field, Input, Stack } from "@chakra-ui/react";
 import { FormEvent } from "react";
 
 export default function SearchBar({
@@ -10,15 +11,29 @@ export default function SearchBar({
     const fData = new FormData(e.currentTarget);
     const searchInput = fData.get("searchInput") || "";
     setSearchInput(searchInput.toString());
-    console.log(searchInput);
   };
   return (
-    <search>
+    <Box borderWidth={"thin"} borderColor={"black"} paddingLeft={2}>
       <form onSubmit={handleSearchByName}>
-        <label htmlFor="searchInput">Search book by name: </label>
-        <input type="search" name="searchInput" />
-        <button type="submit">Search</button>
+        <Field.Root>
+          <Stack direction={"row"}>
+            <Field.Label whiteSpace={"nowrap"}>
+              Search books by name:
+            </Field.Label>
+            <Input type="search" name="searchInput" />
+            <Button type="submit" variant={"outline"}>
+              Search
+            </Button>
+            <Button
+              type="reset"
+              variant={"outline"}
+              onClick={() => setSearchInput("")}
+            >
+              Clear
+            </Button>
+          </Stack>
+        </Field.Root>
       </form>
-    </search>
+    </Box>
   );
 }

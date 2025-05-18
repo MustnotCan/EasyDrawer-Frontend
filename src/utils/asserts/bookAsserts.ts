@@ -47,3 +47,30 @@ export function assertIsItemView(iv: unknown): asserts iv is itemViewProps {
     console.error("error happened: ", e);
   }
 }
+export function assertResponseHaveProperties(
+  response: unknown
+): asserts response is { dirs: string[]; files: itemViewProps[] } {
+  try {
+    if (typeof response !== "object" || response === null) {
+      throw new Error("response must be a non-null object");
+    }
+    if (!("dirs" in response) || !Array.isArray(response.dirs)) {
+      throw new Error("response does not have a valid dirs object");
+    }
+    if (!("files" in response) || typeof response.files !== "object") {
+      throw new Error("response does not have a valid files object");
+    }
+    if (!Array.isArray(response.files)) {
+      throw new Error("files Should be an array");
+    }
+    for (const file of response.files) {
+      try {
+        assertIsItemView(file);
+      } catch {
+        console.log("Some item is not a valid ItemView in Multi tagger");
+      }
+    }
+  } catch (e) {
+    console.error("error happened: ", e);
+  }
+}

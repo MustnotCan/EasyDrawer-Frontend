@@ -9,6 +9,7 @@ export type tagAdderProps = {
   name: string;
   tags: tagType[];
   itemTags: tagType[];
+  queryData: unknown[];
 };
 export type itemViewProps = {
   thumbnail: string;
@@ -16,21 +17,23 @@ export type itemViewProps = {
   id: string;
   path: string;
   tags: tagType[];
-  like: boolean;
-  markForLater: boolean;
-  lastOpened: Date;
+  lastOpened: string;
 };
+
 export type itemView = {
   prop: itemViewProps;
   showFullName: boolean;
-  existingTags: tagType[];
   itemTags: tagType[];
 };
 export type menuProps = {
   name: string;
-  tags: tagType[];
   itemTags: tagType[];
   id: string;
-  markForLater: boolean;
+  queryData: unknown[];
 };
-export type reqBody = { data: []; count: number; take: number; pn: number };
+export type reqBody = {
+  data: itemViewProps[];
+  count: number;
+  take: number;
+  pn: number;
+};

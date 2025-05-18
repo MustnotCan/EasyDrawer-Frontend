@@ -1,70 +1,128 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ItemView from "./ItemView.tsx";
-import { itemViewProps, tagType } from "../types/types.ts";
+import { itemViewProps } from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
+import ItemSize from "./ItemSize.tsx";
+import {
+  ActionBar,
+  Box,
+  Button,
+  CloseButton,
+  Portal,
+  Stack,
+} from "@chakra-ui/react";
+
 export default function ListItemView(args: {
   books: itemViewProps[];
-  tags: tagType[];
   setSearchInput: (arg0: string) => void;
+  setTake: (arg0: number) => void;
+  queryData: unknown[];
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
+  //Items are added by title
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const addToSelected = useCallback((item: string) => {
+  const selectionMode = useRef(false);
+  const firstRef = useRef(true);
+  const addToSelected = (item: string) => {
     setSelectedItems((prev) => (prev.includes(item) ? prev : [...prev, item]));
-  }, []);
+  };
 
   const clearSelected = useCallback(() => {
     setSelectedItems([]);
+    selectionMode.current = false;
+    firstRef.current = true;
   }, []);
 
-  const removeFromSelected = useCallback((item: string) => {
-    setSelectedItems((prev) => prev.filter((si) => si !== item));
-  }, []);
+  const removeFromSelected = (item: string) => {
+    setSelectedItems((prev) => {
+      const newList = prev.filter((si) => si !== item);
+      if (newList.length == 0) {
+        selectionMode.current = false;
+        firstRef.current = true;
+      }
+      return newList;
+    });
+  };
+  const toggleSelected = (item: string) => {
+    if (selectedItems.includes(item)) {
+      removeFromSelected(item);
+    } else {
+      addToSelected(item);
+    }
+  };
   return (
     <>
-      <div>
-        Selected:{selectedItems.length}
-        <button onClick={clearSelected}>clear Selected</button>
-      </div>
-      <div>
-        <button
-          onClick={() => {
-            setshowFullname(!showFullname);
-          }}
-        >
-          {showFullname == true ? "Hide" : "Show"} full name
-        </button>
-      </div>
-      <div>
+      <Stack direction={"row"}>
+        <ItemSize setTake={args.setTake} take={args.queryData[1] as number} />
         <SearchBar setSearchInput={args.setSearchInput} />
-        <div className="divPdfs">
+        <ActionBar.Root
+          open={selectedItems.length > 0}
+          closeOnInteractOutside={false}
+        >
+          <Portal>
+            <ActionBar.Positioner>
+              <ActionBar.Content>
+                <ActionBar.SelectionTrigger>
+                  {selectedItems.length} selected
+                </ActionBar.SelectionTrigger>
+                <ActionBar.Separator />
+                <Button variant="outline" size="sm">
+                  Still thinking about buttons
+                </Button>
+                <ActionBar.CloseTrigger asChild onClick={clearSelected}>
+                  <CloseButton size="sm" />
+                </ActionBar.CloseTrigger>
+              </ActionBar.Content>
+            </ActionBar.Positioner>
+          </Portal>
+        </ActionBar.Root>
+
+        <Stack>
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              setshowFullname(!showFullname);
+            }}
+          >
+            {showFullname == true ? "Hide" : "Show"} full name
+          </Button>
+        </Stack>
+      </Stack>
+      <Stack>
+        <Stack direction={"row"} wrap={"wrap"} gap={"4"}>
           {args.books.map((IV: itemViewProps) => {
             const selected = selectedItems.includes(IV.title);
             return (
-              <div key={IV.path}>
-                {selected ? (
-                  <button onClick={() => removeFromSelected(IV.title)}>
-                    Unselect
-                  </button>
-                ) : (
-                  <></>
-                )}
+              <Box
+                key={IV.id}
+                width={"max-content"}
+                justifyItems={"center"}
+                marginRight={"10"}
+                marginTop={"3"}
+                marginLeft={"0"}
+                marginBottom={"5"}
+              >
                 <ItemView
                   addToSelected={addToSelected}
-                  removeFromSelected={removeFromSelected}
+                  toggleSelected={(item: string) => toggleSelected(item)}
                   itemView={{
                     prop: IV,
                     showFullName: showFullname,
-                    existingTags: args.tags,
                     itemTags: IV.tags,
                   }}
                   selected={selected}
+                  isSelectionMode={selectionMode.current}
+                  setSelectionMode={(bool: boolean) =>
+                    (selectionMode.current = bool)
+                  }
+                  isFirst={firstRef}
+                  queryData={args.queryData}
                 />
-              </div>
+              </Box>
             );
           })}
-        </div>
-      </div>
+        </Stack>
+      </Stack>
     </>
   );
 }

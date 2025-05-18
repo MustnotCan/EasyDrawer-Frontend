@@ -1,11 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { addTagsToBook, removeTagsFromBook } from "../utils/queries/booksApi";
-import { useRevalidator } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { tagAdderProps } from "../types/types";
+import { changeTags } from "../utils/queries/booksApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { itemViewProps, reqBody, tagAdderProps } from "../types/types";
+import { Button, Stack } from "@chakra-ui/react";
 export default function TagAdder(props: tagAdderProps) {
   const queryClient = useQueryClient();
-  const { revalidate } = useRevalidator();
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.itemTags.map((iT) => iT.id)
   );
@@ -15,7 +14,6 @@ export default function TagAdder(props: tagAdderProps) {
     setCBoxes((prevCBoxes) => {
       if (prevCBoxes.includes(e.target.id)) {
         setToRemTags((tRT) => {
-          console.log("adding tag", e.target.id);
           return [...tRT, e.target.id];
         });
         return prevCBoxes.filter((cb) => cb !== e.target.id);
@@ -24,18 +22,61 @@ export default function TagAdder(props: tagAdderProps) {
       }
     });
   };
+
+  const { mutate } = useMutation({
+    mutationFn: (args: {
+      addedTags: string[];
+      removedTags: string[];
+      name: string;
+    }) => {
+      const addedTags = args.addedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "add",
+        };
+        return literal;
+      });
+      const removedTags = args.removedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "remove",
+        };
+        return literal;
+      });
+      return changeTags([...addedTags, ...removedTags], args.name);
+    },
+
+    onSuccess: (modifiedBook: itemViewProps) => {
+      queryClient.setQueryData(
+        ["books", ...props.queryData],
+        (prevBooks: reqBody): reqBody => {
+          const newData = prevBooks.data.map((book) => {
+            return book.title === modifiedBook.title
+              ? { ...book, tags: modifiedBook.tags }
+              : book;
+          });
+          return {
+            data: newData,
+            count: newData.length,
+            pn: prevBooks.pn,
+            take: prevBooks.take,
+          };
+        }
+      );
+    },
+  });
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    removeTagsFromBook(Array.from(new Set([...toRemTags])), props.name);
-    await addTagsToBook(cBoxes, props.name);
-    queryClient.refetchQueries({ queryKey: ["books"] });
-    revalidate();
-    console.log("clicking saving");
+    mutate({
+      addedTags: cBoxes,
+      removedTags: Array.from(new Set([...toRemTags])),
+      name: props.name,
+    });
   };
   return (
     <>
       <search>
-        find tag:
+        Find tag:
         <input
           onChange={(e) => {
             e.stopPropagation();
@@ -45,26 +86,35 @@ export default function TagAdder(props: tagAdderProps) {
       </search>
       <form method="post" onSubmit={formAction} id="tagAddingForm">
         <label htmlFor="tags">Tags:</label>
-        <div style={{ overflow: "scroll", height: 100 }}>
+        <Stack overflow={"auto"} maxHeight={"170px"}>
           {props.tags
             .filter((tag) =>
-              searchInput != "" ? tag.name.includes(searchInput) : true
+              searchInput.toLocaleLowerCase() != ""
+                ? tag.name.toLocaleLowerCase().includes(searchInput)
+                : true
             )
-            .map((tag) => (
-              <div key={tag.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    id={tag.id}
-                    onChange={onChangeHandler}
-                    checked={cBoxes.includes(tag.id)}
-                  />
-                  {tag.name}
-                </label>
-              </div>
-            ))}
-        </div>
-        <button type="submit">Save tags</button>
+            .map(
+              (tag) =>
+                tag.name.toLowerCase() != "unclassified" &&
+                tag.name.toLowerCase() != "favorite" && (
+                  <div key={tag.id}>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={tag.id}
+                        onChange={onChangeHandler}
+                        checked={cBoxes.includes(tag.id)}
+                      />
+
+                      {tag.name}
+                    </label>
+                  </div>
+                )
+            )}
+        </Stack>
+        <Button variant={"outline"} type="submit">
+          Save
+        </Button>
       </form>
     </>
   );

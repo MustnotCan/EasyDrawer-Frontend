@@ -1,124 +1,80 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
-import { removeTag, renameTag } from "../utils/queries/tagsApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRevalidator } from "react-router-dom";
+"use client";
+import { FormEvent, useEffect, useState } from "react";
 import { tagType } from "../types/types";
+import { List, Stack, Button } from "@chakra-ui/react";
+import CheckBoxTagFilter from "./CheckBoxTagFilter";
 export default function TagFilter(props: {
   tags: tagType[];
   setTFB: (arg0: string[]) => void;
+  isFavorite: boolean;
 }) {
-  const [cBoxes, setCBoxes] = useState<string[]>([]);
+  const [cBoxes, setCBoxes] = useState<string[]>(
+    props.isFavorite ? ["Favorite"] : []
+  );
 
-  const onChangeHandler = (e: ChangeEvent) => {
-    if (cBoxes?.includes(e.target.id)) {
-      setCBoxes(cBoxes.filter((cb) => cb != e.target.id));
+  useEffect(() => {
+    if (props.isFavorite) {
+      setCBoxes(["Favorite"]);
     } else {
-      const box = cBoxes?.concat([e.target.id]);
+      setCBoxes([]);
+    }
+  }, [props.isFavorite]);
+  const onChangeHandler = (name: string) => {
+    if (cBoxes?.includes(name)) {
+      setCBoxes(cBoxes.filter((cb) => cb != name));
+    } else {
+      const box = cBoxes?.concat([name]);
       setCBoxes(box);
     }
   };
   const formAction = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (cBoxes.includes("Unclassified") && cBoxes.length > 1) {
+      return new Error(
+        "A book cannot be unclassified and have a tag at the same time"
+      );
+    }
     props.setTFB(cBoxes);
   };
-  const clearFilter = () => setCBoxes([]);
+  const clearFilter = () => setCBoxes(props.isFavorite ? ["Favorite"] : []);
+
   return (
-    <div className="tagFilter">
+    <Stack>
       <form
-        className="TagAdderForm"
+        className=""
         method="post"
         onSubmit={formAction}
         id="tagFilteringForm"
       >
         <label htmlFor="tags">Tags:</label>
-        {props.tags.map((tag) => (
-          <div key={tag.id}>
-            <input
-              type="checkbox"
-              id={tag.name}
-              name={tag.name}
-              onChange={onChangeHandler}
-              checked={cBoxes.includes(tag.name)}
-            />
-            <label>{tag.name}</label>
-            <DeleteButton tagName={tag.name} />
-            <RenameButton tagName={tag.name} />
-          </div>
-        ))}
-        <button type="submit">Filter</button>
-        <button type="submit" onClick={clearFilter}>
-          Clear Filters
-        </button>
+        <List.Root
+          variant={"plain"}
+          overflowX={"auto"}
+          maxHeight={"170px"}
+          marginBottom={"5px"}
+        >
+          {props.tags.map((tag) => (
+            <List.Item key={tag.id}>
+              {!(tag.name.toLowerCase() == "favorite" && props.isFavorite) &&
+                !(tag.name.toLowerCase() == "unclassified") && (
+                  <CheckBoxTagFilter
+                    cBoxes={cBoxes}
+                    onChangeHandler={onChangeHandler}
+                    tag={tag}
+                  />
+                )}
+            </List.Item>
+          ))}
+        </List.Root>
+        <Stack direction={"row"} justifyContent={"space-between"}>
+          <Button variant={"outline"} type="submit">
+            Filter
+          </Button>
+          <Button variant={"outline"} type="submit" onClick={clearFilter}>
+            Clear Filters
+          </Button>
+        </Stack>
       </form>
-    </div>
-  );
-}
-export function DeleteButton(prop: { tagName: string }) {
-  const queryClient = useQueryClient();
-  const { revalidate } = useRevalidator();
-  const { mutate } = useMutation({
-    mutationFn: (tag: { name: string }) => removeTag(tag),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["tags"] });
-      revalidate();
-    },
-    onError: (err) => {
-      console.error("Error removing tag:", err);
-    },
-  });
-  const deleteTag = () => mutate({ name: prop.tagName });
-
-  return <button onClick={deleteTag}>remove</button>;
-}
-export function RenameButton(prop: { tagName: string }) {
-  const [renaming, setRenaming] = useState(false);
-  const [newValue, setNewValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
-  const { revalidate } = useRevalidator();
-  const { mutate } = useMutation({
-    mutationFn: (newName: string) =>
-      renameTag({ prevName: prop.tagName, newName: newName }),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["tags"] });
-      revalidate();
-    },
-    onError: (err) => {
-      console.error("Error renaming tag:", err);
-    },
-  });
-  const reNameTagOff: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation();
-    setRenaming(true);
-    console.log(inputRef.current);
-    inputRef?.current?.focus();
-  };
-  const reNameTagOn: React.MouseEventHandler<HTMLButtonElement> = () => {
-    console.log(newValue);
-    mutate(newValue);
-    setRenaming(false);
-  };
-  useEffect(() => {
-    if (renaming && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [renaming]);
-  return (
-    <div>
-      {!renaming && <button onClick={reNameTagOff}>rename</button>}
-      {renaming && (
-        <>
-          <label>New tag name</label>
-          <input
-            onBlur={(e) => {
-              setNewValue(e.currentTarget.value);
-            }}
-            defaultValue={prop.tagName}
-            ref={inputRef}
-          />
-          <button onClick={reNameTagOn}>Done</button>
-        </>
-      )}
-    </div>
+    </Stack>
   );
 }

@@ -1,54 +1,57 @@
 import TagAdder from "./TagAdder";
-import { menuProps } from "../types/types";
-import { removeBookById, removeBookByName } from "../utils/queries/booksApi";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRevalidator } from "react-router-dom";
-export default function Menu(props: menuProps) {
+import { menuProps, tagType } from "../types/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { Menu, Portal } from "@chakra-ui/react";
+import { LuChevronRight } from "react-icons/lu";
+import { CiMenuBurger } from "react-icons/ci";
+
+export default function ItemViewMenu(props: menuProps) {
   const queryClient = useQueryClient();
-  const { revalidate } = useRevalidator();
-  const removeBookByIdMutation = useMutation({
+  /*const removeBookByIdMutation = useMutation({
     mutationFn: (id: string) => removeBookById(id),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["books"] });
+      queryClient.setQueryData(["books", ...props.queryData], (prevData) => {
+        console.log(prevData);
+        console.log(props.queryData);
+      });
       revalidate();
     },
     onError: (err) => {
       console.error("Error removing book by id:", err);
     },
-  });
-  const removeBooksByNameMutation = useMutation({
-    mutationFn: (name: string) => removeBookByName(name),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["books"] });
-      revalidate();
-    },
-    onError: (err) => {
-      console.error("Error removing books by name:", err);
-    },
-  });
+  });*/
+  const tags: tagType[] = queryClient.getQueryData(["tags"]) || [];
   return (
-    <div
-      style={{
-        borderWidth: "5px",
-        borderColor: "red",
-        borderStyle: "solid",
-      }}
-      className="menu"
-    >
-      {" "}
-      <button
-        onClick={() => {
-          removeBookByIdMutation.mutate(props.id);
-          console.log("you are clicking me!");
-        }}
-      >
-        remove this book
-      </button>
-      <button onClick={() => removeBooksByNameMutation.mutate(props.name)}>
-        remove all books with this name
-      </button>
-      <button onClick={() => {}}>download this book</button>
-      <TagAdder tags={props.tags} name={props.name} itemTags={props.itemTags} />
-    </div>
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <CiMenuBurger size="25" />
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <Menu.Item value="rm-file">
+              Bad to remove a file from here
+            </Menu.Item>
+            <Menu.Root positioning={{ placement: "right-start", gutter: 2 }}>
+              <Menu.TriggerItem>
+                Change Tags <LuChevronRight />
+              </Menu.TriggerItem>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <TagAdder
+                      itemTags={props.itemTags}
+                      tags={tags}
+                      name={props.name}
+                      queryData={props.queryData}
+                    />
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   );
 }

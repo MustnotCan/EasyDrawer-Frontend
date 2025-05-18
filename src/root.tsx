@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { Provider } from "./ui/provider.tsx";
+
 const queryClient = new QueryClient();
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,7 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>My App</title>
+        <title>Pdf Management App</title>
         <Meta />
         <Links />
       </head>
@@ -22,9 +24,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function Root() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Outlet />
-    </QueryClientProvider>
+    <Provider>
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+      </QueryClientProvider>
+    </Provider>
   );
 }
 export function HydrateFallback() {
