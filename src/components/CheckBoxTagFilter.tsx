@@ -26,6 +26,7 @@ export default function CheckBoxTagFilter({
           onClick={() => onChangeHandler(tag.name)}
           id={tag.name}
           variant={"outline"}
+          form="tagFilteringForm"
         >
           <Checkbox.Control />
           <Checkbox.Label>

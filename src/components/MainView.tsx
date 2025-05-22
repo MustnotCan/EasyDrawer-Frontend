@@ -60,7 +60,6 @@ export default function View() {
         tfb: queryKey[3] as unknown as string[],
         searchName: queryKey[4] as string,
       });
-      console.log(res);
       return res;
     },
   });

@@ -25,15 +25,34 @@ export type itemView = {
   showFullName: boolean;
   itemTags: tagType[];
 };
+export type ItemViewProps = {
+  itemView: itemView;
+  queryData: unknown[];
+};
 export type menuProps = {
   name: string;
   itemTags: tagType[];
   id: string;
   queryData: unknown[];
+  downloadPath: string;
 };
 export type reqBody = {
   data: itemViewProps[];
   count: number;
   take: number;
   pn: number;
+};
+export type taggedTags = {
+  id: string;
+  action: string;
+};
+export type multiTaggerFileProps = { item: itemViewProps };
+export type multiTaggerFolderProps = {
+  setDir: React.Dispatch<React.SetStateAction<string[]>>;
+  item: string;
+  path: string;
+};
+export type selectedItem = {
+  path: string;
+  type: string;
 };

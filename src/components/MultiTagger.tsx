@@ -2,16 +2,21 @@
 //renaming deleting and everything that's supposed to be in a file browser
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { getBooks, getFilesInDir } from "../utils/queries/booksApi";
-import { getTags } from "../utils/queries/tagsApi";
-import { THUMBS_URL } from "../utils/envVar";
+import { Fragment, useState } from "react";
+import { getFilesInDir } from "../utils/queries/booksApi";
 import { Breadcrumb, Stack } from "@chakra-ui/react";
+import { MultiTaggerFile } from "./MultiTaggerFile";
+import { MultiTaggerFolder } from "./MultiTaggerFolder";
+import { ItemContainer } from "./ItemContainer";
+import { selectedItem } from "@/types/types";
+import { ItemContainerActionBar } from "./ItemContainerActionBar";
 
 export default function MultiTagger() {
-  const [pn, setPn] = useState(1);
-  const [take, setTake] = useState(10);
+  const [pn] = useState(1);
+  const [take] = useState(10);
   const [dirs, setDir] = useState<string[]>([""]);
+  const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
+
   const data = useQuery({
     queryKey: ["Dirs&files", dirs, pn, take],
     queryFn: ({ queryKey }) => {
@@ -26,12 +31,12 @@ export default function MultiTagger() {
   return (
     <>
       <Stack direction={"column"}>
-        <Breadcrumb.Root variant={"underline"}>
+        <Breadcrumb.Root variant={"plain"}>
           <Breadcrumb.List>
             {dirs.map((dir, index) => (
-              <>
+              <Fragment key={dir}>
                 <Breadcrumb.Item
-                  key={dir}
+                  className="hover:cursor-pointer"
                   onClick={() =>
                     setDir((prev) => {
                       const indexOfDir = prev.indexOf(dir);
@@ -42,42 +47,51 @@ export default function MultiTagger() {
                   {index == 0 ? "root" : dir}
                 </Breadcrumb.Item>
                 <Breadcrumb.Separator />
-              </>
+              </Fragment>
             ))}
           </Breadcrumb.List>
         </Breadcrumb.Root>
         <Stack>
           <Stack direction={"row"} wrap={"wrap"}>
-            {data.data?.map((value, index) => {
-              if (typeof value == "string") {
-                return (
-                  <div
-                    style={{
-                      borderStyle: "solid",
-                      margin: "10px",
-                      height: "20px",
-                    }}
-                    key={value}
-                    onClick={() => setDir((dirs) => [...dirs, value])}
-                  >
-                    {index}-{value}
-                  </div>
-                );
-              } else {
-                return (
-                  <div key={value.id}>
-                    {" "}
-                    <img
-                      src={THUMBS_URL + value.thumbnail}
-                      alt={value.title}
-                    ></img>
-                    <label>{value.title}</label>
-                  </div>
-                );
-              }
+            {data.data?.map((item) => {
+              const selected = selectedItems
+                .filter(
+                  (i) =>
+                    i.type === (typeof item == "string" ? "folder" : "file")
+                )
+                .map((i) => i.path)
+                .includes(typeof item === "string" ? item : item.title);
+              return (
+                <Stack
+                  className="hover:cursor-pointer"
+                  key={typeof item == "string" ? item : item.id}
+                >
+                  <ItemContainer
+                    children={
+                      typeof item == "string" ? (
+                        <MultiTaggerFolder
+                          item={item}
+                          setDir={setDir}
+                          path={[...dirs, item].join("/")}
+                        />
+                      ) : (
+                        <MultiTaggerFile item={item} />
+                      )
+                    }
+                    selected={selected}
+                    selectedItems={selectedItems}
+                    setSelectedItems={setSelectedItems}
+                  />
+                </Stack>
+              );
             })}
           </Stack>
         </Stack>
+        <ItemContainerActionBar
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
+          ItemContainerParent={MultiTagger.name}
+        />
       </Stack>
     </>
   );

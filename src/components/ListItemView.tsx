@@ -1,16 +1,11 @@
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import ItemView from "./ItemView.tsx";
-import { itemViewProps } from "../types/types.ts";
+import { itemViewProps, selectedItem } from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
 import ItemSize from "./ItemSize.tsx";
-import {
-  ActionBar,
-  Box,
-  Button,
-  CloseButton,
-  Portal,
-  Stack,
-} from "@chakra-ui/react";
+import { Box, Button, Stack } from "@chakra-ui/react";
+import { ItemContainer } from "./ItemContainer.tsx";
+import { ItemContainerActionBar } from "./ItemContainerActionBar.tsx";
 
 export default function ListItemView(args: {
   books: itemViewProps[];
@@ -19,63 +14,12 @@ export default function ListItemView(args: {
   queryData: unknown[];
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
-  //Items are added by title
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const selectionMode = useRef(false);
-  const firstRef = useRef(true);
-  const addToSelected = (item: string) => {
-    setSelectedItems((prev) => (prev.includes(item) ? prev : [...prev, item]));
-  };
-
-  const clearSelected = useCallback(() => {
-    setSelectedItems([]);
-    selectionMode.current = false;
-    firstRef.current = true;
-  }, []);
-
-  const removeFromSelected = (item: string) => {
-    setSelectedItems((prev) => {
-      const newList = prev.filter((si) => si !== item);
-      if (newList.length == 0) {
-        selectionMode.current = false;
-        firstRef.current = true;
-      }
-      return newList;
-    });
-  };
-  const toggleSelected = (item: string) => {
-    if (selectedItems.includes(item)) {
-      removeFromSelected(item);
-    } else {
-      addToSelected(item);
-    }
-  };
+  const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
   return (
     <>
       <Stack direction={"row"}>
         <ItemSize setTake={args.setTake} take={args.queryData[1] as number} />
         <SearchBar setSearchInput={args.setSearchInput} />
-        <ActionBar.Root
-          open={selectedItems.length > 0}
-          closeOnInteractOutside={false}
-        >
-          <Portal>
-            <ActionBar.Positioner>
-              <ActionBar.Content>
-                <ActionBar.SelectionTrigger>
-                  {selectedItems.length} selected
-                </ActionBar.SelectionTrigger>
-                <ActionBar.Separator />
-                <Button variant="outline" size="sm">
-                  Still thinking about buttons
-                </Button>
-                <ActionBar.CloseTrigger asChild onClick={clearSelected}>
-                  <CloseButton size="sm" />
-                </ActionBar.CloseTrigger>
-              </ActionBar.Content>
-            </ActionBar.Positioner>
-          </Portal>
-        </ActionBar.Root>
 
         <Stack>
           <Button
@@ -91,7 +35,10 @@ export default function ListItemView(args: {
       <Stack>
         <Stack direction={"row"} wrap={"wrap"} gap={"4"}>
           {args.books.map((IV: itemViewProps) => {
-            const selected = selectedItems.includes(IV.title);
+            const selected = selectedItems
+              .filter((i) => i.type == "file")
+              .map((item) => item.path)
+              .includes(IV.title);
             return (
               <Box
                 key={IV.id}
@@ -102,26 +49,30 @@ export default function ListItemView(args: {
                 marginLeft={"0"}
                 marginBottom={"5"}
               >
-                <ItemView
-                  addToSelected={addToSelected}
-                  toggleSelected={(item: string) => toggleSelected(item)}
-                  itemView={{
-                    prop: IV,
-                    showFullName: showFullname,
-                    itemTags: IV.tags,
-                  }}
+                <ItemContainer
                   selected={selected}
-                  isSelectionMode={selectionMode.current}
-                  setSelectionMode={(bool: boolean) =>
-                    (selectionMode.current = bool)
+                  setSelectedItems={setSelectedItems}
+                  selectedItems={selectedItems}
+                  children={
+                    <ItemView
+                      itemView={{
+                        prop: IV,
+                        showFullName: showFullname,
+                        itemTags: IV.tags,
+                      }}
+                      queryData={args.queryData}
+                    />
                   }
-                  isFirst={firstRef}
-                  queryData={args.queryData}
-                />
+                ></ItemContainer>
               </Box>
             );
           })}
         </Stack>
+        <ItemContainerActionBar
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
+          ItemContainerParent={ListItemView.name}
+        />
       </Stack>
     </>
   );

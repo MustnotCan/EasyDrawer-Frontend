@@ -1,9 +1,11 @@
+import { taggedTags } from "@/types/types.ts";
 import {
   assertBookHaveProperties,
   assertIsItemView,
   assertResponseHaveProperties,
 } from "../asserts/bookAsserts";
 import { BOOKS_URL } from "../envVar.ts";
+
 export async function getBooks(data: {
   spt: number;
   spp: number;
@@ -21,10 +23,6 @@ export async function getBooks(data: {
   return body;
 }
 
-type taggedTags = {
-  id: string;
-  action: string;
-};
 export async function changeTags(changedTags: taggedTags[], bookName: string) {
   const body = { tags: changedTags, title: bookName };
   const response = await (
@@ -89,5 +87,22 @@ export async function getFilesInDir(props: {
     console.log(
       "Error happened while getting files in :" + `${props.dirs.join("/")}`
     );
+  }
+}
+export async function downloadingBook(url: string, fileName: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    }
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const tempLink = document.createElement("a");
+    tempLink.href = blobUrl;
+    tempLink.download = fileName;
+    tempLink.dispatchEvent(new MouseEvent("click"));
+    URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Error downloading file:", error);
   }
 }

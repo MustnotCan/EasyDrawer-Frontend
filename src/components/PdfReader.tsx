@@ -2,18 +2,22 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 export default function PdfReader() {
-  // This route will display the PDF
   const params = useParams();
+
   useEffect(() => {
-    console.log(params);
-  });
+    document.title =
+      params.path?.slice(params.path?.lastIndexOf("/") + 1) || "PDF Viewer";
+  }, [params.path]);
+
   return (
-    <iframe
-      src={params.path}
-      width="100%"
-      height="800px"
-      title="PDF Viewer"
-      style={{ border: "none" }}
-    />
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <iframe
+        src={`${import.meta.env.VITE_API_MAIN}pdfs/` + params.path}
+        width="100%"
+        height="1000px"
+        title="PDF Viewer"
+        style={{ width: "100vw", height: "46.4vw" }}
+      />
+    </div>
   );
 }
