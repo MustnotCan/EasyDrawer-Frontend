@@ -32,12 +32,7 @@ export default function ItemView(props: ItemViewProps) {
               ? { ...book, tags: modifiedBook.tags }
               : book;
           });
-          return {
-            data: newData,
-            count: prevBooks.count,
-            pn: prevBooks.pn,
-            take: prevBooks.take,
-          };
+          return { ...prevBooks, data: newData };
         }
       );
     },
@@ -91,11 +86,7 @@ export default function ItemView(props: ItemViewProps) {
           downloadPath={
             `${import.meta.env.VITE_API_MAIN}pdfs/` +
             encodeURIComponent(
-              props.itemView.prop.path.slice(
-                "/home/saifparrot/Documents/Learn/".length
-              ) +
-                "/" +
-                props.itemView.prop.title
+              props.itemView.prop.path + "/" + props.itemView.prop.title
             )
           }
         />

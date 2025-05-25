@@ -71,7 +71,7 @@ export default function ListItemView(args: {
         <ItemContainerActionBar
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
-          ItemContainerParent={ListItemView.name}
+          ItemContainerParent={"ListItemView"}
         />
       </Stack>
     </>

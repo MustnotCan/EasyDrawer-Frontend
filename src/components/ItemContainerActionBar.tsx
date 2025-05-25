@@ -18,6 +18,7 @@ export function ItemContainerActionBar(props: {
   );
   type props = { ItemContainerParent: string };
   const Actions: FC<props> = (props: props) => {
+    console.log("item container parent", props.ItemContainerParent);
     if (props.ItemContainerParent == "MultiTagger") {
       return (
         <>

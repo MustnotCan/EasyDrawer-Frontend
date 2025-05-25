@@ -1,4 +1,3 @@
-"use client";
 import { FormEvent, useEffect, useState } from "react";
 import { tagType } from "../types/types";
 import { List, Stack, Button } from "@chakra-ui/react";

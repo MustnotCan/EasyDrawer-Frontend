@@ -10,7 +10,11 @@ export default function TagAdder(props: tagAdderProps) {
   );
   const [searchInput, setSearchInput] = useState<string>("");
   const [toRemTags, setToRemTags] = useState<string[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    if (setIsSaved) {
+      setIsSaved(false);
+    }
     setCBoxes((prevCBoxes) => {
       if (prevCBoxes.includes(e.target.id)) {
         setToRemTags((tRT) => {
@@ -55,14 +59,10 @@ export default function TagAdder(props: tagAdderProps) {
               ? { ...book, tags: modifiedBook.tags }
               : book;
           });
-          return {
-            data: newData,
-            count: newData.length,
-            pn: prevBooks.pn,
-            take: prevBooks.take,
-          };
+          return { ...prevBooks, data: newData };
         }
       );
+      setIsSaved(true);
     },
   });
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
@@ -115,6 +115,7 @@ export default function TagAdder(props: tagAdderProps) {
         <Button variant={"outline"} type="submit">
           Save
         </Button>
+        {isSaved && <h1 className="bg-green-300">saved</h1>}
       </form>
     </>
   );

@@ -12,7 +12,7 @@ export default function PdfReader() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <iframe
-        src={`${import.meta.env.VITE_API_MAIN}pdfs/` + params.path}
+        src={`${import.meta.env.VITE_API_MAIN}pdfs` + params.path}
         width="100%"
         height="1000px"
         title="PDF Viewer"

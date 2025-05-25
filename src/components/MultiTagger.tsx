@@ -54,13 +54,29 @@ export default function MultiTagger() {
         <Stack>
           <Stack direction={"row"} wrap={"wrap"}>
             {data.data?.map((item) => {
-              const selected = selectedItems
-                .filter(
-                  (i) =>
-                    i.type === (typeof item == "string" ? "folder" : "file")
-                )
-                .map((i) => i.path)
-                .includes(typeof item === "string" ? item : item.title);
+              const selected =
+                selectedItems
+                  .filter(
+                    (i) =>
+                      i.type === (typeof item == "string" ? "folder" : "file")
+                  )
+                  .map((i) => i.path)
+                  .includes(
+                    typeof item === "string"
+                      ? [...dirs].join("/") + item
+                      : item.path + "/" + item.title
+                  ) ||
+                selectedItems.includes(
+                  typeof item == "string"
+                    ? {
+                        type: "folder",
+                        path: item.slice(0, item.lastIndexOf("/")),
+                      }
+                    : {
+                        type: "folder",
+                        path: item.path,
+                      }
+                );
               return (
                 <Stack
                   className="hover:cursor-pointer"
@@ -90,7 +106,7 @@ export default function MultiTagger() {
         <ItemContainerActionBar
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
-          ItemContainerParent={MultiTagger.name}
+          ItemContainerParent={"MultiTagger"}
         />
       </Stack>
     </>

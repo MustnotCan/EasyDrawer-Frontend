@@ -27,7 +27,6 @@ export function ItemContainer(props: {
           props.selectedItems,
           props.setSelectedItems
         );
-        console.log("hi", props.selectedItems);
       } else if (isMultiTaggerFileProps(props.children)) {
         toggleSelected(
           {
@@ -43,8 +42,7 @@ export function ItemContainer(props: {
       } else if (isMultiTaggerFolderProps(props.children)) {
         toggleSelected(
           {
-            path:
-              "/home/saifparrot/Documents/Learn" + props.children.props.path,
+            path: props.children.props.path,
             type: "folder",
           },
           props.selectedItems,
@@ -52,7 +50,6 @@ export function ItemContainer(props: {
         );
       }
     }
-    console.log(props.selectedItems);
   };
 
   const onDoubleClickHandler = (
@@ -60,25 +57,15 @@ export function ItemContainer(props: {
   ) => {
     if (!e.ctrlKey) {
       if (isItemView(props.children)) {
-        const encodedUri = encodeURIComponent(
-          props.children.props.itemView.prop.path.slice(
-            "/home/saifparrot/Documents/Learn/".length
-          ) +
-            "/" +
-            props.children.props.itemView.prop.title
-        );
+        const prop = props.children.props.itemView.prop;
+        const encodedUri = encodeURIComponent(prop.path + "/" + prop.title);
         window.open(
           "http://" + location.host + `/pdfreader/${encodedUri}`,
           "_blank"
         );
       } else if (isMultiTaggerFileProps(props.children)) {
-        const encodedUri = encodeURIComponent(
-          props.children.props.item.path.slice(
-            "/home/saifparrot/Documents/Learn/".length
-          ) +
-            "/" +
-            props.children.props.item.title
-        );
+        const prop = props.children.props.item;
+        const encodedUri = encodeURIComponent(prop.path + "/" + prop.title);
         window.open(
           "http://" + location.host + `/pdfreader/${encodedUri}`,
           "_blank"
