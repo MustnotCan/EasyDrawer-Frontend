@@ -1,3 +1,4 @@
+import { Stack } from "@chakra-ui/react";
 import {
   itemView,
   multiTaggerFileProps,
@@ -80,15 +81,19 @@ export function ItemContainer(props: {
 
   return (
     <>
-      <div
+      <Stack
         className={
           "hover:cursor-pointer " + (props.selected ? "opacity-50" : "")
         }
-        onClick={(e) => clickHandler(e)}
-        onDoubleClick={(e) => onDoubleClickHandler(e)}
+        onClick={(e) => {
+          clickHandler(e);
+        }}
+        onDoubleClick={(e) => {
+          onDoubleClickHandler(e);
+        }}
       >
         {props.children}
-      </div>
+      </Stack>
     </>
   );
 }

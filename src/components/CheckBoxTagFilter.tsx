@@ -29,7 +29,7 @@ export default function CheckBoxTagFilter({
           form="tagFilteringForm"
         >
           <Checkbox.Control />
-          <Checkbox.Label>
+          <Checkbox.Label height={"30px"} width={"80px"}>
             <Tooltip content={tag.name}>
               <Box
                 maxWidth="100px"

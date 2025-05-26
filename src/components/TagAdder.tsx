@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { changeTags } from "../utils/queries/booksApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { itemViewProps, reqBody, tagAdderProps } from "../types/types";
-import { Button, Stack } from "@chakra-ui/react";
+import { Button, Input, Stack } from "@chakra-ui/react";
 export default function TagAdder(props: tagAdderProps) {
   const queryClient = useQueryClient();
   const [cBoxes, setCBoxes] = useState<string[]>(
@@ -74,16 +74,21 @@ export default function TagAdder(props: tagAdderProps) {
     });
   };
   return (
-    <>
-      <search>
-        Find tag:
-        <input
+    <Stack
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      <Stack>
+        <label>Find tag:</label>
+        <Input
+          className="border-4 border-black "
+          placeholder="Type here..."
           onChange={(e) => {
             e.stopPropagation();
             setSearchInput(e.target.value);
           }}
-        ></input>
-      </search>
+        />
+      </Stack>
       <form method="post" onSubmit={formAction} id="tagAddingForm">
         <label htmlFor="tags">Tags:</label>
         <Stack overflow={"auto"} maxHeight={"170px"}>
@@ -117,6 +122,6 @@ export default function TagAdder(props: tagAdderProps) {
         </Button>
         {isSaved && <h1 className="bg-green-300">saved</h1>}
       </form>
-    </>
+    </Stack>
   );
 }

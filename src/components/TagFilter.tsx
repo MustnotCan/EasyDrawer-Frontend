@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { tagType } from "../types/types";
-import { List, Stack, Button } from "@chakra-ui/react";
+import { List, Stack, Button, Input } from "@chakra-ui/react";
 import CheckBoxTagFilter from "./CheckBoxTagFilter";
 export default function TagFilter(props: {
   tags: tagType[];
@@ -10,6 +10,7 @@ export default function TagFilter(props: {
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.isFavorite ? ["Favorite"] : []
   );
+  const [searchInput, setSearchInput] = useState<string>("");
 
   useEffect(() => {
     if (props.isFavorite) {
@@ -39,6 +40,17 @@ export default function TagFilter(props: {
 
   return (
     <Stack>
+      <Stack>
+        <label>Filter tags:</label>
+        <Input
+          className="border-4 border-black "
+          placeholder="Type here..."
+          onChange={(e) => {
+            e.stopPropagation();
+            setSearchInput(e.target.value);
+          }}
+        />
+      </Stack>
       <form
         className=""
         method="post"
@@ -49,13 +61,17 @@ export default function TagFilter(props: {
         <List.Root
           variant={"plain"}
           overflowX={"auto"}
-          maxHeight={"170px"}
+          maxHeight={"175px"}
+          alignContent={"space-evenly"}
           marginBottom={"5px"}
         >
           {props.tags.map((tag) => (
             <List.Item key={tag.id}>
               {!(tag.name.toLowerCase() == "favorite" && props.isFavorite) &&
-                !(tag.name.toLowerCase() == "unclassified") && (
+                !(tag.name.toLowerCase() == "unclassified") &&
+                (searchInput.toLocaleLowerCase() != ""
+                  ? tag.name.toLocaleLowerCase().includes(searchInput)
+                  : true) && (
                   <CheckBoxTagFilter
                     cBoxes={cBoxes}
                     onChangeHandler={onChangeHandler}

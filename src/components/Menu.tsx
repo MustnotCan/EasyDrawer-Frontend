@@ -26,7 +26,7 @@ export default function ItemViewMenu(props: menuProps) {
   const tags: tagType[] = queryClient.getQueryData(["tags"]) || [];
   return (
     <Menu.Root>
-      <Menu.Trigger asChild>
+      <Menu.Trigger asChild onDoubleClick={(e) => e.stopPropagation()}>
         <CiMenuBurger size="25" />
       </Menu.Trigger>
       <Portal>
@@ -42,7 +42,7 @@ export default function ItemViewMenu(props: menuProps) {
               <FaDownload /> Download
             </Menu.Item>
             <Menu.Root positioning={{ placement: "right-start", gutter: 2 }}>
-              <Menu.TriggerItem>
+              <Menu.TriggerItem onDoubleClick={(e) => e.stopPropagation()}>
                 Change Tags <LuChevronRight />
               </Menu.TriggerItem>
               <Portal>
