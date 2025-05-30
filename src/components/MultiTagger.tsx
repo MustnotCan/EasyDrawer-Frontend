@@ -16,6 +16,7 @@ export default function MultiTagger() {
   const [take] = useState(10);
   const [dirs, setDir] = useState<string[]>([""]);
   const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
+  const [unSelectedItems, setUnSelectedItems] = useState<selectedItem[]>([]);
 
   const data = useQuery({
     queryKey: ["Dirs&files", dirs, pn, take],
@@ -54,29 +55,6 @@ export default function MultiTagger() {
         <Stack>
           <Stack direction={"row"} wrap={"wrap"}>
             {data.data?.map((item) => {
-              const selected =
-                selectedItems
-                  .filter(
-                    (i) =>
-                      i.type === (typeof item == "string" ? "folder" : "file")
-                  )
-                  .map((i) => i.path)
-                  .includes(
-                    typeof item === "string"
-                      ? [...dirs].join("/") + item
-                      : item.path + "/" + item.title
-                  ) ||
-                selectedItems.includes(
-                  typeof item == "string"
-                    ? {
-                        type: "folder",
-                        path: item.slice(0, item.lastIndexOf("/")),
-                      }
-                    : {
-                        type: "folder",
-                        path: item.path,
-                      }
-                );
               return (
                 <Stack
                   className="hover:cursor-pointer"
@@ -94,9 +72,10 @@ export default function MultiTagger() {
                         <MultiTaggerFile item={item} />
                       )
                     }
-                    selected={selected}
                     selectedItems={selectedItems}
+                    unSelectedItems={unSelectedItems}
                     setSelectedItems={setSelectedItems}
+                    setUnSelectedItems={setUnSelectedItems}
                   />
                 </Stack>
               );
@@ -107,6 +86,7 @@ export default function MultiTagger() {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           ItemContainerParent={"MultiTagger"}
+          setUnselectedItems={setUnSelectedItems}
         />
       </Stack>
     </>

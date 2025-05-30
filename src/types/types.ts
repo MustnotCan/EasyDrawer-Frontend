@@ -6,10 +6,10 @@ export type FileType = {
   tags: tagType[];
 };
 export type tagAdderProps = {
-  name: string;
+  name?: string;
   tags: tagType[];
   itemTags: tagType[];
-  queryData: unknown[];
+  queryData?: unknown[];
 };
 export type itemViewProps = {
   thumbnail: string;

@@ -76,9 +76,7 @@ export async function getFilesInDir(props: {
           }&take=${props.take}`
       )
     ).json();
-    console.log(response);
     assertResponseHaveProperties(response);
-
     return [
       ...response.dirs.map((dir) =>
         dir.replace(dir.slice(0, dir.lastIndexOf("/") + 1), "")

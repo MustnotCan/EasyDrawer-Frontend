@@ -35,10 +35,6 @@ export default function ListItemView(args: {
       <Stack>
         <Stack direction={"row"} wrap={"wrap"} gap={"4"}>
           {args.books.map((IV: itemViewProps) => {
-            const selected = selectedItems
-              .filter((i) => i.type == "file")
-              .map((item) => item.path)
-              .includes(IV.title);
             return (
               <Box
                 key={IV.id}
@@ -50,9 +46,10 @@ export default function ListItemView(args: {
                 marginBottom={"5"}
               >
                 <ItemContainer
-                  selected={selected}
                   setSelectedItems={setSelectedItems}
                   selectedItems={selectedItems}
+                  setUnSelectedItems={() => {}}
+                  unSelectedItems={[]}
                   children={
                     <ItemView
                       itemView={{
@@ -72,6 +69,7 @@ export default function ListItemView(args: {
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
           ItemContainerParent={"ListItemView"}
+          setUnselectedItems={() => {}}
         />
       </Stack>
     </>

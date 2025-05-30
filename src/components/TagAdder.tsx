@@ -27,7 +27,7 @@ export default function TagAdder(props: tagAdderProps) {
     });
   };
 
-  const { mutate } = useMutation({
+  const mutateItemView = useMutation({
     mutationFn: (args: {
       addedTags: string[];
       removedTags: string[];
@@ -65,13 +65,17 @@ export default function TagAdder(props: tagAdderProps) {
       setIsSaved(true);
     },
   });
+
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate({
-      addedTags: cBoxes,
-      removedTags: Array.from(new Set([...toRemTags])),
-      name: props.name,
-    });
+    if (props.name) {
+      mutateItemView.mutate({
+        addedTags: cBoxes,
+        removedTags: Array.from(new Set([...toRemTags])),
+        name: props.name,
+      });
+    } else {
+    }
   };
   return (
     <Stack

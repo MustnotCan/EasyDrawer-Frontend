@@ -32,9 +32,6 @@ export default function ItemViewMenu(props: menuProps) {
       <Portal>
         <Menu.Positioner>
           <Menu.Content>
-            <Menu.Item value="rm-file">
-              Bad to remove a file from here
-            </Menu.Item>
             <Menu.Item
               value="download"
               onClick={() => downloadingBook(props.downloadPath, props.name)}
