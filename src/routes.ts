@@ -7,7 +7,9 @@ export default [
     route("/unclassified", "components/MainView.tsx", {
       id: "home-unclassified",
     }),
-    route("/multitagger", "components/MultiTagger.tsx", { id: "multi-tagger" }),
+    route("/multitagger", "components/MultiTagger/MultiTagger.tsx", {
+      id: "multi-tagger",
+    }),
   ]),
   route("/pdfreader/:path", "components/PdfReader.tsx"),
 ] satisfies RouteConfig;

@@ -8,8 +8,12 @@ export type FileType = {
 export type tagAdderProps = {
   name?: string;
   tags: tagType[];
-  itemTags: tagType[];
+  itemTags?: tagType[];
   queryData?: unknown[];
+  sharedTags?: tagType[];
+  unsharedTags?: tagType[];
+  data?: string[];
+  isMultiTag?: boolean;
 };
 export type itemViewProps = {
   thumbnail: string;
@@ -56,3 +60,4 @@ export type selectedItem = {
   path: string;
   type: string;
 };
+export type onlyPathAndTags = { fullpath: string; tags: tagType[] };

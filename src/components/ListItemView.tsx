@@ -4,8 +4,8 @@ import { itemViewProps, selectedItem } from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
 import ItemSize from "./ItemSize.tsx";
 import { Box, Button, Stack } from "@chakra-ui/react";
-import { ItemContainer } from "./ItemContainer.tsx";
-import { ItemContainerActionBar } from "./ItemContainerActionBar.tsx";
+import { ItemContainer } from "./ItemContainer/ItemContainer.tsx";
+import { ItemContainerActionBar } from "./ItemContainer/ItemContainerActionBar.tsx";
 
 export default function ListItemView(args: {
   books: itemViewProps[];
@@ -33,7 +33,7 @@ export default function ListItemView(args: {
         </Stack>
       </Stack>
       <Stack>
-        <Stack direction={"row"} wrap={"wrap"} gap={"4"}>
+        <Stack direction={"row"} wrap={"wrap"}>
           {args.books.map((IV: itemViewProps) => {
             return (
               <Box
@@ -70,6 +70,9 @@ export default function ListItemView(args: {
           setSelectedItems={setSelectedItems}
           ItemContainerParent={"ListItemView"}
           setUnselectedItems={() => {}}
+          unselectedItems={[]}
+          setDir={() => {}}
+          tags={[]}
         />
       </Stack>
     </>

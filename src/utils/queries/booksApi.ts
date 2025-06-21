@@ -1,8 +1,11 @@
-import { taggedTags } from "@/types/types.ts";
+import { selectedItem, taggedTags } from "@/types/types.ts";
 import {
   assertBookHaveProperties,
   assertIsItemView,
+  assertIsItemViewArray,
+  assertItemViewHasOnlyTagsAndTitles,
   assertResponseHaveProperties,
+  assertResponseIsArrayOfPathAndTags,
 } from "../asserts/bookAsserts";
 import { BOOKS_URL } from "../envVar.ts";
 
@@ -32,7 +35,7 @@ export async function changeTags(changedTags: taggedTags[], bookName: string) {
       headers: { "Content-Type": "application/json" },
     })
   ).json();
-  assertIsItemView(response);
+  assertItemViewHasOnlyTagsAndTitles(response);
   return response;
 }
 
@@ -61,19 +64,12 @@ export async function removeBookByName(bookName: string) {
   }
 }
 
-export async function getFilesInDir(props: {
-  dirs: string[];
-  pn: number;
-  take: number;
-}) {
+export async function getFilesInDir(props: { dirs: string[] }) {
   try {
     const dirs = props.dirs;
     const response = await (
       await fetch(
-        BOOKS_URL +
-          `multiTagger/${encodeURIComponent(dirs.join("/"))}?pn=${
-            props.pn
-          }&take=${props.take}`
+        BOOKS_URL + `multiTagger/${encodeURIComponent(dirs.join("/"))}`
       )
     ).json();
     assertResponseHaveProperties(response);
@@ -105,4 +101,74 @@ export async function downloadingBook(url: string, fileName: string) {
   } catch (error) {
     console.error("Error downloading file:", error);
   }
+}
+export async function getSelectedFilesDetails(args: {
+  selected: selectedItem[];
+  unselected: selectedItem[];
+}) {
+  try {
+    const response = await (
+      await fetch(BOOKS_URL + `multiTagger/tags`, {
+        method: "POST",
+        body: JSON.stringify({
+          selected: args.selected.map((s) => s.path),
+          unselected: args.unselected.map((s) => s.path),
+        }),
+        headers: { "Content-Type": "application/json" },
+      })
+    ).json();
+    assertResponseIsArrayOfPathAndTags(response);
+    return response;
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function multiChangeTags(
+  changedTags: taggedTags[],
+  booksNames: string[]
+) {
+  const body = { tags: changedTags, titles: booksNames };
+  const response = await (
+    await fetch(BOOKS_URL + "multiTagger/updatetags", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    })
+  ).json();
+  assertResponseIsArrayOfPathAndTags(response);
+
+  return response;
+}
+export async function multiDelete(props: { data: string[] }) {
+  try {
+    return await fetch(BOOKS_URL + "multiTagger", {
+      method: "DELETE",
+      body: JSON.stringify({
+        files: props.data,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    if (e != null) {
+      console.log("Error while removing books with Name :", e);
+    }
+  }
+}
+
+export async function importFiles(props: { dir: string; files: File[] }) {
+  const formData = new FormData();
+  props.files.forEach((file) => {
+    formData.append("files", file, file.name);
+    if (file.webkitRelativePath && file.webkitRelativePath != "")
+      formData.append("paths", file.webkitRelativePath);
+  });
+  formData.append("dir", props.dir);
+  const response = await (
+    await fetch(BOOKS_URL + "multiTagger/importfile", {
+      body: formData,
+      method: "POST",
+    })
+  ).json();
+  assertIsItemViewArray(response);
+  return response;
 }

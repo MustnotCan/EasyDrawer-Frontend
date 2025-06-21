@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { tagType } from "../types/types";
+import { tagType } from "../../types/types";
 import { List, Stack, Button, Input } from "@chakra-ui/react";
 import CheckBoxTagFilter from "./CheckBoxTagFilter";
 export default function TagFilter(props: {

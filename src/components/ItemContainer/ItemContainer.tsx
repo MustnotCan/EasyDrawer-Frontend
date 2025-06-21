@@ -4,13 +4,13 @@ import {
   multiTaggerFileProps,
   multiTaggerFolderProps,
   selectedItem,
-} from "../types/types";
+} from "../../types/types.ts";
 import {
   isItemView,
   isMultiTaggerFileProps,
   isMultiTaggerFolderProps,
-} from "../utils/guards.ts";
-import { toggleSelected } from "../utils/itemContainerUtils";
+} from "../../utils/guards.ts";
+import { toggleSelected } from "../../utils/itemContainerUtils.ts";
 import { Dispatch, SetStateAction, useMemo } from "react";
 
 export function ItemContainer(props: {
@@ -54,6 +54,10 @@ export function ItemContainer(props: {
   if (isItemView(props.children)) {
     const prop = props.children.props.itemView.prop;
     const type = "file";
+    selected = props.selectedItems
+      .filter((item) => item.type == type)
+      .map((file) => file.path)
+      .includes(prop.path + "/" + prop.title);
     clickHandler = (e) => {
       if (e.ctrlKey) {
         toggleSelected(

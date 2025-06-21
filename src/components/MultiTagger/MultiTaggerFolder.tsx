@@ -11,7 +11,7 @@ export function MultiTaggerFolder(props: multiTaggerFolderProps) {
         margin: "10px",
       }}
     >
-      <FaRegFolder size={"60px"} />
+      <FaRegFolder size={"100px"} />
       {props.item.slice(props.item.lastIndexOf("/") + 1)}
     </Stack>
   );

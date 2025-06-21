@@ -1,28 +1,35 @@
-import { ChangeEvent, FormEvent, useState } from "react";
-import { changeTags } from "../utils/queries/booksApi";
+import { FormEvent, useState } from "react";
+import { changeTags, multiChangeTags } from "../utils/queries/booksApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { itemViewProps, reqBody, tagAdderProps } from "../types/types";
-import { Button, Input, Stack } from "@chakra-ui/react";
+import {
+  itemViewProps,
+  onlyPathAndTags,
+  reqBody,
+  tagAdderProps,
+} from "../types/types";
+import { Box, Button, Checkbox, Input, Stack } from "@chakra-ui/react";
 export default function TagAdder(props: tagAdderProps) {
   const queryClient = useQueryClient();
   const [cBoxes, setCBoxes] = useState<string[]>(
-    props.itemTags.map((iT) => iT.id)
+    props.itemTags
+      ? props.itemTags.map((iT) => iT.id)
+      : props.sharedTags?.map((iT) => iT.id) || []
   );
   const [searchInput, setSearchInput] = useState<string>("");
   const [toRemTags, setToRemTags] = useState<string[]>([]);
   const [isSaved, setIsSaved] = useState(false);
-  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangeHandler = (id: string) => {
     if (setIsSaved) {
       setIsSaved(false);
     }
     setCBoxes((prevCBoxes) => {
-      if (prevCBoxes.includes(e.target.id)) {
+      if (prevCBoxes.includes(id)) {
         setToRemTags((tRT) => {
-          return [...tRT, e.target.id];
+          return [...tRT, id];
         });
-        return prevCBoxes.filter((cb) => cb !== e.target.id);
+        return prevCBoxes.filter((cb) => cb !== id);
       } else {
-        return [...prevCBoxes, e.target.id];
+        return [...prevCBoxes, id];
       }
     });
   };
@@ -52,7 +59,7 @@ export default function TagAdder(props: tagAdderProps) {
 
     onSuccess: (modifiedBook: itemViewProps) => {
       queryClient.setQueryData(
-        ["books", ...props.queryData],
+        ["books", ...(props.queryData || "")],
         (prevBooks: reqBody): reqBody => {
           const newData = prevBooks.data.map((book) => {
             return book.title === modifiedBook.title
@@ -65,7 +72,44 @@ export default function TagAdder(props: tagAdderProps) {
       setIsSaved(true);
     },
   });
-
+  const mutateMultiTager = useMutation({
+    mutationFn: (args: {
+      addedTags: string[];
+      removedTags: string[];
+      data: string[];
+    }) => {
+      const addedTags = args.addedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "add",
+        };
+        return literal;
+      });
+      const removedTags = args.removedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "remove",
+        };
+        return literal;
+      });
+      return multiChangeTags([...addedTags, ...removedTags], args.data);
+    },
+    onSuccess: (modifiedBook: onlyPathAndTags[]) => {
+      queryClient.setQueryData(
+        [...(props.queryData || "")],
+        (prevBooks: onlyPathAndTags[]): onlyPathAndTags[] => {
+          const newData = prevBooks.map((book) => ({
+            ...book,
+            tags:
+              modifiedBook.find((b) => (b.fullpath = book.fullpath))?.tags ||
+              book.tags,
+          }));
+          return newData;
+        }
+      );
+      setIsSaved(true);
+    },
+  });
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (props.name) {
@@ -74,7 +118,12 @@ export default function TagAdder(props: tagAdderProps) {
         removedTags: Array.from(new Set([...toRemTags])),
         name: props.name,
       });
-    } else {
+    } else if (props.data) {
+      mutateMultiTager.mutate({
+        addedTags: cBoxes,
+        removedTags: Array.from(new Set([...toRemTags])),
+        data: props.data,
+      });
     }
   };
   return (
@@ -105,17 +154,29 @@ export default function TagAdder(props: tagAdderProps) {
             .map(
               (tag) =>
                 tag.name.toLowerCase() != "unclassified" &&
-                tag.name.toLowerCase() != "favorite" && (
+                (!props.isMultiTag
+                  ? tag.name.toLowerCase() != "favorite"
+                  : true) && (
                   <div key={tag.id}>
                     <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
+                      <Checkbox.Root
                         id={tag.id}
-                        onChange={onChangeHandler}
+                        onClick={() => onChangeHandler(tag.id)}
                         checked={cBoxes.includes(tag.id)}
-                      />
-
-                      {tag.name}
+                        variant={"subtle"}
+                      >
+                        <Checkbox.Control />
+                        <Checkbox.Label height={"30px"} width={"80px"}>
+                          <Box
+                            maxWidth="100px"
+                            overflow="hidden"
+                            textOverflow="ellipsis"
+                            whiteSpace="nowrap"
+                          >
+                            {tag.name}
+                          </Box>
+                        </Checkbox.Label>
+                      </Checkbox.Root>
                     </label>
                   </div>
                 )

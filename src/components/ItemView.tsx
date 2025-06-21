@@ -60,7 +60,7 @@ export default function ItemView(props: ItemViewProps) {
           <p className="truncate">{props.itemView.prop.title}</p>
         )}
       </Stack>
-      <Stack direction={"row"} gap={"80%"}>
+      <Stack direction={"row"}>
         {isFavorite ? (
           <FaHeart
             color="red"

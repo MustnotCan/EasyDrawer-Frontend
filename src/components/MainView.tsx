@@ -1,5 +1,5 @@
 import ListItemView from "./ListItemView";
-import TagFilter from "./TagFilter";
+import TagFilter from "./TagFilter/TagFilter";
 import Paginator from "./Paginator";
 import AddTag from "./AddTag";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +26,9 @@ export default function View() {
     }
   };
   const location = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pn]);
   useEffect(() => {
     switch (location.pathname) {
       case "/favorite":

@@ -1,4 +1,4 @@
-import { removeTag } from "../utils/queries/tagsApi";
+import { removeTag } from "../../utils/queries/tagsApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IconButton } from "@chakra-ui/react";
 import { DeleteOutlined } from "@ant-design/icons";

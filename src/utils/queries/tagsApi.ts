@@ -1,8 +1,6 @@
 import { assertTagHaveProperties } from "../asserts/tagAsserts";
 import { TAGS_URL } from "../envVar";
 export async function getTags() {
-  console.log(import.meta.env.VITE_API_MAIN);
-  console.log(TAGS_URL);
   const response = (await (await fetch(TAGS_URL)).json()) as [];
   response.forEach((tag) => assertTagHaveProperties(tag));
   return response;

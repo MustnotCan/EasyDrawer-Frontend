@@ -1,6 +1,6 @@
 import ItemView from "../components/ItemView";
-import { MultiTaggerFile } from "../components/MultiTaggerFile";
-import { MultiTaggerFolder } from "../components/MultiTaggerFolder";
+import { MultiTaggerFile } from "../components/MultiTagger/MultiTaggerFile";
+import { MultiTaggerFolder } from "../components/MultiTagger/MultiTaggerFolder";
 import {
   ItemViewProps,
   multiTaggerFileProps,

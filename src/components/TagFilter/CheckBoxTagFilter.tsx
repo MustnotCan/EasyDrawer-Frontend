@@ -1,10 +1,10 @@
 import { Checkbox } from "@chakra-ui/react/checkbox";
 import { DeleteButton } from "./DeleteButtonTagFilter";
 import { useMemo, useState } from "react";
-import { RenameButton } from "./RenameButtonTagFilter";
-import { tagType } from "../types/types";
+import { RenameButton } from "../RenameButtonTagFilter";
+import { tagType } from "../../types/types";
 import { Box, Stack } from "@chakra-ui/react";
-import { Tooltip } from "../ui/tooltip";
+import { Tooltip } from "../../ui/tooltip";
 type props = {
   cBoxes: string[];
   tag: tagType;

@@ -1,0 +1,76 @@
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { getFilesInDir } from "../../utils/queries/booksApi";
+import { Stack } from "@chakra-ui/react";
+import { MultiTaggerFile } from "./MultiTaggerFile";
+import { MultiTaggerFolder } from "./MultiTaggerFolder";
+import { ItemContainer } from "../ItemContainer/ItemContainer";
+import { selectedItem, tagType } from "../../types/types";
+import { ItemContainerActionBar } from "../ItemContainer/ItemContainerActionBar";
+import { MultiTaggerBreadCrumb } from "./MultiTaggerBreadCrumb";
+import { getTags } from "../../utils/queries/tagsApi";
+import { MultiTaggerImport } from "./MultiTaggerImport";
+
+export default function MultiTagger() {
+  const [dirs, setDir] = useState<string[]>([""]);
+  const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
+  const [unSelectedItems, setUnSelectedItems] = useState<selectedItem[]>([]);
+  const tags = useQuery({ queryKey: ["tags"], queryFn: getTags })
+    .data as tagType[];
+  const data = useQuery({
+    queryKey: ["Dirs&files", dirs],
+    queryFn: ({ queryKey }) => {
+      return getFilesInDir({
+        dirs: queryKey[1] as string[],
+      });
+    },
+  });
+
+  return (
+    <Stack direction={"column"}>
+      <Stack>
+        <MultiTaggerImport dirs={dirs} />
+      </Stack>
+      <MultiTaggerBreadCrumb dirs={dirs} setDir={setDir} />
+      <Stack>
+        <Stack direction={"row"} wrap={"wrap"}>
+          {data.data?.map((item) => {
+            return (
+              <Stack
+                className="hover:cursor-pointer"
+                key={typeof item == "string" ? item : item.id}
+              >
+                <ItemContainer
+                  children={
+                    typeof item == "string" ? (
+                      <MultiTaggerFolder
+                        item={item}
+                        setDir={setDir}
+                        path={[...dirs, item].join("/")}
+                      />
+                    ) : (
+                      <MultiTaggerFile item={item} />
+                    )
+                  }
+                  selectedItems={selectedItems}
+                  unSelectedItems={unSelectedItems}
+                  setSelectedItems={setSelectedItems}
+                  setUnSelectedItems={setUnSelectedItems}
+                />
+              </Stack>
+            );
+          })}
+        </Stack>
+      </Stack>
+      <ItemContainerActionBar
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        ItemContainerParent={"MultiTagger"}
+        setUnselectedItems={setUnSelectedItems}
+        unselectedItems={unSelectedItems}
+        tags={tags}
+        setDir={setDir}
+      />
+    </Stack>
+  );
+}
