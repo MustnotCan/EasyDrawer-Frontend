@@ -73,6 +73,7 @@ export default function ListItemView(args: {
           unselectedItems={[]}
           setDir={() => {}}
           tags={[]}
+          dirs={[]}
         />
       </Stack>
     </>

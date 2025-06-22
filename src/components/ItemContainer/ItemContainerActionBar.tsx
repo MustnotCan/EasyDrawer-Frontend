@@ -13,6 +13,7 @@ export function ItemContainerActionBar(props: {
   unselectedItems: selectedItem[];
   tags: tagType[];
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
+  dirs: string[];
 }) {
   type actionProps = { ItemContainerParent: string };
   const Actions: FC<actionProps> = (prop: actionProps) => {
@@ -25,6 +26,7 @@ export function ItemContainerActionBar(props: {
           setUnselectedItems={props.setUnselectedItems}
           tags={props.tags}
           setDir={props.setDir}
+          dirs={props.dirs}
         />
       );
     } else if (prop.ItemContainerParent == "ListItemView") {

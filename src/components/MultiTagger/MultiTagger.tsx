@@ -70,6 +70,7 @@ export default function MultiTagger() {
         unselectedItems={unSelectedItems}
         tags={tags}
         setDir={setDir}
+        dirs={dirs}
       />
     </Stack>
   );

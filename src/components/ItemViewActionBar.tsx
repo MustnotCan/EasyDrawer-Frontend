@@ -1,4 +1,4 @@
-import { Button, Menu, Portal, Spinner } from "@chakra-ui/react";
+import { Menu, Portal, Spinner } from "@chakra-ui/react";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
 import TagAdder from "./TagAdder";
@@ -107,13 +107,6 @@ export function ItemViewActionBar(props: {
           </Menu.Positioner>
         </Portal>
       </Menu.Root>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => console.log(props.selectedItems)}
-      >
-        how many are we{" "}
-      </Button>
     </>
   );
 }

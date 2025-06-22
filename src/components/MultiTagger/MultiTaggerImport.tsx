@@ -19,7 +19,6 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
         (prev: (string | itemViewProps)[]) => {
-          console.log(addedFiles);
           return [...prev, ...addedFiles];
         }
       );
@@ -52,7 +51,19 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       <FileUpload.Root
         maxFiles={Infinity}
         onFileAccept={(e) => {
-          setFiles((prev) => [...prev, ...e.files]);
+          const filesToImport: File[] = [];
+          e.files.forEach((file) => {
+            if (
+              files.filter(
+                (fl) =>
+                  fl.name == file.name &&
+                  fl.webkitRelativePath == file.webkitRelativePath
+              ).length == 0
+            ) {
+              filesToImport.push(file);
+            }
+          });
+          setFiles((prev) => [...prev, ...filesToImport]);
         }}
       >
         <FileUpload.HiddenInput />
@@ -93,7 +104,21 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
 
       <FileUpload.Root
         directory={true}
-        onFileAccept={(e) => setFolders([...e.files])}
+        onFileAccept={(e) => {
+          const filesToImport: File[] = [];
+          e.files.forEach((file) => {
+            if (
+              folders.filter(
+                (fl) =>
+                  fl.name == file.name &&
+                  fl.webkitRelativePath == file.webkitRelativePath
+              ).length == 0
+            ) {
+              filesToImport.push(file);
+            }
+          });
+          setFolders((prev) => [...prev, ...filesToImport]);
+        }}
         maxFiles={100}
       >
         <FileUpload.HiddenInput />

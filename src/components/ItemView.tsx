@@ -7,6 +7,7 @@ import { CiHeart } from "react-icons/ci";
 import { Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { changeTags } from "../utils/queries/booksApi";
+import { runtimeConfig } from "../entry.client";
 export default function ItemView(props: ItemViewProps) {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     props.itemView.prop.tags
@@ -84,7 +85,7 @@ export default function ItemView(props: ItemViewProps) {
           id={props.itemView.prop.id}
           queryData={props.queryData}
           downloadPath={
-            `${import.meta.env.VITE_API_MAIN}pdfs/` +
+            `${runtimeConfig.VITE_API_MAIN}pdfs/` +
             encodeURIComponent(
               props.itemView.prop.path + "/" + props.itemView.prop.title
             )

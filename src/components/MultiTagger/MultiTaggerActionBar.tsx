@@ -1,5 +1,5 @@
 import { onlyPathAndTags, selectedItem, tagType } from "../../types/types";
-import { Button, Menu, Portal, Spinner } from "@chakra-ui/react";
+import { Menu, Portal, Spinner } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
@@ -17,6 +17,7 @@ export function MultiTaggerActionBar(props: {
   unselectedItems: selectedItem[];
   tags: tagType[];
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
+  dirs: string[];
 }) {
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
@@ -71,7 +72,12 @@ export function MultiTaggerActionBar(props: {
       });
     },
     onSuccess: () => {
-      props.setDir([""]);
+      if (props.dirs.length == 1) {
+        queryClient.fetchQuery({ queryKey: ["Dirs&files", props.dirs] });
+      } else {
+        props.setDir([""]);
+      }
+
       props.setSelectedItems([]);
       props.setUnselectedItems([]);
     },
@@ -135,13 +141,6 @@ export function MultiTaggerActionBar(props: {
           </Menu.Positioner>
         </Portal>
       </Menu.Root>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => console.log(props.selectedItems)}
-      >
-        how many are we{" "}
-      </Button>
     </>
   );
 }

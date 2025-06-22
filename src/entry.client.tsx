@@ -37,7 +37,7 @@ if (import.meta.env.PROD) {
         throw new Error("Failed to load config.json");
       }
       const config = await response.json();
-      runtimeConfig.VITE_API_MAIN = config.API;
+      runtimeConfig.VITE_API_MAIN = config.VITE_API_MAIN;
     } catch (error) {
       console.error("Error loading configuration:", error);
     } finally {
