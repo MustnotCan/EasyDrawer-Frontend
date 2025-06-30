@@ -19,7 +19,13 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
         (prev: (string | itemViewProps)[]) => {
-          return [...prev, ...addedFiles];
+          const existingFiles = prev
+            .filter((file) => !(typeof file == "string"))
+            .map((file) => file.title);
+          return [
+            ...prev,
+            ...addedFiles.filter((file) => !existingFiles.includes(file.title)),
+          ];
         }
       );
     },
@@ -41,7 +47,13 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
             if (newFolder && !newFolders.includes(newFolder))
               newFolders.push(newFolder);
           });
-          return [...prev, ...newFolders];
+          const existingFolders = prev
+            .filter((file) => typeof file == "string")
+            .map((file) => file);
+          return [
+            ...prev,
+            ...newFolders.filter((file) => !existingFolders.includes(file)),
+          ];
         }
       );
     },
@@ -119,7 +131,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
           });
           setFolders((prev) => [...prev, ...filesToImport]);
         }}
-        maxFiles={100}
+        maxFiles={Infinity}
       >
         <FileUpload.HiddenInput />
         <Stack direction={"row"}>
