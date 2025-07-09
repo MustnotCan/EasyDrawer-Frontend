@@ -137,9 +137,6 @@ export function ItemContainer(props: {
       }
     };
   } else if (isMultiTaggerFolderProps(props.children)) {
-    // what if we select parent deselect an element and then deselect parent ? the deselected element will still be there
-    //need queries for sending selected+unselected in queries
-    //should use a boutton that triggers the menu that do the fetching and then change tags
     const path = props.children.props.path;
     const item = props.children.props.item;
     const splittedPath = path

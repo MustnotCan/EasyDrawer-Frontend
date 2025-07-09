@@ -47,9 +47,9 @@ export default function ItemView(props: ItemViewProps) {
     <Stack>
       <Stack>
         <img
-          loading="lazy"
           src={THUMBS_URL + props.itemView.prop.thumbnail}
           alt={props.itemView.prop.title}
+          loading="lazy"
         />
       </Stack>
       <Stack className="mt-2 max-w-[250px]">

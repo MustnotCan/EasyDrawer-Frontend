@@ -23,7 +23,13 @@ export type itemViewProps = {
   tags: tagType[];
   lastOpened: string;
 };
-
+export type itemViewPropsWithoutTags = {
+  thumbnail: string;
+  title: string;
+  id: string;
+  path: string;
+  lastOpened: string;
+};
 export type itemView = {
   prop: itemViewProps;
   showFullName: boolean;

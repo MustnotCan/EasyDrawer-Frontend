@@ -24,42 +24,58 @@ export default function MultiTagger() {
         dirs: queryKey[1] as string[],
       });
     },
+    staleTime: Infinity,
   });
-
   return (
     <Stack direction={"column"}>
-      <Stack>
+      <Stack direction={"column"}>
         <MultiTaggerImport dirs={dirs} />
       </Stack>
       <MultiTaggerBreadCrumb dirs={dirs} setDir={setDir} />
       <Stack>
-        <Stack direction={"row"} wrap={"wrap"}>
-          {data.data?.map((item) => {
-            return (
-              <Stack
-                className="hover:cursor-pointer"
-                key={typeof item == "string" ? item : item.id}
-              >
-                <ItemContainer
-                  children={
-                    typeof item == "string" ? (
-                      <MultiTaggerFolder
-                        item={item}
-                        setDir={setDir}
-                        path={[...dirs, item].join("/")}
-                      />
-                    ) : (
-                      <MultiTaggerFile item={item} />
-                    )
-                  }
-                  selectedItems={selectedItems}
-                  unSelectedItems={unSelectedItems}
-                  setSelectedItems={setSelectedItems}
-                  setUnSelectedItems={setUnSelectedItems}
-                />
-              </Stack>
-            );
-          })}
+        <Stack>
+          <Stack direction={"row"} wrap={"wrap"}>
+            {data.data
+              ?.filter((item) => typeof item === "string")
+              .sort()
+              .map((item) => {
+                return (
+                  <Stack className="hover:cursor-pointer" key={item}>
+                    <ItemContainer
+                      children={
+                        <MultiTaggerFolder
+                          item={item}
+                          setDir={setDir}
+                          path={[...dirs, item].join("/")}
+                        />
+                      }
+                      selectedItems={selectedItems}
+                      unSelectedItems={unSelectedItems}
+                      setSelectedItems={setSelectedItems}
+                      setUnSelectedItems={setUnSelectedItems}
+                    />
+                  </Stack>
+                );
+              })}
+          </Stack>
+          <Stack direction={"row"} wrap={"wrap"}>
+            {data.data
+              ?.filter((item) => typeof item !== "string")
+              .sort()
+              .map((item) => {
+                return (
+                  <Stack className="hover:cursor-pointer" key={item.id}>
+                    <ItemContainer
+                      children={<MultiTaggerFile item={item} />}
+                      selectedItems={selectedItems}
+                      unSelectedItems={unSelectedItems}
+                      setSelectedItems={setSelectedItems}
+                      setUnSelectedItems={setUnSelectedItems}
+                    />
+                  </Stack>
+                );
+              })}
+          </Stack>
         </Stack>
       </Stack>
       <ItemContainerActionBar

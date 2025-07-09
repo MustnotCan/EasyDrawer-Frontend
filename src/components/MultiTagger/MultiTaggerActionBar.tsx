@@ -1,5 +1,10 @@
-import { onlyPathAndTags, selectedItem, tagType } from "../../types/types";
-import { Menu, Portal, Spinner } from "@chakra-ui/react";
+import {
+  itemViewProps,
+  onlyPathAndTags,
+  selectedItem,
+  tagType,
+} from "../../types/types";
+import { Button, Input, Menu, Portal, Spinner, Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
@@ -7,9 +12,38 @@ import TagAdder from "../TagAdder";
 import {
   getSelectedFilesDetails,
   multiDelete,
+  multiMove,
 } from "../../utils/queries/booksApi";
 import { useState } from "react";
+function MultiTaggerActionBarInput(props: {
+  moveClickHandler: (newDir: string) => void;
+}) {
+  const [input, setInput] = useState<string>("");
+  return (
+    <Stack direction={"row"}>
+      <Input
+        title="Folder name"
+        placeholder="Folder name"
+        onChange={(e) => setInput(e.currentTarget.value)}
+        onKeyUp={(e) => {
+          if (e.key == "Enter") {
+            props.moveClickHandler(input);
+          }
+        }}
+      />
 
+      <Button
+        onClick={(e) => {
+          e.preventDefault();
+
+          props.moveClickHandler(input);
+        }}
+      >
+        Ok
+      </Button>
+    </Stack>
+  );
+}
 export function MultiTaggerActionBar(props: {
   selectedItems: selectedItem[];
   setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
@@ -71,21 +105,134 @@ export function MultiTaggerActionBar(props: {
         data: args.files,
       });
     },
-    onSuccess: () => {
-      if (props.dirs.length == 1) {
-        queryClient.fetchQuery({ queryKey: ["Dirs&files", props.dirs] });
-      } else {
-        props.setDir([""]);
-      }
+    onSuccess: (_, variables: { files: string[] }) => {
+      variables.files.forEach((file) => {
+        const splittedFile = file.split("/");
+        queryClient.setQueryData(
+          ["Dirs&files", file.split("/").slice(0, -1)],
+          (prev: (string | itemViewProps)[] | undefined) => {
+            return prev
+              ? [
+                  ...prev.filter(
+                    (item) =>
+                      typeof item == "string" ||
+                      item.title != splittedFile.at(splittedFile.length - 1)
+                  ),
+                ]
+              : [];
+          }
+        );
+      });
+    },
+  });
+  const moveMutation = useMutation({
+    mutationFn: (args: { files: string[]; newPath: string }) => {
+      return multiMove({
+        data: args.files,
+        newPath: args.newPath,
+      });
+    },
+    onSuccess: (
+      addedFiles: itemViewProps[],
+      variables: { files: string[]; newPath: string }
+    ) => {
+      queryClient.setQueryData(
+        ["Dirs&files", props.dirs],
+        (prev: (string | itemViewProps)[] | undefined) => {
+          if (!prev) {
+            return [...addedFiles];
+          } else {
+            const existingFiles = prev
+              .filter((file) => !(typeof file == "string"))
+              .map((file) => file.title);
+            return [
+              ...prev,
+              ...addedFiles.filter(
+                (file) => !existingFiles.includes(file.title)
+              ),
+            ].sort();
+          }
+        }
+      );
+      const pathsToUpdate = Array.from(
+        new Set(addedFiles.map((af) => af.path))
+      );
+      pathsToUpdate.forEach((pto) => {
+        const fullArray = pto.split("/");
+        fullArray.slice(0, fullArray.length - 1).forEach((_, index, arr) => {
+          const existingCache = queryClient.getQueryData([
+            "Dirs&files",
+            arr.slice(0, index + 1),
+          ]) as (string | itemViewProps)[] | undefined;
+          if (
+            fullArray[index + 1] &&
+            (!existingCache ||
+              !existingCache.find(
+                (el) => typeof el == "string" && el == fullArray[index + 1]
+              ))
+          ) {
+            queryClient.setQueryData(
+              ["Dirs&files", arr.slice(0, index + 1)],
+              (prev: (string | itemViewProps)[] | undefined) => {
+                if (!prev) {
+                  return [fullArray[index + 1]];
+                } else {
+                  return [...prev, fullArray[index + 1]];
+                }
+              }
+            );
+          }
+        });
+      });
 
-      props.setSelectedItems([]);
-      props.setUnselectedItems([]);
+      //
+      variables.files.forEach((file) => {
+        const splittedFile = file.split("/");
+        queryClient.setQueryData(
+          ["Dirs&files", file.split("/").slice(0, -1)],
+          (prev: (string | itemViewProps)[] | undefined) => {
+            return prev
+              ? [
+                  ...prev.filter(
+                    (item) =>
+                      typeof item == "string" ||
+                      item.title != splittedFile.at(splittedFile.length - 1)
+                  ),
+                ]
+              : [];
+          }
+        );
+      });
     },
   });
   const removeClickHandler = () => {
     removeMutation.mutate({
       files: data.map((file) => file.fullpath),
     });
+    props.setSelectedItems(() => []);
+    props.setUnselectedItems(() => []);
+  };
+  const moveClickHandler = (newDir?: string) => {
+    let actualDir;
+    if (newDir) {
+      actualDir = [...props.dirs, newDir].join("/");
+    } else {
+      actualDir = [...props.dirs].join("/");
+    }
+
+    const files = data
+      .filter(
+        (file) =>
+          file.fullpath.slice(0, file.fullpath.lastIndexOf("/")) != actualDir
+      )
+      .map((file) => file.fullpath);
+    moveMutation.mutate({
+      files: files,
+      newPath: actualDir || "/",
+    });
+
+    props.setSelectedItems([]);
+    props.setUnselectedItems([]);
   };
   return (
     <>
@@ -104,12 +251,47 @@ export function MultiTaggerActionBar(props: {
           <Menu.Positioner>
             <Menu.Content>
               <>
-                <Menu.Item value="rm-file" onClick={removeClickHandler}>
+                <Menu.Item value="rm-files" onClick={removeClickHandler}>
                   Remove Selected Files
                 </Menu.Item>
                 <Menu.Root
                   positioning={{ placement: "right-start", gutter: 2 }}
                 >
+                  <Menu.TriggerItem onDoubleClick={(e) => e.stopPropagation()}>
+                    Move <LuChevronRight />
+                  </Menu.TriggerItem>
+                  <Portal>
+                    <Menu.Positioner>
+                      <Menu.Content>
+                        <Menu.Item
+                          value="mv-here"
+                          onClick={() => moveClickHandler()}
+                        >
+                          Move Here
+                        </Menu.Item>
+                        <Menu.Root
+                          positioning={{ placement: "right-start", gutter: 2 }}
+                        >
+                          <Menu.TriggerItem
+                            onDoubleClick={(e) => e.stopPropagation()}
+                          >
+                            Move to a new folder <LuChevronRight />
+                          </Menu.TriggerItem>
+                          <Portal>
+                            <Menu.Positioner>
+                              <Menu.Content>
+                                <MultiTaggerActionBarInput
+                                  moveClickHandler={moveClickHandler}
+                                />
+                              </Menu.Content>
+                            </Menu.Positioner>
+                          </Portal>
+                        </Menu.Root>
+                      </Menu.Content>
+                    </Menu.Positioner>
+                  </Portal>
+                </Menu.Root>
+                <Menu.Root positioning={{ placement: "right-start" }}>
                   <Menu.TriggerItem onDoubleClick={(e) => e.stopPropagation()}>
                     Change Tags <LuChevronRight />
                   </Menu.TriggerItem>

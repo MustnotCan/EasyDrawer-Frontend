@@ -33,9 +33,13 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
   const folderMutation = useMutation({
     mutationKey: ["multiTaggerFolderImport"],
     mutationFn: (args: { dirs: string; files: File[] }) => {
+      console.log(args.files);
       return importFiles({ dir: args.dirs, files: args.files });
     },
-    onSuccess: (addedFiles: itemViewProps[]) => {
+    onSuccess: (
+      addedFiles: itemViewProps[],
+      variables: { dirs: string; files: File[] }
+    ) => {
       setFolders([]);
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
@@ -56,12 +60,46 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
           ];
         }
       );
+      variables.files.forEach((file) => {
+        const splittedPath = [
+          ...props.dirs,
+          file.webkitRelativePath.split("/")[0],
+        ];
+        queryClient.setQueryData(
+          ["Dirs&files", splittedPath],
+          (prev: (string | itemViewProps)[] | undefined) => {
+            if (prev) {
+              if (
+                prev.find(
+                  (item) =>
+                    typeof item != "string" &&
+                    item.title == file.webkitRelativePath.split("/")[1]
+                )
+              )
+                return [...prev];
+              return [
+                ...prev,
+                addedFiles.find(
+                  (item) => item.title == file.webkitRelativePath.split("/")[1]
+                ),
+              ];
+            } else {
+              return [
+                addedFiles.find(
+                  (item) => item.title == file.webkitRelativePath.split("/")[1]
+                ),
+              ];
+            }
+          }
+        );
+      });
     },
   });
   return (
     <Stack direction={"column"} width={"200px"}>
       <FileUpload.Root
         maxFiles={Infinity}
+        accept={"application/pdf"}
         onFileAccept={(e) => {
           const filesToImport: File[] = [];
           e.files.forEach((file) => {
@@ -116,6 +154,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
 
       <FileUpload.Root
         directory={true}
+        accept={"application/pdf"}
         onFileAccept={(e) => {
           const filesToImport: File[] = [];
           e.files.forEach((file) => {

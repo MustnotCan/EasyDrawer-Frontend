@@ -2,7 +2,7 @@ import { selectedItem, taggedTags } from "@/types/types.ts";
 import {
   assertBookHaveProperties,
   assertIsItemView,
-  assertIsItemViewArray,
+  assertIsItemViewWithoutTagsArray,
   assertItemViewHasOnlyTagsAndTitles,
   assertResponseHaveProperties,
   assertResponseIsArrayOfPathAndTags,
@@ -169,6 +169,27 @@ export async function importFiles(props: { dir: string; files: File[] }) {
       method: "POST",
     })
   ).json();
-  assertIsItemViewArray(response);
+  assertIsItemViewWithoutTagsArray(response);
   return response;
+}
+export async function multiMove(props: { data: string[]; newPath: string }) {
+  try {
+    const response = await (
+      await fetch(BOOKS_URL + "multiTagger/moveFiles", {
+        method: "PATCH",
+        body: JSON.stringify({
+          files: props.data,
+          newPath: props.newPath,
+        }),
+        headers: { "Content-Type": "application/json" },
+      })
+    ).json();
+    assertIsItemViewWithoutTagsArray(response);
+    return response;
+  } catch (e) {
+    if (e != null) {
+      console.log("Error while moving books :", e);
+    }
+    return [];
+  }
 }

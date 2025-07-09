@@ -5,17 +5,16 @@ import { Tooltip } from "../../ui/tooltip";
 
 export function MultiTaggerFile(props: multiTaggerFileProps) {
   return (
-    <Stack className="w-30 h-50">
+    <Stack className="w-65 h-70">
       <img
         src={THUMBS_URL + props.item.thumbnail}
         alt={"Thumbnail not generated yet"}
-        width={"70%"}
+        width={"80%"}
         height={"70%"}
+        loading="lazy"
       />
       <Tooltip content={props.item.title}>
-        <p className="overflow-ellipsis line-clamp-3 max-w-200 max-h-200">
-          {props.item.title}
-        </p>
+        <p className="truncate w-50">{props.item.title}</p>
       </Tooltip>
     </Stack>
   );
