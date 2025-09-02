@@ -3,22 +3,22 @@ import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
 import TagAdder from "./TagAdder";
 import { useState } from "react";
-import { onlyPathAndTags, selectedItem, tagType } from "../types/types";
+import { onlyPathAndTagsType, selectedItemType, tagType } from "../types/types";
 import {} from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSelectedFilesDetails } from "../utils/queries/booksApi";
 import { getTags } from "../utils/queries/tagsApi";
 
 export function ItemViewActionBar(props: {
-  selectedItems: selectedItem[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
+  selectedItems: selectedItemType[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
 }) {
   const tags = useQuery({ queryKey: ["tags"], queryFn: getTags })
     .data as tagType[];
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<onlyPathAndTags[]>([]);
+  const [data, setData] = useState<onlyPathAndTagsType[]>([]);
   const queryClient = useQueryClient();
   const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -29,8 +29,8 @@ export function ItemViewActionBar(props: {
         queryKey: ["ItemViewMultiTagging", props.selectedItems],
         queryFn: ({ queryKey }) =>
           getSelectedFilesDetails({
-            selected: queryKey.at(1) as selectedItem[],
-            unselected: [] as selectedItem[],
+            selected: queryKey.at(1) as selectedItemType[],
+            unselected: [] as selectedItemType[],
           }),
       });
 

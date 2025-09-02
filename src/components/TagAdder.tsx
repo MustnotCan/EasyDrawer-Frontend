@@ -2,13 +2,13 @@ import { FormEvent, useState } from "react";
 import { changeTags, multiChangeTags } from "../utils/queries/booksApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  itemViewProps,
-  onlyPathAndTags,
-  reqBody,
-  tagAdderProps,
+  itemViewPropsType,
+  onlyPathAndTagsType,
+  reqBodyType,
+  tagAdderPropsType,
 } from "../types/types";
 import { Box, Button, Checkbox, Input, Stack } from "@chakra-ui/react";
-export default function TagAdder(props: tagAdderProps) {
+export default function TagAdder(props: tagAdderPropsType) {
   const queryClient = useQueryClient();
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.itemTags
@@ -57,10 +57,10 @@ export default function TagAdder(props: tagAdderProps) {
       return changeTags([...addedTags, ...removedTags], args.name);
     },
 
-    onSuccess: (modifiedBook: itemViewProps) => {
+    onSuccess: (modifiedBook: itemViewPropsType) => {
       queryClient.setQueryData(
         ["books", ...(props.queryData || "")],
-        (prevBooks: reqBody): reqBody => {
+        (prevBooks: reqBodyType): reqBodyType => {
           const newData = prevBooks.data.map((book) => {
             return book.title === modifiedBook.title
               ? { ...book, tags: modifiedBook.tags }
@@ -94,10 +94,10 @@ export default function TagAdder(props: tagAdderProps) {
       });
       return multiChangeTags([...addedTags, ...removedTags], args.data);
     },
-    onSuccess: (modifiedBook: onlyPathAndTags[]) => {
+    onSuccess: (modifiedBook: onlyPathAndTagsType[]) => {
       queryClient.setQueryData(
         [...(props.queryData || "")],
-        (prevBooks: onlyPathAndTags[]): onlyPathAndTags[] => {
+        (prevBooks: onlyPathAndTagsType[]): onlyPathAndTagsType[] => {
           const newData = prevBooks.map((book) => ({
             ...book,
             tags:

@@ -1,9 +1,8 @@
-import { assertTagHaveProperties } from "../asserts/tagAsserts";
 import { TAGS_URL } from "../envVar";
+import { tagSchema } from "../../types/schemas";
 export async function getTags() {
   const response = (await (await fetch(TAGS_URL)).json()) as [];
-  response.forEach((tag) => assertTagHaveProperties(tag));
-  return response;
+  return response.map((tag) => tagSchema.parse(tag));
 }
 
 export async function addTag(tag: { name: string }) {
@@ -13,8 +12,7 @@ export async function addTag(tag: { name: string }) {
     headers: { "Content-Type": "application/json" },
   });
   const body = (await response.json()) as unknown;
-  assertTagHaveProperties(body);
-  return body;
+  return tagSchema.parse(body);
 }
 export async function removeTag(tag: { name: string }) {
   const response = await fetch(TAGS_URL, {
@@ -23,8 +21,7 @@ export async function removeTag(tag: { name: string }) {
     headers: { "Content-Type": "application/json" },
   });
   const body = (await response.json()) as unknown;
-  assertTagHaveProperties(body);
-  return body;
+  return tagSchema.parse(body);
 }
 export async function renameTag(prop: { prevName: string; newName: string }) {
   const response = await fetch(TAGS_URL, {
@@ -35,6 +32,5 @@ export async function renameTag(prop: { prevName: string; newName: string }) {
     headers: { "Content-Type": "application/json" },
   });
   const body = (await response.json()) as unknown;
-  assertTagHaveProperties(body);
-  return body;
+  return tagSchema.parse(body);
 }

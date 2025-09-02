@@ -1,9 +1,9 @@
 import { Stack } from "@chakra-ui/react";
 import {
-  itemView,
-  multiTaggerFileProps,
-  multiTaggerFolderProps,
-  selectedItem,
+  itemViewType,
+  multiTaggerFilePropsType,
+  multiTaggerFolderPropsType,
+  selectedItemType,
 } from "../../types/types.ts";
 import {
   isItemView,
@@ -15,12 +15,12 @@ import { Dispatch, SetStateAction, useMemo } from "react";
 
 export function ItemContainer(props: {
   children: React.ReactElement<
-    itemView | multiTaggerFileProps | multiTaggerFolderProps
+    itemViewType | multiTaggerFilePropsType | multiTaggerFolderPropsType
   >;
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
-  selectedItems: selectedItem[];
-  unSelectedItems: selectedItem[];
-  setUnSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
+  selectedItems: selectedItemType[];
+  unSelectedItems: selectedItemType[];
+  setUnSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
 }) {
   const filteredSIFiles = useMemo(
     () =>
@@ -103,8 +103,8 @@ export function ItemContainer(props: {
       (lsp.length - lup.length > 0 && !alreadyInUSI) ||
       (lsp.length - lup.length < 0 && alreadyInSI);
     const toggle = (
-      selectedItems: selectedItem[],
-      setSelectedItems: Dispatch<SetStateAction<selectedItem[]>>
+      selectedItems: selectedItemType[],
+      setSelectedItems: Dispatch<SetStateAction<selectedItemType[]>>
     ) =>
       toggleSelected(
         {
@@ -179,8 +179,8 @@ export function ItemContainer(props: {
       });
     };
     const toggle = (
-      selectedItems: selectedItem[],
-      setSelectedItems: Dispatch<SetStateAction<selectedItem[]>>
+      selectedItems: selectedItemType[],
+      setSelectedItems: Dispatch<SetStateAction<selectedItemType[]>>
     ) =>
       toggleSelected(
         {

@@ -1,13 +1,12 @@
-import { selectedItem, taggedTags } from "@/types/types.ts";
-import {
-  assertBookHaveProperties,
-  assertIsItemView,
-  assertIsItemViewWithoutTagsArray,
-  assertItemViewHasOnlyTagsAndTitles,
-  assertResponseHaveProperties,
-  assertResponseIsArrayOfPathAndTags,
-} from "../asserts/bookAsserts";
+import { selectedItemType, taggedTagsType } from "@/types/types.ts";
 import { BOOKS_URL } from "../envVar.ts";
+import {
+  itemViewPropsSchema,
+  onlyPathAndTagsSchema,
+  reqBodySchema,
+  returnedFilesSchema,
+} from "../../types/schemas.ts";
+import z from "zod";
 
 export async function getBooks(data: {
   spt: number;
@@ -19,14 +18,18 @@ export async function getBooks(data: {
     BOOKS_URL +
       `?take=${data.spt}&pn=${data.spp}&searchName=${data.searchName}&tags=${data.tfb}`
   );
-
   const body = (await response.json()) as object;
-  assertBookHaveProperties(body);
-  body.data?.forEach((iv) => assertIsItemView(iv));
-  return body;
+  const parsedBody = reqBodySchema.parse(body);
+  return {
+    ...parsedBody,
+    data: parsedBody.data.map((iv) => itemViewPropsSchema.parse(iv)),
+  };
 }
 
-export async function changeTags(changedTags: taggedTags[], bookName: string) {
+export async function changeTags(
+  changedTags: taggedTagsType[],
+  bookName: string
+) {
   const body = { tags: changedTags, title: bookName };
   const response = await (
     await fetch(BOOKS_URL, {
@@ -35,8 +38,7 @@ export async function changeTags(changedTags: taggedTags[], bookName: string) {
       headers: { "Content-Type": "application/json" },
     })
   ).json();
-  assertItemViewHasOnlyTagsAndTitles(response);
-  return response;
+  return itemViewPropsSchema.parse(response);
 }
 
 export async function removeBookById(BookId: string) {
@@ -67,12 +69,12 @@ export async function removeBookByName(bookName: string) {
 export async function getFilesInDir(props: { dirs: string[] }) {
   try {
     const dirs = props.dirs;
-    const response = await (
+    const untypedResponse = await (
       await fetch(
         BOOKS_URL + `multiTagger/${encodeURIComponent(dirs.join("/"))}`
       )
     ).json();
-    assertResponseHaveProperties(response);
+    const response = returnedFilesSchema.parse(untypedResponse);
     return [
       ...response.dirs.map((dir) =>
         dir.replace(dir.slice(0, dir.lastIndexOf("/") + 1), "")
@@ -103,11 +105,11 @@ export async function downloadingBook(url: string, fileName: string) {
   }
 }
 export async function getSelectedFilesDetails(args: {
-  selected: selectedItem[];
-  unselected: selectedItem[];
+  selected: selectedItemType[];
+  unselected: selectedItemType[];
 }) {
   try {
-    const response = await (
+    const untypedResponse = await (
       await fetch(BOOKS_URL + `multiTagger/tags`, {
         method: "POST",
         body: JSON.stringify({
@@ -117,25 +119,25 @@ export async function getSelectedFilesDetails(args: {
         headers: { "Content-Type": "application/json" },
       })
     ).json();
-    assertResponseIsArrayOfPathAndTags(response);
+    const response = z.array(onlyPathAndTagsSchema).parse(untypedResponse);
     return response;
   } catch (e) {
     console.log(e);
   }
 }
 export async function multiChangeTags(
-  changedTags: taggedTags[],
+  changedTags: taggedTagsType[],
   booksNames: string[]
 ) {
   const body = { tags: changedTags, titles: booksNames };
-  const response = await (
+  const untypedResponse = await (
     await fetch(BOOKS_URL + "multiTagger/updatetags", {
       method: "PATCH",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
     })
   ).json();
-  assertResponseIsArrayOfPathAndTags(response);
+  const response = z.array(onlyPathAndTagsSchema).parse(untypedResponse);
 
   return response;
 }
@@ -163,18 +165,18 @@ export async function importFiles(props: { dir: string; files: File[] }) {
       formData.append("paths", file.webkitRelativePath);
   });
   formData.append("dir", props.dir);
-  const response = await (
+  const untypedResponse = await (
     await fetch(BOOKS_URL + "multiTagger/importfile", {
       body: formData,
       method: "POST",
     })
   ).json();
-  assertIsItemViewWithoutTagsArray(response);
+  const response = z.array(itemViewPropsSchema).parse(untypedResponse);
   return response;
 }
 export async function multiMove(props: { data: string[]; newPath: string }) {
   try {
-    const response = await (
+    const untypedResponse = await (
       await fetch(BOOKS_URL + "multiTagger/moveFiles", {
         method: "PATCH",
         body: JSON.stringify({
@@ -184,7 +186,7 @@ export async function multiMove(props: { data: string[]; newPath: string }) {
         headers: { "Content-Type": "application/json" },
       })
     ).json();
-    assertIsItemViewWithoutTagsArray(response);
+    const response = z.array(itemViewPropsSchema).parse(untypedResponse);
     return response;
   } catch (e) {
     if (e != null) {

@@ -1,11 +1,52 @@
-export type tagType = { id: string; name: string };
-export type FileType = {
-  thumbnail: string;
-  title: string;
-  path: string;
-  tags: tagType[];
+import * as z from "zod";
+import {
+  tagSchema,
+  FileSchema,
+  onlyPathAndTagsSchema,
+  itemViewPropsSchema,
+  itemViewSchema,
+  ItemViewPropsSchema,
+  reqBodySchema,
+  returnedFilesSchema,
+} from "./schemas";
+
+export type tagType = z.infer<typeof tagSchema>;
+export type FileType = z.infer<typeof FileSchema>;
+export type itemViewPropsType = z.infer<typeof itemViewPropsSchema>;
+export type onlyPathAndTagsType = z.infer<typeof onlyPathAndTagsSchema>;
+export type returnedFilesType = z.infer<typeof returnedFilesSchema>;
+export type itemViewType = z.infer<typeof itemViewSchema>;
+export type ItemViewPropsType = z.infer<typeof ItemViewPropsSchema>;
+export type reqBodyType = z.infer<typeof reqBodySchema>;
+
+export type itemViewPropsNoTagsType = {
+  [K in keyof FileType as K extends "tags" ? never : K]: FileType[K];
+} & {
+  id: string;
+  lastOpened: string;
 };
-export type tagAdderProps = {
+export type menuPropsType = {
+  name: string;
+  itemTags: tagType[];
+  id: string;
+  queryData: unknown[];
+  downloadPath: string;
+};
+export type taggedTagsType = {
+  id: string;
+  action: string;
+};
+export type multiTaggerFilePropsType = { item: itemViewPropsType };
+export type multiTaggerFolderPropsType = {
+  setDir: React.Dispatch<React.SetStateAction<string[]>>;
+  item: string;
+  path: string;
+};
+export type selectedItemType = {
+  path: string;
+  type: string;
+};
+export type tagAdderPropsType = {
   name?: string;
   tags: tagType[];
   itemTags?: tagType[];
@@ -15,55 +56,3 @@ export type tagAdderProps = {
   data?: string[];
   isMultiTag?: boolean;
 };
-export type itemViewProps = {
-  thumbnail: string;
-  title: string;
-  id: string;
-  path: string;
-  tags: tagType[];
-  lastOpened: string;
-};
-export type itemViewPropsWithoutTags = {
-  thumbnail: string;
-  title: string;
-  id: string;
-  path: string;
-  lastOpened: string;
-};
-export type itemView = {
-  prop: itemViewProps;
-  showFullName: boolean;
-  itemTags: tagType[];
-};
-export type ItemViewProps = {
-  itemView: itemView;
-  queryData: unknown[];
-};
-export type menuProps = {
-  name: string;
-  itemTags: tagType[];
-  id: string;
-  queryData: unknown[];
-  downloadPath: string;
-};
-export type reqBody = {
-  data: itemViewProps[];
-  count: number;
-  take: number;
-  pn: number;
-};
-export type taggedTags = {
-  id: string;
-  action: string;
-};
-export type multiTaggerFileProps = { item: itemViewProps };
-export type multiTaggerFolderProps = {
-  setDir: React.Dispatch<React.SetStateAction<string[]>>;
-  item: string;
-  path: string;
-};
-export type selectedItem = {
-  path: string;
-  type: string;
-};
-export type onlyPathAndTags = { fullpath: string; tags: tagType[] };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ItemView from "./ItemView.tsx";
-import { itemViewProps, selectedItem } from "../types/types.ts";
+import { itemViewPropsType, selectedItemType } from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
 import ItemSize from "./ItemSize.tsx";
 import { Box, Button, Stack } from "@chakra-ui/react";
@@ -8,13 +8,13 @@ import { ItemContainer } from "./ItemContainer/ItemContainer.tsx";
 import { ItemContainerActionBar } from "./ItemContainer/ItemContainerActionBar.tsx";
 
 export default function ListItemView(args: {
-  books: itemViewProps[];
+  books: itemViewPropsType[];
   setSearchInput: (arg0: string) => void;
   setTake: (arg0: number) => void;
   queryData: unknown[];
 }) {
   const [showFullname, setshowFullname] = useState<boolean>(false);
-  const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
   return (
     <>
       <Stack direction={"row"}>
@@ -34,7 +34,7 @@ export default function ListItemView(args: {
       </Stack>
       <Stack>
         <Stack direction={"row"} wrap={"wrap"}>
-          {args.books.map((IV: itemViewProps) => {
+          {args.books.map((IV: itemViewPropsType) => {
             return (
               <Box
                 key={IV.id}

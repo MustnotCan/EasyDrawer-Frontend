@@ -1,9 +1,9 @@
-import { multiTaggerFileProps } from "@/types/types";
+import { multiTaggerFilePropsType } from "@/types/types";
 import { THUMBS_URL } from "../../utils/envVar";
 import { Stack } from "@chakra-ui/react";
 import { Tooltip } from "../../ui/tooltip";
 
-export function MultiTaggerFile(props: multiTaggerFileProps) {
+export function MultiTaggerFile(props: multiTaggerFilePropsType) {
   return (
     <Stack className="w-65 h-70">
       <img

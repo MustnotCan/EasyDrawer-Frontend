@@ -1,16 +1,16 @@
 import { FC } from "react";
-import { selectedItem, tagType } from "../../types/types";
+import { selectedItemType, tagType } from "../../types/types";
 import { clearSelected } from "../../utils/itemContainerUtils";
 import { ActionBar, CloseButton, Portal } from "@chakra-ui/react";
 
 import { MultiTaggerActionBar } from "../MultiTagger/MultiTaggerActionBar";
 import { ItemViewActionBar } from "../ItemViewActionBar";
 export function ItemContainerActionBar(props: {
-  selectedItems: selectedItem[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
+  selectedItems: selectedItemType[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
   ItemContainerParent: string;
-  setUnselectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
-  unselectedItems: selectedItem[];
+  setUnselectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
+  unselectedItems: selectedItemType[];
   tags: tagType[];
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
   dirs: string[];

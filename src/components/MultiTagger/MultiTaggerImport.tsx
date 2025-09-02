@@ -1,4 +1,4 @@
-import { itemViewProps } from "../../types/types";
+import { itemViewPropsType } from "../../types/types";
 import { importFiles } from "../../utils/queries/booksApi";
 import { Button, FileUpload, Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,11 +14,11 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
     mutationFn: (args: { dirs: string; files: File[] }) => {
       return importFiles({ dir: args.dirs, files: args.files });
     },
-    onSuccess: (addedFiles: itemViewProps[]) => {
+    onSuccess: (addedFiles: itemViewPropsType[]) => {
       setFiles([]);
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
-        (prev: (string | itemViewProps)[]) => {
+        (prev: (string | itemViewPropsType)[]) => {
           const existingFiles = prev
             .filter((file) => !(typeof file == "string"))
             .map((file) => file.title);
@@ -37,13 +37,13 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       return importFiles({ dir: args.dirs, files: args.files });
     },
     onSuccess: (
-      addedFiles: itemViewProps[],
+      addedFiles: itemViewPropsType[],
       variables: { dirs: string; files: File[] }
     ) => {
       setFolders([]);
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
-        (prev: (string | itemViewProps)[]) => {
+        (prev: (string | itemViewPropsType)[]) => {
           const newFolders: string[] = [];
           const nbrSlashesInDir = props.dirs.length;
           addedFiles.forEach((file) => {
@@ -67,7 +67,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
         ];
         queryClient.setQueryData(
           ["Dirs&files", splittedPath],
-          (prev: (string | itemViewProps)[] | undefined) => {
+          (prev: (string | itemViewPropsType)[] | undefined) => {
             if (prev) {
               if (
                 prev.find(

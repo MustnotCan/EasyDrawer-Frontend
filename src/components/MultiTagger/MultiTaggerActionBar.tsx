@@ -1,7 +1,7 @@
 import {
-  itemViewProps,
-  onlyPathAndTags,
-  selectedItem,
+  itemViewPropsType,
+  onlyPathAndTagsType,
+  selectedItemType,
   tagType,
 } from "../../types/types";
 import { Button, Input, Menu, Portal, Spinner, Stack } from "@chakra-ui/react";
@@ -45,10 +45,10 @@ function MultiTaggerActionBarInput(props: {
   );
 }
 export function MultiTaggerActionBar(props: {
-  selectedItems: selectedItem[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
-  setUnselectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>;
-  unselectedItems: selectedItem[];
+  selectedItems: selectedItemType[];
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
+  setUnselectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
+  unselectedItems: selectedItemType[];
   tags: tagType[];
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
   dirs: string[];
@@ -56,7 +56,7 @@ export function MultiTaggerActionBar(props: {
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<onlyPathAndTags[]>([]);
+  const [data, setData] = useState<onlyPathAndTagsType[]>([]);
   const queryClient = useQueryClient();
 
   const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -68,8 +68,8 @@ export function MultiTaggerActionBar(props: {
         queryKey: ["multiTagger", props.selectedItems, props.unselectedItems],
         queryFn: ({ queryKey }) =>
           getSelectedFilesDetails({
-            selected: queryKey.at(1) as selectedItem[],
-            unselected: queryKey.at(2) as selectedItem[],
+            selected: queryKey.at(1) as selectedItemType[],
+            unselected: queryKey.at(2) as selectedItemType[],
           }),
       });
 
@@ -110,7 +110,7 @@ export function MultiTaggerActionBar(props: {
         const splittedFile = file.split("/");
         queryClient.setQueryData(
           ["Dirs&files", file.split("/").slice(0, -1)],
-          (prev: (string | itemViewProps)[] | undefined) => {
+          (prev: (string | itemViewPropsType)[] | undefined) => {
             return prev
               ? [
                   ...prev.filter(
@@ -133,12 +133,12 @@ export function MultiTaggerActionBar(props: {
       });
     },
     onSuccess: (
-      addedFiles: itemViewProps[],
+      addedFiles: itemViewPropsType[],
       variables: { files: string[]; newPath: string }
     ) => {
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
-        (prev: (string | itemViewProps)[] | undefined) => {
+        (prev: (string | itemViewPropsType)[] | undefined) => {
           if (!prev) {
             return [...addedFiles];
           } else {
@@ -163,7 +163,7 @@ export function MultiTaggerActionBar(props: {
           const existingCache = queryClient.getQueryData([
             "Dirs&files",
             arr.slice(0, index + 1),
-          ]) as (string | itemViewProps)[] | undefined;
+          ]) as (string | itemViewPropsType)[] | undefined;
           if (
             fullArray[index + 1] &&
             (!existingCache ||
@@ -173,7 +173,7 @@ export function MultiTaggerActionBar(props: {
           ) {
             queryClient.setQueryData(
               ["Dirs&files", arr.slice(0, index + 1)],
-              (prev: (string | itemViewProps)[] | undefined) => {
+              (prev: (string | itemViewPropsType)[] | undefined) => {
                 if (!prev) {
                   return [fullArray[index + 1]];
                 } else {
@@ -190,7 +190,7 @@ export function MultiTaggerActionBar(props: {
         const splittedFile = file.split("/");
         queryClient.setQueryData(
           ["Dirs&files", file.split("/").slice(0, -1)],
-          (prev: (string | itemViewProps)[] | undefined) => {
+          (prev: (string | itemViewPropsType)[] | undefined) => {
             return prev
               ? [
                   ...prev.filter(

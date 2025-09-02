@@ -1,5 +1,10 @@
 import Menu from "./Menu";
-import { ItemViewProps, itemViewProps, reqBody, tagType } from "../types/types";
+import {
+  ItemViewPropsType,
+  itemViewPropsType,
+  reqBodyType,
+  tagType,
+} from "../types/types";
 import { useState } from "react";
 import { THUMBS_URL } from "../utils/envVar";
 import { FaHeart } from "react-icons/fa";
@@ -8,7 +13,7 @@ import { Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { changeTags } from "../utils/queries/booksApi";
 import { runtimeConfig } from "../entry.client";
-export default function ItemView(props: ItemViewProps) {
+export default function ItemView(props: ItemViewPropsType) {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     props.itemView.prop.tags
       .map((tag) => tag.name.toLowerCase())
@@ -24,10 +29,10 @@ export default function ItemView(props: ItemViewProps) {
       };
       return changeTags([literal], args.name);
     },
-    onSuccess: (modifiedBook: itemViewProps) => {
+    onSuccess: (modifiedBook: itemViewPropsType) => {
       queryClient.setQueryData(
         ["books", ...props.queryData],
-        (prevBooks: reqBody): reqBody => {
+        (prevBooks: reqBodyType): reqBodyType => {
           const newData = prevBooks.data.map((book) => {
             return book.title === modifiedBook.title
               ? { ...book, tags: modifiedBook.tags }

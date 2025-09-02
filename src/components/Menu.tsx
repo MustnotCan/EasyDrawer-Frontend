@@ -1,5 +1,5 @@
 import TagAdder from "./TagAdder";
-import { menuProps, tagType } from "../types/types";
+import { menuPropsType, tagType } from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Portal } from "@chakra-ui/react";
 import { LuChevronRight } from "react-icons/lu";
@@ -7,7 +7,7 @@ import { CiMenuBurger } from "react-icons/ci";
 import { downloadingBook } from "../utils/queries/booksApi.ts";
 import { FaDownload } from "react-icons/fa6";
 
-export default function ItemViewMenu(props: menuProps) {
+export default function ItemViewMenu(props: menuPropsType) {
   const queryClient = useQueryClient();
 
   /*const removeBookByIdMutation = useMutation({

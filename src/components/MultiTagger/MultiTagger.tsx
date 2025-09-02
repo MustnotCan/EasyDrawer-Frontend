@@ -5,7 +5,7 @@ import { Stack } from "@chakra-ui/react";
 import { MultiTaggerFile } from "./MultiTaggerFile";
 import { MultiTaggerFolder } from "./MultiTaggerFolder";
 import { ItemContainer } from "../ItemContainer/ItemContainer";
-import { selectedItem, tagType } from "../../types/types";
+import { selectedItemType, tagType } from "../../types/types";
 import { ItemContainerActionBar } from "../ItemContainer/ItemContainerActionBar";
 import { MultiTaggerBreadCrumb } from "./MultiTaggerBreadCrumb";
 import { getTags } from "../../utils/queries/tagsApi";
@@ -13,8 +13,10 @@ import { MultiTaggerImport } from "./MultiTaggerImport";
 
 export default function MultiTagger() {
   const [dirs, setDir] = useState<string[]>([""]);
-  const [selectedItems, setSelectedItems] = useState<selectedItem[]>([]);
-  const [unSelectedItems, setUnSelectedItems] = useState<selectedItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
+  const [unSelectedItems, setUnSelectedItems] = useState<selectedItemType[]>(
+    []
+  );
   const tags = useQuery({ queryKey: ["tags"], queryFn: getTags })
     .data as tagType[];
   const data = useQuery({

@@ -1,21 +1,21 @@
-import { selectedItem } from "@/types/types";
+import { selectedItemType } from "@/types/types";
 
 export const addToSelected = (
-  item: selectedItem,
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>
+  item: selectedItemType,
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>
 ) => {
   setSelectedItems((prev) => (prev.includes(item) ? prev : [...prev, item]));
 };
 
 export const clearSelected = (
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>
 ) => {
   setSelectedItems([]);
 };
 
 export const removeFromSelected = (
-  item: selectedItem,
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>
+  item: selectedItemType,
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>
 ) => {
   setSelectedItems((prev) => {
     const newList = prev.filter(
@@ -27,9 +27,9 @@ export const removeFromSelected = (
   });
 };
 export const toggleSelected = (
-  item: selectedItem,
-  selectedItems: selectedItem[],
-  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItem[]>>
+  item: selectedItemType,
+  selectedItems: selectedItemType[],
+  setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>
 ) => {
   if (
     selectedItems
