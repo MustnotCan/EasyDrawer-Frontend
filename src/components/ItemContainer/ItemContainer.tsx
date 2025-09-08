@@ -69,11 +69,13 @@ export function ItemContainer(props: {
     };
     onDoubleClickHandler = (e) => {
       if (!e.ctrlKey) {
-        const encodedUri = encodeURIComponent(prop.path + "/" + prop.title);
-        window.open(
+        console.log(prop.id, prop.path);
+        const encodedUri = encodeURIComponent(prop.id);
+        const newWindow = window.open(
           "http://" + location.host + `/pdfreader/${encodedUri}`,
           "_blank"
         );
+        if (newWindow) newWindow.localStorage.setItem(prop.id, prop.title);
       }
     };
   } else if (isMultiTaggerFileProps(props.children)) {
@@ -129,7 +131,7 @@ export function ItemContainer(props: {
     };
     onDoubleClickHandler = (e) => {
       if (!e.ctrlKey) {
-        const encodedUri = encodeURIComponent(item.path + "/" + item.title);
+        const encodedUri = encodeURIComponent(item.id);
         window.open(
           "http://" + location.host + `/pdfreader/${encodedUri}`,
           "_blank"
