@@ -61,9 +61,7 @@ export default function ItemView(props: ItemViewPropsType) {
           queryData={props.queryData}
           downloadPath={
             `${runtimeConfig.VITE_API_MAIN}pdfs/` +
-            encodeURIComponent(
-              props.itemView.prop.path + "/" + props.itemView.prop.title
-            )
+            encodeURIComponent(props.itemView.prop.id)
           }
         />
       </Stack>

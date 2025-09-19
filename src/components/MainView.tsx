@@ -17,8 +17,8 @@ export default function View() {
   const [searchName, setSearchName] = useState<string>("");
   const [isAnd, setIsAnd] = useState<boolean>(true);
   const [orderBy, setOrderBy] = useState<orderByType>({
-    direction: "asc",
-    criteria: "addedDate",
+    direction: "desc",
+    criteria: "lastAccess",
   });
   const alteredSetTFB = (newTfb: string[]) => {
     const setA = new Set(newTfb);

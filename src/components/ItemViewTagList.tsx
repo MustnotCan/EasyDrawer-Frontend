@@ -79,8 +79,8 @@ export default function TagList(props: tagAdderPropsType) {
             )
             .map(
               (tag) =>
-                tag.name != "Unclassified" &&
-                (!props.isMultiTag ? tag.name != "Favorite" : true) && (
+                tag.name != "unclassified" &&
+                (!props.isMultiTag ? tag.name != "favorite" : true) && (
                   <div key={tag.id}>
                     <label className="flex items-center gap-2">
                       <Checkbox.Root
@@ -97,7 +97,7 @@ export default function TagList(props: tagAdderPropsType) {
                             textOverflow="ellipsis"
                             whiteSpace="nowrap"
                           >
-                            {tag.name}
+                            {tag.name[0].toUpperCase() + tag.name.slice(1)}
                           </Box>
                         </Checkbox.Label>
                       </Checkbox.Root>

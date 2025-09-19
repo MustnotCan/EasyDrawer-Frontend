@@ -28,11 +28,6 @@ export default function TagFilter(props: {
   };
   const formAction = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (cBoxes.includes("Unclassified") && cBoxes.length > 1) {
-      return new Error(
-        "A book cannot be unclassified and have a tag at the same time"
-      );
-    }
     props.setTFB(cBoxes);
   };
   const clearFilter = () => setCBoxes(props.isFavorite ? ["favorite"] : []);
