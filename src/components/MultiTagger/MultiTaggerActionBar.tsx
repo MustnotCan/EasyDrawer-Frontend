@@ -1,5 +1,5 @@
 import {
-  itemViewPropsType,
+  multiTaggerFilePropsType,
   onlyPathAndTagsType,
   selectedItemType,
   tagType,
@@ -8,7 +8,7 @@ import { Button, Input, Menu, Portal, Spinner, Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
-import TagAdder from "../TagAdder";
+import TagList from "../ItemViewTagList";
 import {
   getSelectedFilesDetails,
   multiDelete,
@@ -109,8 +109,8 @@ export function MultiTaggerActionBar(props: {
       variables.files.forEach((file) => {
         const splittedFile = file.split("/");
         queryClient.setQueryData(
-          ["Dirs&files", file.split("/").slice(0, -1)],
-          (prev: (string | itemViewPropsType)[] | undefined) => {
+          ["Dirs&files", splittedFile.slice(0, -1)],
+          (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
             return prev
               ? [
                   ...prev.filter(
@@ -133,12 +133,63 @@ export function MultiTaggerActionBar(props: {
       });
     },
     onSuccess: (
-      addedFiles: itemViewPropsType[],
+      addedFiles: multiTaggerFilePropsType[],
       variables: { files: string[]; newPath: string }
     ) => {
+      const pathsToUpdate = Array.from(
+        new Set(addedFiles.map((af) => af.path))
+      );
+      pathsToUpdate.forEach((pto) => {
+        const fullArray = pto.split("/"); 
+        fullArray.slice(0, fullArray.length - 1).forEach((_, index, arr) => {
+          const existingCache = queryClient.getQueryData([
+            "Dirs&files",
+            arr.slice(0, index + 1),
+          ]) as (string | multiTaggerFilePropsType)[] | undefined;
+          if (
+            fullArray[index + 1] &&
+            (!existingCache ||
+              !existingCache.find(
+                (el) => typeof el == "string" && el == fullArray[index + 1]
+              ))
+          ) {
+            queryClient.setQueryData(
+              ["Dirs&files", arr.slice(0, index + 1)],
+              (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
+                if (!prev) {
+                  return [fullArray[index + 1]];
+                } else {
+                  return [...prev, fullArray[index + 1]];
+                }
+              }
+            );
+          }
+        });
+      });
+
+      // update the cache for the folder from where files were removed
+      variables.files.forEach((file) => {
+        const splittedFile = file.split("/");
+        queryClient.setQueryData(
+          ["Dirs&files", file.split("/").slice(0, -1)],
+          (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
+            return prev
+              ? [
+                  ...prev.filter(
+                    (item) =>
+                      typeof item == "string" ||
+                      item.title != splittedFile.at(splittedFile.length - 1)
+                  ),
+                ]
+              : [];
+          }
+        );
+      });
+
+      // basically, when you move files into a new dir, you do that to the new dir, the next code updates the files in it
       queryClient.setQueryData(
-        ["Dirs&files", props.dirs],
-        (prev: (string | itemViewPropsType)[] | undefined) => {
+        ["Dirs&files", pathsToUpdate.at(0)?.split("/")],
+        (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
           if (!prev) {
             return [...addedFiles];
           } else {
@@ -154,55 +205,6 @@ export function MultiTaggerActionBar(props: {
           }
         }
       );
-      const pathsToUpdate = Array.from(
-        new Set(addedFiles.map((af) => af.path))
-      );
-      pathsToUpdate.forEach((pto) => {
-        const fullArray = pto.split("/");
-        fullArray.slice(0, fullArray.length - 1).forEach((_, index, arr) => {
-          const existingCache = queryClient.getQueryData([
-            "Dirs&files",
-            arr.slice(0, index + 1),
-          ]) as (string | itemViewPropsType)[] | undefined;
-          if (
-            fullArray[index + 1] &&
-            (!existingCache ||
-              !existingCache.find(
-                (el) => typeof el == "string" && el == fullArray[index + 1]
-              ))
-          ) {
-            queryClient.setQueryData(
-              ["Dirs&files", arr.slice(0, index + 1)],
-              (prev: (string | itemViewPropsType)[] | undefined) => {
-                if (!prev) {
-                  return [fullArray[index + 1]];
-                } else {
-                  return [...prev, fullArray[index + 1]];
-                }
-              }
-            );
-          }
-        });
-      });
-
-      //
-      variables.files.forEach((file) => {
-        const splittedFile = file.split("/");
-        queryClient.setQueryData(
-          ["Dirs&files", file.split("/").slice(0, -1)],
-          (prev: (string | itemViewPropsType)[] | undefined) => {
-            return prev
-              ? [
-                  ...prev.filter(
-                    (item) =>
-                      typeof item == "string" ||
-                      item.title != splittedFile.at(splittedFile.length - 1)
-                  ),
-                ]
-              : [];
-          }
-        );
-      });
     },
   });
   const removeClickHandler = () => {
@@ -301,7 +303,7 @@ export function MultiTaggerActionBar(props: {
                         {loading ? (
                           <Spinner />
                         ) : (
-                          <TagAdder
+                          <TagList
                             tags={props.tags}
                             sharedTags={sharedTags}
                             unsharedTags={unsharedTags}

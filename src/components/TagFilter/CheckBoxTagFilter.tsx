@@ -1,13 +1,13 @@
 import { Checkbox } from "@chakra-ui/react/checkbox";
 import { DeleteButton } from "./DeleteButtonTagFilter";
 import { useMemo, useState } from "react";
-import { RenameButton } from "../RenameButtonTagFilter";
-import { tagType } from "../../types/types";
+import { RenameButton } from "./RenameButtonTagFilter";
+import { tagWithCountType } from "../../types/types";
 import { Box, Stack } from "@chakra-ui/react";
 import { Tooltip } from "../../ui/tooltip";
 type props = {
   cBoxes: string[];
-  tag: tagType;
+  tag: tagWithCountType;
   onChangeHandler: (arg0: string) => void;
 };
 export default function CheckBoxTagFilter({
@@ -30,23 +30,29 @@ export default function CheckBoxTagFilter({
         >
           <Checkbox.Control />
           <Checkbox.Label height={"30px"} width={"80px"}>
-            <Tooltip content={tag.name}>
+            <Tooltip content={tag.name + " (" + tag.booksCount + ")"}>
               <Box
                 maxWidth="100px"
                 overflow="hidden"
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
               >
-                {tag.name}
+                {tag.name[0].toUpperCase() +
+                  tag.name.slice(1) +
+                  " (" +
+                  tag.booksCount +
+                  ")"}{" "}
               </Box>
             </Tooltip>
           </Checkbox.Label>
         </Checkbox.Root>
       )}
 
-      {!["unclassified", "favorite"].includes(tag.name.toLowerCase()) &&
+      {!["unclassified", "favorite", "bin"].includes(tag.name.toLowerCase()) &&
         !renaming && <DeleteButtonMemo tagName={tag.name} />}
-      {!["unclassified", "favorite"].includes(tag.name.toLowerCase()) && (
+      {!["unclassified", "favorite", "bin"].includes(
+        tag.name.toLowerCase()
+      ) && (
         <RenameButtonMemo
           tagName={tag.name}
           renaming={renaming}

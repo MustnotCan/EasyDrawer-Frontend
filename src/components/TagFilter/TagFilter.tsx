@@ -1,20 +1,19 @@
 import { FormEvent, useEffect, useState } from "react";
-import { tagType } from "../../types/types";
+import { tagWithCountType } from "../../types/types";
 import { List, Stack, Button, Input } from "@chakra-ui/react";
 import CheckBoxTagFilter from "./CheckBoxTagFilter";
 export default function TagFilter(props: {
-  tags: tagType[];
+  tags: tagWithCountType[];
   setTFB: (arg0: string[]) => void;
   isFavorite: boolean;
 }) {
   const [cBoxes, setCBoxes] = useState<string[]>(
-    props.isFavorite ? ["Favorite"] : []
+    props.isFavorite ? ["favorite"] : []
   );
   const [searchInput, setSearchInput] = useState<string>("");
-
   useEffect(() => {
     if (props.isFavorite) {
-      setCBoxes(["Favorite"]);
+      setCBoxes(["favorite"]);
     } else {
       setCBoxes([]);
     }
@@ -36,7 +35,7 @@ export default function TagFilter(props: {
     }
     props.setTFB(cBoxes);
   };
-  const clearFilter = () => setCBoxes(props.isFavorite ? ["Favorite"] : []);
+  const clearFilter = () => setCBoxes(props.isFavorite ? ["favorite"] : []);
 
   return (
     <Stack>

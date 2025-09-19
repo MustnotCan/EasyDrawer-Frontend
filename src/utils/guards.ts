@@ -14,7 +14,7 @@ export function isItemView(
 }
 export function isMultiTaggerFileProps(
   element: React.ReactElement
-): element is React.ReactElement<multiTaggerFilePropsType> {
+): element is React.ReactElement<{ item: multiTaggerFilePropsType }> {
   return element.type === MultiTaggerFile;
 }
 

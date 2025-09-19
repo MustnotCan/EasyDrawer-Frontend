@@ -1,7 +1,6 @@
 import { Stack } from "@chakra-ui/react";
 import Navigation from "./Navigation";
 import { useState } from "react";
-
 import { Link, Outlet } from "react-router-dom";
 
 export default function Home() {

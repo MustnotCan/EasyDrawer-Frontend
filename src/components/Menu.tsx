@@ -1,15 +1,14 @@
-import TagAdder from "./TagAdder";
-import { menuPropsType, tagType } from "../types/types";
-import { useQueryClient } from "@tanstack/react-query";
+import TagList from "./ItemViewTagList.tsx";
+import { itemViewMenuPropsType } from "../types/types";
 import { Menu, Portal } from "@chakra-ui/react";
 import { LuChevronRight } from "react-icons/lu";
 import { CiMenuBurger } from "react-icons/ci";
 import { downloadingBook } from "../utils/queries/booksApi.ts";
 import { FaDownload } from "react-icons/fa6";
+import { useTags } from "../utils/Hooks/TagsHook.ts";
 
-export default function ItemViewMenu(props: menuPropsType) {
-  const queryClient = useQueryClient();
-
+export default function ItemViewMenu(props: itemViewMenuPropsType) {
+  const tags = useTags();
   /*const removeBookByIdMutation = useMutation({
     mutationFn: (id: string) => removeBookById(id),
     onSuccess: () => {
@@ -23,7 +22,7 @@ export default function ItemViewMenu(props: menuPropsType) {
       console.error("Error removing book by id:", err);
     },
   });*/
-  const tags: tagType[] = queryClient.getQueryData(["tags"]) || [];
+
   return (
     <Menu.Root>
       <Menu.Trigger asChild onDoubleClick={(e) => e.stopPropagation()}>
@@ -45,7 +44,7 @@ export default function ItemViewMenu(props: menuPropsType) {
               <Portal>
                 <Menu.Positioner>
                   <Menu.Content>
-                    <TagAdder
+                    <TagList
                       itemTags={props.itemTags}
                       tags={tags}
                       name={props.name}

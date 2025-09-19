@@ -1,48 +1,23 @@
 import Menu from "./Menu";
-import {
-  ItemViewPropsType,
-  itemViewPropsType,
-  reqBodyType,
-  tagType,
-} from "../types/types";
+import { ItemViewPropsType } from "../types/types";
 import { useState } from "react";
 import { THUMBS_URL } from "../utils/envVar";
 import { FaHeart } from "react-icons/fa";
 import { CiHeart } from "react-icons/ci";
 import { Stack } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { changeTags } from "../utils/queries/booksApi";
 import { runtimeConfig } from "../entry.client";
+import { Tooltip } from "../ui/tooltip";
+import { useItemViewChangeTagsMutation } from "../utils/Hooks/ItemViewHook.ts";
+import { useTags } from "../utils/Hooks/TagsHook.ts";
+
 export default function ItemView(props: ItemViewPropsType) {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     props.itemView.prop.tags
       .map((tag) => tag.name.toLowerCase())
       .includes("favorite")
   );
-  const queryClient = useQueryClient();
-  const tags = queryClient.getQueryData(["tags"]) as tagType[];
-  const { mutate } = useMutation({
-    mutationFn: (args: { isFavorite: boolean; name: string }) => {
-      const literal = {
-        id: tags.filter((tag) => tag.name == "Favorite")[0].id,
-        action: isFavorite ? "add" : "remove",
-      };
-      return changeTags([literal], args.name);
-    },
-    onSuccess: (modifiedBook: itemViewPropsType) => {
-      queryClient.setQueryData(
-        ["books", ...props.queryData],
-        (prevBooks: reqBodyType): reqBodyType => {
-          const newData = prevBooks.data.map((book) => {
-            return book.title === modifiedBook.title
-              ? { ...book, tags: modifiedBook.tags }
-              : book;
-          });
-          return { ...prevBooks, data: newData };
-        }
-      );
-    },
-  });
+  const tags = useTags();
+  const mutate = useItemViewChangeTagsMutation(props.queryData, tags);
   function favoriteToggleHandler(isFavorite: boolean, name: string) {
     mutate({ isFavorite: isFavorite, name: name });
     setIsFavorite(!isFavorite);
@@ -57,15 +32,9 @@ export default function ItemView(props: ItemViewPropsType) {
           loading="lazy"
         />
       </Stack>
-      <Stack className="mt-2 max-w-[250px]">
-        {props.itemView.showFullName ? (
-          <p className="truncate whitespace-normal">
-            {props.itemView.prop.title}
-          </p>
-        ) : (
-          <p className="truncate">{props.itemView.prop.title}</p>
-        )}
-      </Stack>
+      <Tooltip content={props.itemView.prop.title}>
+        <p className="truncate w-50">{props.itemView.prop.title}</p>
+      </Tooltip>
       <Stack direction={"row"}>
         {isFavorite ? (
           <FaHeart
@@ -84,6 +53,7 @@ export default function ItemView(props: ItemViewPropsType) {
             }}
           />
         )}
+
         <Menu
           name={props.itemView.prop.title}
           itemTags={props.itemView.itemTags}

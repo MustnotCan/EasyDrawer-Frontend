@@ -69,7 +69,6 @@ export function ItemContainer(props: {
     };
     onDoubleClickHandler = (e) => {
       if (!e.ctrlKey) {
-        console.log(prop.id, prop.path);
         const encodedUri = encodeURIComponent(prop.id);
         const newWindow = window.open(
           "http://" + location.host + `/pdfreader/${encodedUri}`,

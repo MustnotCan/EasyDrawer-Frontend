@@ -1,40 +1,47 @@
 import { useState } from "react";
 import ItemView from "./ItemView.tsx";
-import { itemViewPropsType, selectedItemType } from "../types/types.ts";
+import {
+  itemViewPropsType,
+  listItemViewQueryDataType,
+  orderByType,
+  selectedItemType,
+} from "../types/types.ts";
 import SearchBar from "./SearchBar.tsx";
 import ItemSize from "./ItemSize.tsx";
-import { Box, Button, Stack } from "@chakra-ui/react";
+import { Box, Stack } from "@chakra-ui/react";
 import { ItemContainer } from "./ItemContainer/ItemContainer.tsx";
 import { ItemContainerActionBar } from "./ItemContainer/ItemContainerActionBar.tsx";
+import ListItemViewSortBy from "./ListItemViewSortBy.tsx";
 
-export default function ListItemView(args: {
+export default function ListItemView(props: {
   books: itemViewPropsType[];
   setSearchInput: (arg0: string) => void;
   setTake: (arg0: number) => void;
-  queryData: unknown[];
+  queryData: listItemViewQueryDataType;
+  orderBy: orderByType;
+  setOrderBy: React.Dispatch<
+    React.SetStateAction<{
+      criteria: string;
+      direction: string;
+    }>
+  >;
 }) {
-  const [showFullname, setshowFullname] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
+
   return (
     <>
       <Stack direction={"row"}>
-        <ItemSize setTake={args.setTake} take={args.queryData[1] as number} />
-        <SearchBar setSearchInput={args.setSearchInput} />
-
-        <Stack>
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              setshowFullname(!showFullname);
-            }}
-          >
-            {showFullname == true ? "Hide" : "Show"} full name
-          </Button>
-        </Stack>
+        <ItemSize setTake={props.setTake} take={props.queryData[1] as number} />
+        <SearchBar setSearchInput={props.setSearchInput} />
+        {/*add the sorting*/}
+        <ListItemViewSortBy
+          orderBy={props.orderBy}
+          setOrderBy={props.setOrderBy}
+        />
       </Stack>
       <Stack>
         <Stack direction={"row"} wrap={"wrap"}>
-          {args.books.map((IV: itemViewPropsType) => {
+          {props.books.map((IV: itemViewPropsType) => {
             return (
               <Box
                 key={IV.id}
@@ -54,10 +61,9 @@ export default function ListItemView(args: {
                     <ItemView
                       itemView={{
                         prop: IV,
-                        showFullName: showFullname,
                         itemTags: IV.tags,
                       }}
-                      queryData={args.queryData}
+                      queryData={props.queryData}
                     />
                   }
                 ></ItemContainer>

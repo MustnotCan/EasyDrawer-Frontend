@@ -1,25 +1,36 @@
-import { selectedItemType, taggedTagsType } from "@/types/types.ts";
+import {
+  itemViewPropsType,
+  orderByType,
+  selectedItemType,
+  taggedTagsType,
+} from "@/types/types.ts";
 import { BOOKS_URL } from "../envVar.ts";
 import {
+  changedTagsResponseSchema,
   itemViewPropsSchema,
+  multiTaggerFilePropsSchema,
   onlyPathAndTagsSchema,
   reqBodySchema,
   returnedFilesSchema,
 } from "../../types/schemas.ts";
 import z from "zod";
 
-export async function getBooks(data: {
+export async function getBooks(props: {
   spt: number;
   spp: number;
   tfb: string[];
   searchName: string;
+  isAnd: boolean;
+  orderBy: orderByType;
 }) {
   const response = await fetch(
     BOOKS_URL +
-      `?take=${data.spt}&pn=${data.spp}&searchName=${data.searchName}&tags=${data.tfb}`
+      `?take=${props.spt}&pn=${props.spp}&searchName=${props.searchName}&tags=${props.tfb}&isAnd=${props.isAnd}&oB=${props.orderBy.criteria}&direction=${props.orderBy.direction}`
   );
   const body = (await response.json()) as object;
+
   const parsedBody = reqBodySchema.parse(body);
+
   return {
     ...parsedBody,
     data: parsedBody.data.map((iv) => itemViewPropsSchema.parse(iv)),
@@ -38,7 +49,7 @@ export async function changeTags(
       headers: { "Content-Type": "application/json" },
     })
   ).json();
-  return itemViewPropsSchema.parse(response);
+  return changedTagsResponseSchema.parse(response);
 }
 
 export async function removeBookById(BookId: string) {
@@ -171,12 +182,12 @@ export async function importFiles(props: { dir: string; files: File[] }) {
       method: "POST",
     })
   ).json();
-  const response = z.array(itemViewPropsSchema).parse(untypedResponse);
+  const response = z.array(multiTaggerFilePropsSchema).parse(untypedResponse);
   return response;
 }
 export async function multiMove(props: { data: string[]; newPath: string }) {
   try {
-    const untypedResponse = await (
+    const untypedResponse: itemViewPropsType[] = await (
       await fetch(BOOKS_URL + "multiTagger/moveFiles", {
         method: "PATCH",
         body: JSON.stringify({
@@ -186,7 +197,9 @@ export async function multiMove(props: { data: string[]; newPath: string }) {
         headers: { "Content-Type": "application/json" },
       })
     ).json();
-    const response = z.array(itemViewPropsSchema).parse(untypedResponse);
+
+    const response = z.array(multiTaggerFilePropsSchema).parse(untypedResponse);
+
     return response;
   } catch (e) {
     if (e != null) {

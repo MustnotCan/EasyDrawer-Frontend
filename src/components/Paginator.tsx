@@ -12,7 +12,7 @@ export default function Paginator(props: {
       pageSize={1}
       page={props.pn}
       onPageChange={(e) => props.setPn(e.page)}
-      siblingCount={1}
+      siblingCount={2}
       alignSelf={"center"}
     >
       <ButtonGroup variant="ghost" size="sm">

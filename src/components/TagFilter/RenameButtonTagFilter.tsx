@@ -1,9 +1,7 @@
-import { renameTag } from "../utils/queries/tagsApi.ts";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { EditOutlined } from "@ant-design/icons";
 import { Button, IconButton, Input } from "@chakra-ui/react";
-import { tagType } from "@/types/types.ts";
+import { useTags } from "../../utils/Hooks/RenameButtonTagFilterDataHook.ts";
 export function RenameButton(prop: {
   tagName: string;
   renaming: boolean;
@@ -11,23 +9,7 @@ export function RenameButton(prop: {
 }) {
   const [newValue, setNewValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const queryClient = useQueryClient();
-  const { mutate } = useMutation({
-    mutationFn: (newName: string) =>
-      renameTag({ prevName: prop.tagName, newName: newName }),
-    onSuccess: (returnedTag: tagType) => {
-      queryClient.setQueryData(["tags"], (oldTags: tagType[]) => {
-        if (!oldTags) return [];
-        return oldTags.map((tag) =>
-          tag.id === returnedTag.id ? { ...tag, name: returnedTag.name } : tag
-        );
-      });
-    },
-    onError: (err) => {
-      console.error("Error renaming tag:", err);
-    },
-  });
+  const mutate = useTags(prop.tagName);
   const reNameTagOff: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     prop.setRenaming(true);
@@ -45,7 +27,7 @@ export function RenameButton(prop: {
   return (
     <div>
       {!prop.renaming && (
-        <IconButton variant={"ghost"} size="sm" onClick={reNameTagOff}>
+        <IconButton variant={"ghost"} size="2xs" onClick={reNameTagOff}>
           <EditOutlined />
         </IconButton>
       )}
@@ -61,6 +43,8 @@ export function RenameButton(prop: {
             onKeyDown={(e) => {
               if (e.key == "Enter" && newValue != "") {
                 reNameTagOn();
+              } else if (e.key == "Escape") {
+                prop.setRenaming(false);
               }
             }}
           />

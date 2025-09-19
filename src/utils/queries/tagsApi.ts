@@ -1,8 +1,8 @@
 import { TAGS_URL } from "../envVar";
-import { tagSchema } from "../../types/schemas";
+import { tagSchema, tagWithCountSchema } from "../../types/schemas";
 export async function getTags() {
   const response = (await (await fetch(TAGS_URL)).json()) as [];
-  return response.map((tag) => tagSchema.parse(tag));
+  return response.map((tag) => tagWithCountSchema.parse(tag));
 }
 
 export async function addTag(tag: { name: string }) {

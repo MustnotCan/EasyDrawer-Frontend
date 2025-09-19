@@ -1,7 +1,7 @@
 import { Menu, Portal, Spinner } from "@chakra-ui/react";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
-import TagAdder from "./TagAdder";
+import TagList from "./ItemViewTagList";
 import { useState } from "react";
 import { onlyPathAndTagsType, selectedItemType, tagType } from "../types/types";
 import {} from "react-router-dom";
@@ -90,7 +90,7 @@ export function ItemViewActionBar(props: {
                         {loading ? (
                           <Spinner />
                         ) : (
-                          <TagAdder
+                          <TagList
                             tags={tags}
                             sharedTags={sharedTags}
                             unsharedTags={unsharedTags}

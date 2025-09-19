@@ -21,9 +21,7 @@ export default function ItemSize(props: {
       defaultValue={[props.take.toString()]}
     >
       <Select.HiddenSelect />
-      <Select.Label alignContent={"center"}>
-        Number of books per page :
-      </Select.Label>
+      <Select.Label alignContent={"center"}>Books per page :</Select.Label>
       <Select.Control width={"100px"}>
         <Select.Trigger>
           <Select.ValueText placeholder={props.take.toString()} />

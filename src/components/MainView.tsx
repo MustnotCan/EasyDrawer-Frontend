@@ -1,18 +1,25 @@
 import ListItemView from "./ListItemView";
 import TagFilter from "./TagFilter/TagFilter";
 import Paginator from "./Paginator";
-import AddTag from "./AddTag";
+import AddTag from "./TagAdder";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getBooks } from "../utils/queries/booksApi";
 import { getTags } from "../utils/queries/tagsApi";
 import { useLocation } from "react-router-dom";
 import { Stack } from "@chakra-ui/react";
+import MainViewSwitch from "./MainViewSwitch";
+import { orderByType } from "@/types/types";
 export default function View() {
   const [pn, setPn] = useState(1);
   const [take, setTake] = useState(25);
   const [tagsFilterBy, setTFB] = useState<string[]>([]);
   const [searchName, setSearchName] = useState<string>("");
+  const [isAnd, setIsAnd] = useState<boolean>(true);
+  const [orderBy, setOrderBy] = useState<orderByType>({
+    direction: "asc",
+    criteria: "addedDate",
+  });
   const alteredSetTFB = (newTfb: string[]) => {
     const setA = new Set(newTfb);
     const setB = new Set(tagsFilterBy);
@@ -25,6 +32,7 @@ export default function View() {
       setPn(1);
     }
   };
+
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -32,11 +40,11 @@ export default function View() {
   useEffect(() => {
     switch (location.pathname) {
       case "/favorite":
-        setTFB(["Favorite"]);
+        setTFB(["favorite"]);
         setPn(1);
         break;
       case "/unclassified":
-        setTFB(["Unclassified"]);
+        setTFB(["unclassified"]);
         setPn(1);
 
         break;
@@ -48,13 +56,15 @@ export default function View() {
     }
   }, [location]);
 
-  const books = useQuery({
+  const { data } = useQuery({
     queryKey: [
       "books",
       pn,
       take,
       [...tagsFilterBy].sort().join(","),
       searchName,
+      isAnd,
+      orderBy,
     ],
     queryFn: ({ queryKey }) => {
       const res = getBooks({
@@ -62,6 +72,8 @@ export default function View() {
         spt: queryKey[2] as number,
         tfb: queryKey[3] as unknown as string[],
         searchName: queryKey[4] as string,
+        isAnd: queryKey[5] as boolean,
+        orderBy: queryKey[6] as orderByType,
       });
       return res;
     },
@@ -90,18 +102,29 @@ export default function View() {
             setTFB={alteredSetTFB}
             isFavorite={location.pathname == "/favorite"}
           />
+          <MainViewSwitch isAnd={isAnd} setIsAnd={setIsAnd} />
+
           <AddTag />
         </Stack>
       )}
       <Stack>
         <ListItemView
-          books={books.data?.data || []}
+          books={data?.data || []}
           setSearchInput={alteredSetSearchName}
           setTake={alteredSetTake}
-          queryData={[pn, take, [...tagsFilterBy].sort().join(","), searchName]}
+          queryData={[
+            pn,
+            take,
+            [...tagsFilterBy].sort().join(","),
+            searchName,
+            isAnd,
+            orderBy,
+          ]}
+          orderBy={orderBy}
+          setOrderBy={setOrderBy}
         />
-        {books.data?.data.length != 0 && (
-          <Paginator pn={pn} setPn={setPn} count={books.data?.count || 1} />
+        {data?.data.length != 0 && (
+          <Paginator pn={pn} setPn={setPn} count={data?.count || 1} />
         )}
       </Stack>
     </Stack>

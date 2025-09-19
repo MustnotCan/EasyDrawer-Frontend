@@ -12,12 +12,7 @@ export function MultiTaggerBreadCrumb(props: {
           <Fragment key={dir + index}>
             <Breadcrumb.Item
               className="hover:cursor-pointer"
-              onClick={() =>
-                props.setDir((prev) => {
-                  const indexOfDir = prev.indexOf(dir);
-                  return prev.slice(0, indexOfDir + 1);
-                })
-              }
+              onClick={() => props.setDir((prev) => prev.slice(0, index + 1))}
             >
               {index == 0 ? "root" : dir}
             </Breadcrumb.Item>

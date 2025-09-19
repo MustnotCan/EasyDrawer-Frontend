@@ -1,4 +1,4 @@
-import { itemViewPropsType } from "../../types/types";
+import { multiTaggerFilePropsType } from "../../types/types";
 import { importFiles } from "../../utils/queries/booksApi";
 import { Button, FileUpload, Stack } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,11 +14,11 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
     mutationFn: (args: { dirs: string; files: File[] }) => {
       return importFiles({ dir: args.dirs, files: args.files });
     },
-    onSuccess: (addedFiles: itemViewPropsType[]) => {
+    onSuccess: (addedFiles: multiTaggerFilePropsType[]) => {
       setFiles([]);
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
-        (prev: (string | itemViewPropsType)[]) => {
+        (prev: (string | multiTaggerFilePropsType)[]) => {
           const existingFiles = prev
             .filter((file) => !(typeof file == "string"))
             .map((file) => file.title);
@@ -33,17 +33,16 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
   const folderMutation = useMutation({
     mutationKey: ["multiTaggerFolderImport"],
     mutationFn: (args: { dirs: string; files: File[] }) => {
-      console.log(args.files);
       return importFiles({ dir: args.dirs, files: args.files });
     },
     onSuccess: (
-      addedFiles: itemViewPropsType[],
+      addedFiles: multiTaggerFilePropsType[],
       variables: { dirs: string; files: File[] }
     ) => {
       setFolders([]);
       queryClient.setQueryData(
         ["Dirs&files", props.dirs],
-        (prev: (string | itemViewPropsType)[]) => {
+        (prev: (string | multiTaggerFilePropsType)[]) => {
           const newFolders: string[] = [];
           const nbrSlashesInDir = props.dirs.length;
           addedFiles.forEach((file) => {
@@ -67,7 +66,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
         ];
         queryClient.setQueryData(
           ["Dirs&files", splittedPath],
-          (prev: (string | itemViewPropsType)[] | undefined) => {
+          (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
             if (prev) {
               if (
                 prev.find(
@@ -153,7 +152,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       </FileUpload.Root>
 
       <FileUpload.Root
-        directory={true}
+        directory={true} 
         accept={"application/pdf"}
         onFileAccept={(e) => {
           const filesToImport: File[] = [];

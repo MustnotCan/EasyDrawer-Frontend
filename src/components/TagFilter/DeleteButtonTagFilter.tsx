@@ -20,7 +20,7 @@ export function DeleteButton(prop: { tagName: string }) {
   const deleteTag = () => mutate({ name: prop.tagName });
 
   return (
-    <IconButton variant={"ghost"} size={"sm"} onClick={deleteTag}>
+    <IconButton variant={"ghost"} size={"2xs"} onClick={deleteTag}>
       <DeleteOutlined />
     </IconButton>
   );
