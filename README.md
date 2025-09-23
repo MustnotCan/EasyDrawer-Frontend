@@ -1,17 +1,10 @@
-# PDF Management Frontend
+# EasyDrawer Frontend
 
 ## Description
 
-This repository contains the frontend Single Page Application (SPA) for the PDF Management app. Built with React, it provides a user-friendly interface for managing, browsing, and tagging PDFs by communicating with the backend API. The frontend features client-side routing with React Router and efficient data handling with React Query, all styled with Chakra UI for an accessible and responsive experience.
+This repository contains the frontend for the EasyDrawer App. Built with React, it provides a user-friendly interface for managing, browsing, and tagging PDFs by communicating with the backend API. The frontend features client-side routing with React Router and efficient data handling with React Query, all styled with Chakra UI for an accessible and responsive experience.
 
-## Features
-
-- Client-side routing with React Router
-- Data fetching and caching via React Query
-- Tag-based PDF management UI
-- Folder and file operations
-- Search and filter capabilities
-- Responsive and accessible design using Chakra UI
+For more details about the app refer to the backend repository: [EasyDrawer backend](https://github.com/MustnotCan/EasyDrawer-Backend)
 
 ## Local developement setup :
 
@@ -24,7 +17,7 @@ This repository contains the frontend Single Page Application (SPA) for the PDF 
 
 ## Contribution
 
-Issues and feedback are welcome!  
+Issues and feedback are welcome!
 **Note:** Code contributions are currently not accepted.
 
 ## License
