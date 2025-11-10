@@ -4,7 +4,7 @@ import {
   selectedItemType,
   taggedTagsType,
 } from "@/types/types.ts";
-import { BOOKS_URL } from "../envVar.ts";
+import { BOOKS_URL, VITE_API_MAIN } from "../envVar.ts";
 import {
   changedTagsResponseSchema,
   itemViewPropsSchema,
@@ -36,7 +36,14 @@ export async function getBooks(props: {
     data: parsedBody.data.map((iv) => itemViewPropsSchema.parse(iv)),
   };
 }
-
+export async function getBooksDetails(props: { files: string[] }) {
+  const response = await fetch(BOOKS_URL, {
+    method: "POST",
+    body: JSON.stringify({ files: props.files }),
+    headers: { "Content-Type": "application/json" },
+  });
+  return response;
+}
 export async function changeTags(
   changedTags: taggedTagsType[],
   bookName: string
@@ -206,5 +213,19 @@ export async function multiMove(props: { data: string[]; newPath: string }) {
       console.log("Error while moving books :", e);
     }
     return [];
+  }
+}
+
+export async function indexTag(props: { tag: string; index: string }) {
+  try {
+    const response = await fetch(VITE_API_MAIN + "tag/index", {
+      method: "POST",
+      body: JSON.stringify({ tag: props.tag, index: props.index }),
+      headers: { "Content-Type": "application/json" },
+    });
+    console.log(response);
+    return response;
+  } catch (e) {
+    console.log(e);
   }
 }

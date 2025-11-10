@@ -18,8 +18,8 @@ export default function ListItemView(props: {
   setSearchInput: (arg0: string) => void;
   setTake: (arg0: number) => void;
   queryData: listItemViewQueryDataType;
-  orderBy: orderByType;
-  setOrderBy: React.Dispatch<
+  orderBy?: orderByType;
+  setOrderBy?: React.Dispatch<
     React.SetStateAction<{
       criteria: string;
       direction: string;
@@ -34,10 +34,12 @@ export default function ListItemView(props: {
         <ItemSize setTake={props.setTake} take={props.queryData[1] as number} />
         <SearchBar setSearchInput={props.setSearchInput} />
         {/*add the sorting*/}
-        <ListItemViewSortBy
-          orderBy={props.orderBy}
-          setOrderBy={props.setOrderBy}
-        />
+        {props.orderBy && props.setOrderBy && (
+          <ListItemViewSortBy
+            orderBy={props.orderBy}
+            setOrderBy={props.setOrderBy}
+          />
+        )}
       </Stack>
       <Stack>
         <Stack direction={"row"} wrap={"wrap"}>
@@ -66,7 +68,7 @@ export default function ListItemView(props: {
                       queryData={props.queryData}
                     />
                   }
-                ></ItemContainer>
+                />
               </Box>
             );
           })}

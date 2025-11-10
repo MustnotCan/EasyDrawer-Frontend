@@ -10,9 +10,11 @@ import { ItemContainerActionBar } from "../ItemContainer/ItemContainerActionBar"
 import { MultiTaggerBreadCrumb } from "./MultiTaggerBreadCrumb";
 import { getTags } from "../../utils/queries/tagsApi";
 import { MultiTaggerImport } from "./MultiTaggerImport";
+import { useLocation } from "react-router-dom";
 
 export default function MultiTagger() {
-  const [dirs, setDir] = useState<string[]>([""]);
+  const location = useLocation();
+  const [dirs, setDir] = useState<string[]>(location.state?.split("/") || [""]);
   const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
   const [unSelectedItems, setUnSelectedItems] = useState<selectedItemType[]>(
     []
@@ -63,7 +65,7 @@ export default function MultiTagger() {
           <Stack direction={"row"} wrap={"wrap"}>
             {data.data
               ?.filter((item) => typeof item !== "string")
-              .sort()
+              .sort((a, b) => a.title.localeCompare(b.title))
               .map((item) => {
                 return (
                   <Stack className="hover:cursor-pointer" key={item.id}>

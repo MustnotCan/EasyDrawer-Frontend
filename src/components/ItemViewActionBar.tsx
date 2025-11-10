@@ -4,21 +4,20 @@ import { LuChevronRight } from "react-icons/lu";
 import TagList from "./ItemViewTagList";
 import { useState } from "react";
 import { onlyPathAndTagsType, selectedItemType, tagType } from "../types/types";
-import {} from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { getSelectedFilesDetails } from "../utils/queries/booksApi";
-import { getTags } from "../utils/queries/tagsApi";
+import { useTags } from "../utils/Hooks/TagsHook";
 
 export function ItemViewActionBar(props: {
   selectedItems: selectedItemType[];
   setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
 }) {
-  const tags = useQuery({ queryKey: ["tags"], queryFn: getTags })
-    .data as tagType[];
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<onlyPathAndTagsType[]>([]);
+  
+  const tags = useTags();
   const queryClient = useQueryClient();
   const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

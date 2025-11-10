@@ -4,9 +4,10 @@ import {
   multiTaggerQueryDataType,
   tagAdderPropsType,
 } from "../types/types";
-import { Box, Button, Checkbox, Input, Stack } from "@chakra-ui/react";
+import { Button, Checkbox, Input, Stack } from "@chakra-ui/react";
 import { useMultiTaggerBookTagsMutation } from "../utils/Hooks/MultiTaggerHooks";
 import { useItemViewBookTagsMutation } from "../utils/Hooks/ItemViewHook";
+import { Toaster, toaster } from "../ui/toaster";
 export default function TagList(props: tagAdderPropsType) {
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.itemTags
@@ -81,28 +82,25 @@ export default function TagList(props: tagAdderPropsType) {
               (tag) =>
                 tag.name != "unclassified" &&
                 (!props.isMultiTag ? tag.name != "favorite" : true) && (
-                  <div key={tag.id}>
-                    <label className="flex items-center gap-2">
-                      <Checkbox.Root
-                        id={tag.id}
-                        onClick={() => onChangeHandler(tag.id)}
-                        checked={cBoxes.includes(tag.id)}
-                        variant={"subtle"}
-                      >
-                        <Checkbox.Control />
-                        <Checkbox.Label height={"30px"} width={"80px"}>
-                          <Box
-                            maxWidth="100px"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
-                            whiteSpace="nowrap"
-                          >
-                            {tag.name[0].toUpperCase() + tag.name.slice(1)}
-                          </Box>
-                        </Checkbox.Label>
-                      </Checkbox.Root>
-                    </label>
-                  </div>
+                  <Checkbox.Root
+                    id={tag.id}
+                    onClick={() => onChangeHandler(tag.id)}
+                    checked={cBoxes.includes(tag.id)}
+                    variant={"subtle"}
+                    key={tag.id}
+                  >
+                    <Checkbox.Control />
+                    <Checkbox.Label
+                      height={"30px"}
+                      width={"80px"}
+                      maxWidth="100px"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                    >
+                      {tag.name[0].toUpperCase() + tag.name.slice(1)}{" "}
+                    </Checkbox.Label>
+                  </Checkbox.Root>
                 )
             )}
         </Stack>
@@ -112,13 +110,22 @@ export default function TagList(props: tagAdderPropsType) {
           onClick={() => {
             if (!isSaved) {
               setIsSaved(!isSaved);
+              const toastId = toaster.create({
+                description: "Tags saved successfully",
+                type: "success",
+                closable: true,
+                action: {
+                  label: "X",
+                  onClick: () => toaster.dismiss(toastId),
+                },
+              });
             }
           }}
         >
           Save
         </Button>
-        {isSaved && <h1 className="bg-green-300">saved</h1>}
       </form>
+      <Toaster />
     </Stack>
   );
 }

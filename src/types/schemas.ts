@@ -4,7 +4,7 @@ export const tagSchema = z.object({
   name: z.string(),
 });
 export const tagWithCountSchema = tagSchema.extend({
-  booksCount: z.number(),
+  booksCount: z.union([z.number(), z.string()]),
 });
 export const FileSchema = z.object({
   thumbnail: z.string(),
@@ -18,10 +18,19 @@ export const onlyPathAndTagsSchema = z.object({
 });
 export const itemViewPropsSchema = FileSchema.extend({
   id: z.string(),
-  lastAccess: z.string(),
-  lastModified: z.string(),
-  addedDate: z.string(),
+  lastAccess: z.optional(z.string()),
+  lastModified: z.optional(z.string()),
+  addedDate: z.optional(z.string()),
+  pages: z.optional(
+    z.array(z.object({ page: z.number(), highlighted: z.string() }))
+  ),
 });
+export const hitResults = itemViewPropsSchema.extend({
+  pages: z.optional(
+    z.array(z.object({ page: z.number(), highlighted: z.string() }))
+  ),
+});
+
 export const multiTaggerFilePropsSchema = z.object({
   thumbnail: z.string(),
   title: z.string(),
@@ -44,10 +53,10 @@ export const orderBySchema = z.object({
 export const listItemViewQueryDataSchema = z.tuple([
   z.number(),
   z.number(),
-  z.string(),
-  z.string(),
-  z.boolean(),
-  orderBySchema
+  z.optional(z.string()),
+  z.optional(z.string()),
+  z.optional(z.boolean()),
+  z.optional(orderBySchema),
 ]);
 export const selectedItemSchema = z.object({
   path: z.string(),
@@ -73,3 +82,6 @@ export const returnedFilesSchema = z.object({
   files: z.array(multiTaggerFilePropsSchema),
 });
 
+export const returnedMeiliSearch = z.object({
+  data: z.array(itemViewPropsSchema),
+});

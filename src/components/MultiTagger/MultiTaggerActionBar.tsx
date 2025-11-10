@@ -137,10 +137,10 @@ export function MultiTaggerActionBar(props: {
       variables: { files: string[]; newPath: string }
     ) => {
       const pathsToUpdate = Array.from(
-        new Set(addedFiles.map((af) => af.path))
+        new Set(addedFiles.map((af) => (af.path != "/" ? af.path : "")))
       );
       pathsToUpdate.forEach((pto) => {
-        const fullArray = pto.split("/"); 
+        const fullArray = pto.split("/");
         fullArray.slice(0, fullArray.length - 1).forEach((_, index, arr) => {
           const existingCache = queryClient.getQueryData([
             "Dirs&files",
@@ -190,9 +190,7 @@ export function MultiTaggerActionBar(props: {
       queryClient.setQueryData(
         ["Dirs&files", pathsToUpdate.at(0)?.split("/")],
         (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
-          if (!prev) {
-            return [...addedFiles];
-          } else {
+          if (prev) {
             const existingFiles = prev
               .filter((file) => !(typeof file == "string"))
               .map((file) => file.title);
@@ -207,6 +205,13 @@ export function MultiTaggerActionBar(props: {
       );
     },
   });
+  const queryData = queryClient.getQueryData(["Dirs&files", props.dirs]) as
+    | (string | multiTaggerFilePropsType)[]
+    | undefined;
+
+  const dirNames = Array.isArray(queryData)
+    ? queryData.filter((item): item is string => typeof item === "string")
+    : [];
   const removeClickHandler = () => {
     removeMutation.mutate({
       files: data.map((file) => file.fullpath),
@@ -265,6 +270,17 @@ export function MultiTaggerActionBar(props: {
                   <Portal>
                     <Menu.Positioner>
                       <Menu.Content>
+                        <Stack>
+                          {dirNames.map((item) => (
+                            <Menu.Item
+                              value={item}
+                              onClick={() => moveClickHandler(item)}
+                              key={item}
+                            >
+                              Move to : {item}
+                            </Menu.Item>
+                          ))}
+                        </Stack>
                         <Menu.Item
                           value="mv-here"
                           onClick={() => moveClickHandler()}

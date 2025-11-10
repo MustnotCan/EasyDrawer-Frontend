@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-type Envs = { VITE_API_MAIN?: string };
+type Envs = { VITE_API_MAIN?: string; VITE_MEILISEARCH_URI?: string };
 export const runtimeConfig: Envs = window.__RUNTIME_CONFIG__ ?? {};
 
 window.__RUNTIME_CONFIG__ = runtimeConfig; // persist across HMR
@@ -38,6 +38,7 @@ if (import.meta.env.PROD) {
       }
       const config = await response.json();
       runtimeConfig.VITE_API_MAIN = config.VITE_API_MAIN;
+      runtimeConfig.VITE_MEILISEARCH_URI = config.VITE_MEILISEARCH_URI;
     } catch (error) {
       console.error("Error loading configuration:", error);
     } finally {
@@ -47,6 +48,6 @@ if (import.meta.env.PROD) {
 } else {
   // Development: Use VITE_API_MAIN from Vite env
   runtimeConfig.VITE_API_MAIN = import.meta.env.VITE_API_MAIN;
-  console.log("dev", runtimeConfig.VITE_API_MAIN);
+  runtimeConfig.VITE_MEILISEARCH_URI = import.meta.env.VITE_MEILISEARCH_URI;
   startApp();
 }
