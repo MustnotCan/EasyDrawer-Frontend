@@ -14,7 +14,6 @@ import {
   tagWithCountSchema,
   orderBySchema,
   multiTaggerFilePropsSchema,
-  hitResults,
 } from "./schemas";
 
 export type tagType = z.infer<typeof tagSchema>;
@@ -49,10 +48,8 @@ export type itemViewMenuPropsType = {
   name: string;
   itemTags: tagType[];
   id: string;
-  path: string;
   queryData: listItemViewQueryDataType;
   downloadPath: string;
-  pages?: { page: number; highlighted: string }[];
 };
 export type taggedTagsType = {
   id: string;
@@ -77,5 +74,3 @@ export type tagAdderPropsType = {
   data?: string[];
   isMultiTag?: boolean;
 };
-
-export type hitResultsType = z.infer<typeof hitResults>;

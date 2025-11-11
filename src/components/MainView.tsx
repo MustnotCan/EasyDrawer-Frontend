@@ -5,16 +5,11 @@ import AddTag from "./TagAdder";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getBooks } from "../utils/queries/booksApi";
+import { getTags } from "../utils/queries/tagsApi";
 import { useLocation } from "react-router-dom";
 import { Stack } from "@chakra-ui/react";
 import MainViewSwitch from "./MainViewSwitch";
-import { orderByType } from "../types/types";
-import {
-  useAddTag,
-  useDeleteTag,
-  useRenameTag,
-  useTags,
-} from "../utils/Hooks/TagsHook";
+import { orderByType } from "@/types/types";
 export default function View() {
   const [pn, setPn] = useState(1);
   const [take, setTake] = useState(25);
@@ -25,7 +20,6 @@ export default function View() {
     direction: "desc",
     criteria: "lastAccess",
   });
-
   const alteredSetTFB = (newTfb: string[]) => {
     const setA = new Set(newTfb);
     const setB = new Set(tagsFilterBy);
@@ -38,8 +32,7 @@ export default function View() {
       setPn(1);
     }
   };
-  const renameTagMutation = useRenameTag();
-  const deleteTagMutation = useDeleteTag();
+
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,7 +55,7 @@ export default function View() {
         break;
     }
   }, [location]);
-  const addTagMutation = useAddTag();
+
   const { data } = useQuery({
     queryKey: [
       "books",
@@ -86,7 +79,7 @@ export default function View() {
     },
   });
 
-  const tags = useTags();
+  const tags = useQuery({ queryKey: ["tags"], queryFn: getTags });
 
   const alteredSetTake = (newTake: number) => {
     if (newTake != take) {
@@ -105,16 +98,13 @@ export default function View() {
       {!(location.pathname == "/unclassified") && (
         <Stack marginRight={"10"}>
           <TagFilter
-            tags={tags || []}
+            tags={tags.data || []}
             setTFB={alteredSetTFB}
             isFavorite={location.pathname == "/favorite"}
-            deleteTagMutation={deleteTagMutation}
-            renameTagMutation={renameTagMutation}
-            filterKey="Tags"
           />
           <MainViewSwitch isAnd={isAnd} setIsAnd={setIsAnd} />
 
-          <AddTag mutate={addTagMutation} filterKey="Tag" />
+          <AddTag />
         </Stack>
       )}
       <Stack>
