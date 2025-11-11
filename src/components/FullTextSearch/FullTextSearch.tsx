@@ -89,7 +89,7 @@ export default function FullTextSearch() {
               </Alert.Content>
             </Alert.Root>
           )}
-          {searchName && (
+          {data?.data?.estimatedTotalHits && searchName && (
             <Stack direction="row" placeContent={"center"}>
               <Button
                 disabled={offset == 0}
@@ -98,11 +98,7 @@ export default function FullTextSearch() {
                 <FaArrowLeft />
               </Button>
               <Button
-                disabled={
-                  (data.data?.estimatedTotalHits &&
-                    offset * take + take >= data.data?.estimatedTotalHits) ||
-                  true
-                }
+                disabled={offset * take + take >= data.data?.estimatedTotalHits}
                 onClick={() => setOffset((prev) => prev + 1)}
               >
                 <FaArrowRight />

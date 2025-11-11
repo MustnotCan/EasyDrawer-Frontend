@@ -89,6 +89,7 @@ export async function search(props: {
           });
       });
       z.array(hitResults).parse(groupedHitsWithDetails);
+      console.log("estimatedTotalHits : ", response["estimatedTotalHits"]);
       return {
         data: groupedHitsWithDetails,
         estimatedTotalHits: response["estimatedTotalHits"],
