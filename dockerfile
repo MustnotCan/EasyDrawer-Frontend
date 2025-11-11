@@ -3,7 +3,7 @@ WORKDIR /build
 COPY package.json .
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npx react-router build
 
 FROM nginx AS final
 WORKDIR /usr/share/nginx/html

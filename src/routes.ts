@@ -10,6 +10,7 @@ export default [
     route("/multitagger", "components/MultiTagger/MultiTagger.tsx", {
       id: "multi-tagger",
     }),
+    route("/fts", "components/FullTextSearch/FullTextSearch.tsx"),
   ]),
-  route("/pdfreader/:path", "components/PdfReader.tsx"),
+  route("/pdfreader/:path/:page?", "components/PdfReader.tsx"),
 ] satisfies RouteConfig;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { THUMBS_URL } from "../utils/envVar";
 import { FaHeart } from "react-icons/fa";
 import { CiHeart } from "react-icons/ci";
-import { Stack } from "@chakra-ui/react";
+import {  Stack } from "@chakra-ui/react";
 import { runtimeConfig } from "../entry.client";
 import { Tooltip } from "../ui/tooltip";
 import { useItemViewChangeTagsMutation } from "../utils/Hooks/ItemViewHook.ts";
@@ -22,7 +22,6 @@ export default function ItemView(props: ItemViewPropsType) {
     mutate({ isFavorite: isFavorite, name: name });
     setIsFavorite(!isFavorite);
   }
-
   return (
     <Stack>
       <Stack>
@@ -63,6 +62,8 @@ export default function ItemView(props: ItemViewPropsType) {
             `${runtimeConfig.VITE_API_MAIN}pdfs/` +
             encodeURIComponent(props.itemView.prop.id)
           }
+          path={props.itemView.prop.path}
+          pages={props.itemView.prop.pages}
         />
       </Stack>
     </Stack>

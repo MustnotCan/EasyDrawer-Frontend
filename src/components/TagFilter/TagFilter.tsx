@@ -2,14 +2,40 @@ import { FormEvent, useEffect, useState } from "react";
 import { tagWithCountType } from "../../types/types";
 import { List, Stack, Button, Input } from "@chakra-ui/react";
 import CheckBoxTagFilter from "./CheckBoxTagFilter";
+import { UseMutateFunction } from "@tanstack/react-query";
+import { EnqueuedTask } from "meilisearch";
+import { useTags } from "../../utils/Hooks/TagsHook";
 export default function TagFilter(props: {
   tags: tagWithCountType[];
   setTFB: (arg0: string[]) => void;
   isFavorite: boolean;
+  renameTagMutation?: UseMutateFunction<
+    { id: string; name: string },
+    Error,
+    { newName: string; prevName: string },
+    unknown
+  >;
+  deleteTagMutation:
+    | UseMutateFunction<
+        { id: string; name: string },
+        Error,
+        { name: string },
+        unknown
+      >
+    | UseMutateFunction<
+        EnqueuedTask | undefined,
+        Error,
+        {
+          name: string;
+        },
+        unknown
+      >;
+  filterKey: string;
 }) {
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.isFavorite ? ["favorite"] : []
   );
+  const tags = useTags();
   const [searchInput, setSearchInput] = useState<string>("");
   useEffect(() => {
     if (props.isFavorite) {
@@ -35,7 +61,7 @@ export default function TagFilter(props: {
   return (
     <Stack>
       <Stack>
-        <label>Filter tags:</label>
+        <label>Filter {props.filterKey}:</label>
         <Input
           className="border-4 border-black "
           placeholder="Type here..."
@@ -45,13 +71,10 @@ export default function TagFilter(props: {
           }}
         />
       </Stack>
-      <form
-        className=""
-        method="post"
-        onSubmit={formAction}
-        id="tagFilteringForm"
-      >
-        <label htmlFor="tags">Tags:</label>
+      <form method="post" onSubmit={formAction} id="tagFilteringForm">
+        <label htmlFor={props.filterKey}>
+          {props.filterKey[0].toUpperCase() + props.filterKey.slice(1)}:
+        </label>
         <List.Root
           variant={"plain"}
           overflowX={"auto"}
@@ -59,8 +82,8 @@ export default function TagFilter(props: {
           alignContent={"space-evenly"}
           marginBottom={"5px"}
         >
-          {props.tags.map((tag) => (
-            <List.Item key={tag.id}>
+          {(props.tags ? props.tags : tags).map((tag) => (
+            <List.Item key={tag.id} >
               {!(tag.name.toLowerCase() == "favorite" && props.isFavorite) &&
                 !(tag.name.toLowerCase() == "unclassified") &&
                 (searchInput.toLocaleLowerCase() != ""
@@ -70,6 +93,9 @@ export default function TagFilter(props: {
                     cBoxes={cBoxes}
                     onChangeHandler={onChangeHandler}
                     tag={tag}
+                    renameTagMutation={props.renameTagMutation}
+                    deleteTagMutation={props.deleteTagMutation}
+                    filterKey={props.filterKey}
                   />
                 )}
             </List.Item>
@@ -77,10 +103,10 @@ export default function TagFilter(props: {
         </List.Root>
         <Stack direction={"row"} justifyContent={"space-between"}>
           <Button variant={"outline"} type="submit">
-            Filter
+            Apply
           </Button>
           <Button variant={"outline"} type="submit" onClick={clearFilter}>
-            Clear Filters
+            Clear
           </Button>
         </Stack>
       </form>
