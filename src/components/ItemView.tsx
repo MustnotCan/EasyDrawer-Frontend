@@ -4,12 +4,11 @@ import { useState } from "react";
 import { THUMBS_URL } from "../utils/envVar";
 import { FaHeart } from "react-icons/fa";
 import { CiHeart } from "react-icons/ci";
-import {  Stack } from "@chakra-ui/react";
-import { runtimeConfig } from "../entry.client";
+import { Stack } from "@chakra-ui/react";
 import { Tooltip } from "../ui/tooltip";
 import { useItemViewChangeTagsMutation } from "../utils/Hooks/ItemViewHook.ts";
 import { useTags } from "../utils/Hooks/TagsHook.ts";
-
+import { VITE_API_MAIN } from "../utils/envVar";
 export default function ItemView(props: ItemViewPropsType) {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     props.itemView.prop.tags
@@ -18,8 +17,8 @@ export default function ItemView(props: ItemViewPropsType) {
   );
   const tags = useTags();
   const mutate = useItemViewChangeTagsMutation(props.queryData, tags);
-  function favoriteToggleHandler(isFavorite: boolean, name: string) {
-    mutate({ isFavorite: isFavorite, name: name });
+  function favoriteToggleHandler(isFavorite: boolean, path: string) {
+    mutate({ isFavorite: isFavorite, path: path });
     setIsFavorite(!isFavorite);
   }
   return (
@@ -40,7 +39,10 @@ export default function ItemView(props: ItemViewPropsType) {
             color="red"
             size={25}
             onClick={() => {
-              favoriteToggleHandler(isFavorite, props.itemView.prop.title);
+              favoriteToggleHandler(
+                isFavorite,
+                props.itemView.prop.path + "/" + props.itemView.prop.title
+              );
             }}
           />
         ) : (
@@ -48,7 +50,10 @@ export default function ItemView(props: ItemViewPropsType) {
             color="red"
             size={25}
             onClick={() => {
-              favoriteToggleHandler(isFavorite, props.itemView.prop.title);
+              favoriteToggleHandler(
+                isFavorite,
+                props.itemView.prop.path + "/" + props.itemView.prop.title
+              );
             }}
           />
         )}
@@ -59,8 +64,7 @@ export default function ItemView(props: ItemViewPropsType) {
           id={props.itemView.prop.id}
           queryData={props.queryData}
           downloadPath={
-            `${runtimeConfig.VITE_API_MAIN}pdfs/` +
-            encodeURIComponent(props.itemView.prop.id)
+            `${VITE_API_MAIN}pdfs/` + encodeURIComponent(props.itemView.prop.id)
           }
           path={props.itemView.prop.path}
           pages={props.itemView.prop.pages}

@@ -3,36 +3,39 @@ import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
 import TagList from "./ItemViewTagList";
 import { useState } from "react";
-import { onlyPathAndTagsType, selectedItemType, tagType } from "../types/types";
+import {
+  itemViewSelectedType,
+  listItemViewQueryDataType,
+  selectedItemType,
+  tagType,
+} from "../types/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { getSelectedFilesDetails } from "../utils/queries/booksApi";
+import { getSelectedFilesDetailsItemView } from "../utils/queries/booksApi";
 import { useTags } from "../utils/Hooks/TagsHook";
 
 export function ItemViewActionBar(props: {
   selectedItems: selectedItemType[];
   setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
+  queryData: listItemViewQueryDataType;
 }) {
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<onlyPathAndTagsType[]>([]);
-  
+  const [data, setData] = useState<itemViewSelectedType[]>([]);
+
   const tags = useTags();
   const queryClient = useQueryClient();
   const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setLoading(true);
-
     try {
       const response = await queryClient.fetchQuery({
         queryKey: ["ItemViewMultiTagging", props.selectedItems],
         queryFn: ({ queryKey }) =>
-          getSelectedFilesDetails({
+          getSelectedFilesDetailsItemView({
             selected: queryKey.at(1) as selectedItemType[],
-            unselected: [] as selectedItemType[],
           }),
       });
-
       if (!response) return;
       setData(response);
       const taggsWithLength = tags.map((tag) => {
@@ -93,8 +96,8 @@ export function ItemViewActionBar(props: {
                             tags={tags}
                             sharedTags={sharedTags}
                             unsharedTags={unsharedTags}
-                            data={data.map((dt) => dt.fullpath)}
-                            queryData={["multiTagger", props.selectedItems, []]}
+                            data={data.map((dt) => dt.path + "/" + dt.title)}
+                            queryData={[...props.queryData]}
                           />
                         )}
                       </Menu.Content>

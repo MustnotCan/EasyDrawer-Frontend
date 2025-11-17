@@ -4,10 +4,14 @@ import {
   multiTaggerQueryDataType,
   tagAdderPropsType,
 } from "../types/types";
-import { Button, Checkbox, Input, Stack } from "@chakra-ui/react";
+import { Box, Button, Checkbox, Input, Stack } from "@chakra-ui/react";
 import { useMultiTaggerBookTagsMutation } from "../utils/Hooks/MultiTaggerHooks";
-import { useItemViewBookTagsMutation } from "../utils/Hooks/ItemViewHook";
+import {
+  useChangeTagsBarMutation,
+  useItemViewBookTagsMutation,
+} from "../utils/Hooks/ItemViewHook";
 import { Toaster, toaster } from "../ui/toaster";
+import { Tooltip } from "../ui/tooltip";
 export default function TagList(props: tagAdderPropsType) {
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.itemTags
@@ -33,23 +37,33 @@ export default function TagList(props: tagAdderPropsType) {
     props.queryData as listItemViewQueryDataType,
     setIsSaved
   );
+  const multiMutateItemView = useChangeTagsBarMutation(
+    props.queryData as listItemViewQueryDataType,
+    setIsSaved
+  );
   const mutateMultiTager = useMultiTaggerBookTagsMutation(
     props.queryData as multiTaggerQueryDataType,
     setIsSaved
   );
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (props.name) {
+    if (props.path) {
       mutateItemView.mutate({
         addedTags: cBoxes,
         removedTags: Array.from(new Set([...toRemTags])),
-        name: props.name,
+        path: props.path,
       });
-    } else if (props.data) {
+    } else if (!props.isMultiTag) {
+      multiMutateItemView.mutate({
+        addedTags: cBoxes,
+        removedTags: Array.from(new Set([...toRemTags])),
+        data: props.data || [],
+      });
+    } else if (props.isMultiTag) {
       mutateMultiTager.mutate({
         addedTags: cBoxes,
         removedTags: Array.from(new Set([...toRemTags])),
-        data: props.data,
+        data: props.data || [],
       });
     }
   };
@@ -98,7 +112,13 @@ export default function TagList(props: tagAdderPropsType) {
                       textOverflow="ellipsis"
                       whiteSpace="nowrap"
                     >
-                      {tag.name[0].toUpperCase() + tag.name.slice(1)}{" "}
+                      <Tooltip
+                        content={tag.name[0].toUpperCase() + tag.name.slice(1)}
+                      >
+                        <Box>
+                          {tag.name[0].toUpperCase() + tag.name.slice(1)}
+                        </Box>
+                      </Tooltip>
                     </Checkbox.Label>
                   </Checkbox.Root>
                 )
@@ -110,14 +130,11 @@ export default function TagList(props: tagAdderPropsType) {
           onClick={() => {
             if (!isSaved) {
               setIsSaved(!isSaved);
-              const toastId = toaster.create({
+              toaster.create({
                 description: "Tags saved successfully",
                 type: "success",
                 closable: true,
-                action: {
-                  label: "X",
-                  onClick: () => toaster.dismiss(toastId),
-                },
+                duration: 3000,
               });
             }
           }}

@@ -9,7 +9,7 @@ const client = new MeiliSearch({
   host: VITE_MEILISEARCH_URI ? VITE_MEILISEARCH_URI : "http://localhost:7700",
 });
 
-export async function search(props: {
+export async function search(args: {
   selectedIndexes: string[];
   query: string;
   hitsPerPage: number;
@@ -17,36 +17,38 @@ export async function search(props: {
 }): Promise<
   { data: hitResultsType[]; estimatedTotalHits: number | undefined } | undefined
 > {
-  if (!props.query) return;
+  if (!args.query) return;
   else {
     try {
       const searchOptions = {
-        limit: props.hitsPerPage,
-        offset: props.offset * props.hitsPerPage,
-        q: props.query,
+        limit: args.hitsPerPage,
+        offset: args.offset * args.hitsPerPage,
+      };
+      const requestDetails = {
+        attributesToHighlight: ["content"],
+        highlightPreTag:
+          '<em style="background-color: rgba(255, 255, 150, 0.6); border-bottom: 2px solid orange; padding: 0 0.2em;">',
+        q: args.query,
       };
       let response;
-      if (props.selectedIndexes.length > 1) {
+      if (args.selectedIndexes.length > 1) {
         response = await client.multiSearch({
           federation: {
-            limit: props.hitsPerPage,
-            offset: props.offset * props.hitsPerPage,
+            ...searchOptions,
           },
           queries: Array.from(
-            props.selectedIndexes.map((index) => ({
+            args.selectedIndexes.map((index) => ({
               indexUid: index,
-              q: props.query,
+              ...requestDetails,
             }))
           ),
         });
       } else {
         response = await client
-          .index(props.selectedIndexes[0])
-          .search(props.query, {
+          .index(args.selectedIndexes[0])
+          .search(args.query, {
             ...searchOptions,
-            attributesToHighlight: ["content"],
-            highlightPreTag:
-              '<em style="background-color: rgba(255, 255, 150, 0.6); border-bottom: 2px solid orange; padding: 0 0.2em;">',
+            ...requestDetails,
           });
       }
       //{"fileId":fileId,"pages":[{"page":page,"highlighted":highlighted},{"page":page,"highlighted":highlighted}]}
@@ -89,7 +91,6 @@ export async function search(props: {
           });
       });
       z.array(hitResults).parse(groupedHitsWithDetails);
-      console.log("estimatedTotalHits : ", response["estimatedTotalHits"]);
       return {
         data: groupedHitsWithDetails,
         estimatedTotalHits: response["estimatedTotalHits"],
@@ -127,9 +128,9 @@ export async function getIndexes() {
     console.log(e);
   }
 }
-export async function removeIndex(props: { index: string }) {
+export async function removeIndex(args: { index: string }) {
   try {
-    return await client.deleteIndex(props.index);
+    return await client.deleteIndex(args.index);
   } catch (e) {
     console.log(e);
   }
@@ -139,12 +140,13 @@ export async function createWebhook() {
   if (availableWebHooks.results.length == 0)
     await client.createWebhook({ url: WEBHOOK_URL });
 }
-export async function addIndex(props: { index: string }) {
+export async function addIndex(args: { index: string }) {
   await createWebhook();
   try {
-    const res = await client.createIndex(props.index, { primaryKey: "id" });
-    await client.index(props.index).updateSettings({
+    const res = await client.createIndex(args.index, { primaryKey: "id" });
+    await client.index(args.index).updateSettings({
       searchableAttributes: ["content"],
+      filterableAttributes: ["fileId"],
     });
     return res;
   } catch (e) {

@@ -43,7 +43,7 @@ export default function FullTextSearch() {
 
     if (!noDiff) {
       setSelectedIndexes(newTfb);
-      setOffset(0);
+      alteredSetSearchName("");
     }
   };
   const indexes = useIndexes();

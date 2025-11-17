@@ -85,3 +85,28 @@ export const returnedFilesSchema = z.object({
 export const returnedMeiliSearch = z.object({
   data: z.array(itemViewPropsSchema),
 });
+export const sseImportTaskSchema = z.object({
+  current: z.number(),
+  total: z.number(),
+  setNumber: z.number(),
+  error: z.optional(z.string()),
+  fileTitle: z.optional(z.string()),
+  addedFileDetails: z.optional(
+    z.object({
+      relativepath: z.string(),
+      uuid: z.string(),
+      thumbnail: z.string(),
+      addedDate: z.string(),
+    })
+  ),
+});
+export const sseIndexingTaskSchema = sseImportTaskSchema.extend({
+  index: z.string(),
+});
+export const itemViewSelectedSchema = z.object({
+  tags: z.array(tagSchema),
+  title: z.string(),
+  path: z.string(),
+  id: z.string(),
+  addedDate: z.string(),
+});

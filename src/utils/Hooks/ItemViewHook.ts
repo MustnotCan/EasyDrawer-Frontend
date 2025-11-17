@@ -1,11 +1,14 @@
 import {
   changedTagsResponseType,
+  itemViewSelectedType,
   listItemViewQueryDataType,
+  onlyPathAndTagsType,
   reqBodyType,
   tagType,
+  tagWithCountType,
 } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { changeTags } from "../queries/booksApi";
+import { changeTags, multiChangeTags } from "../queries/booksApi";
 
 export function useItemViewChangeTagsMutation(
   queryData: listItemViewQueryDataType,
@@ -13,15 +16,16 @@ export function useItemViewChangeTagsMutation(
 ) {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationFn: (args: { isFavorite: boolean; name: string }) => {
+    mutationFn: (args: { isFavorite: boolean; path: string }) => {
       const literal = {
         id: tags.filter((tag) => tag.name == "favorite")[0].id,
         action: args.isFavorite ? "remove" : "add",
       };
-      return changeTags([literal], args.name);
+      return changeTags([literal], args.path);
     },
-    onSuccess: (modifiedBook: changedTagsResponseType) => {
-      queryClient.setQueryData(
+    onSuccess: (modifiedBook: changedTagsResponseType, args) => {
+      //console.log("this fired when i clicked the heart icon");
+      /*queryClient.setQueryData(
         ["books", ...queryData],
         (prevBooks: reqBodyType): reqBodyType => {
           const newData = prevBooks.data.map((book) => {
@@ -31,13 +35,26 @@ export function useItemViewChangeTagsMutation(
           });
           return { ...prevBooks, data: newData };
         }
-      );
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      );*/
+      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.setQueryData(["tags"], (prev: tagWithCountType[]) => {
+        return prev.map((tag) =>
+          tag.name == "favorite"
+            ? {
+                ...tag,
+                booksCount: args.isFavorite
+                  ? Number(tag.booksCount) - 1
+                  : Number(tag.booksCount) + 1,
+              }
+            : tag
+        );
+      });
     },
     onError: (e) => {
       console.log(e);
     },
   });
+
   return mutate;
 }
 /**
@@ -56,7 +73,7 @@ export function useItemViewBookTagsMutation(
     mutationFn: (args: {
       addedTags: string[];
       removedTags: string[];
-      name: string;
+      path: string;
     }) => {
       const addedTags = args.addedTags.map((tag) => {
         const literal = {
@@ -72,48 +89,14 @@ export function useItemViewBookTagsMutation(
         };
         return literal;
       });
-      return changeTags([...addedTags, ...removedTags], args.name);
+      return changeTags([...addedTags, ...removedTags], args.path);
     },
 
     onSuccess: (modifiedBook: changedTagsResponseType) => {
-      queryClient.setQueryData(
+      //console.log("this fired when i changed tags from the itemview");
+      /*queryClient.setQueryData(
         ["books", ...(queryData || "")],
         (prevBooks: reqBodyType): reqBodyType => {
-          // TO DO : Local tags cache update
-          /*const previousBookTags = prevBooks.data.find(
-            (dt) => dt.title == modifiedBook.title
-          )?.tags;
-          const addedTags = modifiedBook.tags.filter(
-            (tag) => !previousBookTags?.map((tg) => tg.name).includes(tag.name)
-          );
-          const removedTags =
-            previousBookTags?.filter(
-              (tag) => !modifiedBook?.tags.includes(tag)
-            ) || [];
-          if (addedTags) {
-            queryClient.setQueryData(
-              ["tags"],
-              (prevTags: tagWithCountType[]) => {
-                console.log("prevTags", prevTags);
-                const updatedTags = [...prevTags];
-
-                for (const tag of addedTags) {
-                  const foundTag = updatedTags.find(
-                    (tg) => tg.name == tag.name
-                  );
-
-                  if (foundTag && foundTag.booksCount) {
-                    foundTag.booksCount += 1;
-                  }
-                }
-
-                const unmodifiedTags = prevTags.filter(
-                  (tg) => !updatedTags.map((tg) => tg.name).includes(tg.name)
-                );
-                return [...unmodifiedTags, ...updatedTags];
-              }
-            );
-          }*/
           const newData = prevBooks.data.map((book) => {
             return book.title === modifiedBook.title
               ? { ...book, tags: modifiedBook.tags }
@@ -121,9 +104,46 @@ export function useItemViewBookTagsMutation(
           });
           return { ...prevBooks, data: newData };
         }
-      );
-      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      );*/
+      queryClient.invalidateQueries({ queryKey: ["books"] });
 
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      setIsSaved(true);
+    },
+  });
+  return mutateItemView;
+}
+export function useChangeTagsBarMutation(
+  queryData: listItemViewQueryDataType,
+  setIsSaved: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  const queryClient = useQueryClient();
+  const mutateItemView = useMutation({
+    mutationFn: (args: {
+      addedTags: string[];
+      removedTags: string[];
+      data: string[];
+    }) => {
+      const addedTags = args.addedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "add",
+        };
+        return literal;
+      });
+      const removedTags = args.removedTags.map((tag) => {
+        const literal = {
+          id: tag,
+          action: "remove",
+        };
+        return literal;
+      });
+      return multiChangeTags([...addedTags, ...removedTags], args.data);
+    },
+
+    onSuccess: (modifiedBooks: onlyPathAndTagsType[]) => {
+      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
       setIsSaved(true);
     },
   });

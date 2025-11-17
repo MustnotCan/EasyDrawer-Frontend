@@ -13,6 +13,7 @@ export const toaster = createToaster({
   placement: "bottom-end",
   pauseOnPageIdle: true,
   max: 3,
+  overlap: false,
 });
 
 export const Toaster = () => {
@@ -35,7 +36,7 @@ export const Toaster = () => {
             {toast.action && (
               <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>
             )}
-            {toast.meta?.closable && <Toast.CloseTrigger />}
+            {toast.closable && <Toast.CloseTrigger />}
           </Toast.Root>
         )}
       </ChakraToaster>

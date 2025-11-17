@@ -1,99 +1,22 @@
-import { multiTaggerFilePropsType } from "../../types/types";
 import { importFiles } from "../../utils/queries/booksApi";
 import { Button, FileUpload, Stack } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { HiSave, HiUpload } from "react-icons/hi";
 
 export function MultiTaggerImport(props: { dirs: string[] }) {
   const [files, setFiles] = useState<File[]>([]);
   const [folders, setFolders] = useState<File[]>([]);
-  const queryClient = useQueryClient();
-  const fileMutation = useMutation({
-    mutationKey: ["multiTaggerFileImport"],
+  const importMutation = useMutation({
     mutationFn: (args: { dirs: string; files: File[] }) => {
       return importFiles({ dir: args.dirs, files: args.files });
     },
-    onSuccess: (addedFiles: multiTaggerFilePropsType[]) => {
+    onSuccess: () => {
       setFiles([]);
-      queryClient.setQueryData(
-        ["Dirs&files", props.dirs],
-        (prev: (string | multiTaggerFilePropsType)[]) => {
-          const existingFiles = prev
-            .filter((file) => !(typeof file == "string"))
-            .map((file) => file.title);
-          return [
-            ...prev,
-            ...addedFiles.filter((file) => !existingFiles.includes(file.title)),
-          ];
-        }
-      );
-    },
-  });
-  const folderMutation = useMutation({
-    mutationKey: ["multiTaggerFolderImport"],
-    mutationFn: (args: { dirs: string; files: File[] }) => {
-      return importFiles({ dir: args.dirs, files: args.files });
-    },
-    onSuccess: (
-      addedFiles: multiTaggerFilePropsType[],
-      variables: { dirs: string; files: File[] }
-    ) => {
       setFolders([]);
-      queryClient.setQueryData(
-        ["Dirs&files", props.dirs],
-        (prev: (string | multiTaggerFilePropsType)[]) => {
-          const newFolders: string[] = [];
-          const nbrSlashesInDir = props.dirs.length;
-          addedFiles.forEach((file) => {
-            const newFolder = file.path.split("/").at(nbrSlashesInDir);
-            if (newFolder && !newFolders.includes(newFolder))
-              newFolders.push(newFolder);
-          });
-          const existingFolders = prev
-            .filter((file) => typeof file == "string")
-            .map((file) => file);
-          return [
-            ...prev,
-            ...newFolders.filter((file) => !existingFolders.includes(file)),
-          ];
-        }
-      );
-      variables.files.forEach((file) => {
-        const splittedPath = [
-          ...props.dirs,
-          file.webkitRelativePath.split("/")[0],
-        ];
-        queryClient.setQueryData(
-          ["Dirs&files", splittedPath],
-          (prev: (string | multiTaggerFilePropsType)[] | undefined) => {
-            if (prev) {
-              if (
-                prev.find(
-                  (item) =>
-                    typeof item != "string" &&
-                    item.title == file.webkitRelativePath.split("/")[1]
-                )
-              )
-                return [...prev];
-              return [
-                ...prev,
-                addedFiles.find(
-                  (item) => item.title == file.webkitRelativePath.split("/")[1]
-                ),
-              ];
-            } else {
-              return [
-                addedFiles.find(
-                  (item) => item.title == file.webkitRelativePath.split("/")[1]
-                ),
-              ];
-            }
-          }
-        );
-      });
     },
   });
+
   return (
     <Stack direction={"column"} width={"200px"}>
       <FileUpload.Root
@@ -137,7 +60,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    fileMutation.mutate({
+                    importMutation.mutate({
                       dirs: props.dirs.join("/"),
                       files: files,
                     })
@@ -152,7 +75,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
       </FileUpload.Root>
 
       <FileUpload.Root
-        directory={true} 
+        directory={true}
         accept={"application/pdf"}
         onFileAccept={(e) => {
           const filesToImport: File[] = [];
@@ -193,7 +116,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    folderMutation.mutate({
+                    importMutation.mutate({
                       dirs: props.dirs.join("/"),
                       files: folders,
                     })

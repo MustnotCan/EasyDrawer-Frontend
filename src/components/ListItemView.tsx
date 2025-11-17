@@ -82,6 +82,7 @@ export default function ListItemView(props: {
           setDir={() => {}}
           tags={[]}
           dirs={[]}
+          queryData={props.queryData}
         />
       </Stack>
     </>

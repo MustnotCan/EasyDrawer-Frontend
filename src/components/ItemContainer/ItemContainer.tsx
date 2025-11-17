@@ -232,7 +232,7 @@ export function ItemContainer(props: {
   return (
     <>
       <Stack
-        className={"hover:cursor-pointer " + (selected ? "opacity-50" : "")}
+        className={"hover:cursor-pointer " + (selected ? " opacity-50" : "")}
         onClick={(e) => {
           clickHandler(e);
         }}

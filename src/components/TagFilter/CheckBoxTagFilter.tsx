@@ -1,14 +1,29 @@
 import { Checkbox } from "@chakra-ui/react/checkbox";
 import { DeleteButton } from "./DeleteButtonTagFilter";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RenameButton } from "./RenameButtonTagFilter";
 import { tagWithCountType } from "../../types/types";
-import { Box, Button, Input, Menu, Portal, Stack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  IconButton,
+  Input,
+  Menu,
+  Portal,
+  Stack,
+} from "@chakra-ui/react";
 import { Tooltip } from "../../ui/tooltip";
 import IndexTagFilter from "./IndexTagFilter";
-import { UseMutateFunction } from "@tanstack/react-query";
+import {
+  UseMutateFunction,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { CiMenuBurger } from "react-icons/ci";
 import { EnqueuedTask } from "meilisearch";
+import { DeleteOutlined } from "@ant-design/icons";
+import { removeBooksWithTag } from "../../utils/queries/booksApi";
+
 type props = {
   cBoxes: string[];
   tag: tagWithCountType;
@@ -59,8 +74,7 @@ export default function CheckBoxTagFilter({
   filterKey,
 }: props) {
   const [renaming, setRenaming] = useState(false);
-  const DeleteButtonMemo = useMemo(() => DeleteButton, []);
-  const RenameButtonMemo = useMemo(() => RenameButton, []);
+
   const [newValue, setNewValue] = useState(tag.name);
 
   const reNameTagOn = () => {
@@ -71,8 +85,18 @@ export default function CheckBoxTagFilter({
       });
     setRenaming(false);
   };
+  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const emptyBinMutation = useMutation({
+    mutationFn: (tag: string) => removeBooksWithTag(tag),
+    onSuccess: (_, tag) => {
+      queryClient.setQueryData(["tags"], (prev: tagWithCountType[]) =>
+        prev.map((tg) => (tg.name == tag ? { ...tg, booksCount: 0 } : tg))
+      );
+      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["Dirs&files"] });
+    },
+  });
   useEffect(() => {
     if (renaming && inputRef.current) {
       inputRef.current.focus();
@@ -124,7 +148,7 @@ export default function CheckBoxTagFilter({
                     <Stack direction={"row"}>
                       {!renaming && (
                         <Menu.Item value="delete" maxWidth={"10"}>
-                          <DeleteButtonMemo
+                          <DeleteButton
                             deleteTagMutation={deleteTagMutation}
                             tagName={tag.name}
                           />
@@ -132,7 +156,7 @@ export default function CheckBoxTagFilter({
                       )}
                       {filterKey == "Tags" && (
                         <Menu.Item value="rename" maxWidth={"10"}>
-                          <RenameButtonMemo setRenaming={setRenaming} />
+                          <RenameButton setRenaming={setRenaming} />
                         </Menu.Item>
                       )}
                       {filterKey == "Tags" && (
@@ -143,6 +167,19 @@ export default function CheckBoxTagFilter({
                 </Menu.Positioner>
               </Portal>
             </Menu.Root>
+          )}
+          {tag.name.toLowerCase() == "bin" && (
+            <IconButton
+              variant={"ghost"}
+              size={"2xs"}
+              onClick={() => {
+                emptyBinMutation.mutate("bin");
+              }}
+            >
+              <Tooltip content="delete">
+                <DeleteOutlined />
+              </Tooltip>
+            </IconButton>
           )}
         </Checkbox.Root>
       )}

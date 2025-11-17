@@ -1,16 +1,16 @@
-import { tagType, tagWithCountType } from "@/types/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { tagType } from "@/types/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addTag, getTags, removeTag, renameTag } from "../queries/tagsApi";
 
 export function useTags() {
-  const queryClient = useQueryClient();
-  if (queryClient.getQueryData(["tags"]) == undefined) {
-    queryClient.fetchQuery({ queryKey: ["tags"], queryFn: getTags });
-  }
-  const tags = queryClient.getQueryData(["tags"]) as tagWithCountType[];
-  return tags;
+  const tags = useQuery({
+    queryKey: ["tags"],
+    queryFn: getTags,
+    staleTime: Infinity,
+    refetchOnMount: false,
+  }).data;
+  return tags || [];
 }
-
 export function useDeleteTag() {
   const queryClient = useQueryClient();
 

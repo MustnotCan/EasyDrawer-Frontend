@@ -23,11 +23,11 @@ export async function removeTag(tag: { name: string }) {
   const body = (await response.json()) as unknown;
   return tagSchema.parse(body);
 }
-export async function renameTag(prop: { prevName: string; newName: string }) {
+export async function renameTag(args: { prevName: string; newName: string }) {
   const response = await fetch(TAGS_URL, {
     method: "PATCH",
     body: JSON.stringify({
-      body: { prevTagName: prop.prevName, newTagName: prop.newName },
+      body: { prevTagName: args.prevName, newTagName: args.newName },
     }),
     headers: { "Content-Type": "application/json" },
   });

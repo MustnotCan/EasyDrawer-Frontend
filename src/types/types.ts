@@ -15,6 +15,9 @@ import {
   orderBySchema,
   multiTaggerFilePropsSchema,
   hitResults,
+  sseIndexingTaskSchema,
+  sseImportTaskSchema,
+  itemViewSelectedSchema,
 } from "./schemas";
 
 export type tagType = z.infer<typeof tagSchema>;
@@ -68,7 +71,7 @@ export type selectedItemType = {
   type: string;
 };
 export type tagAdderPropsType = {
-  name?: string;
+  path?: string;
   tags: tagType[];
   itemTags?: tagType[];
   queryData: multiTaggerQueryDataType | listItemViewQueryDataType;
@@ -79,3 +82,6 @@ export type tagAdderPropsType = {
 };
 
 export type hitResultsType = z.infer<typeof hitResults>;
+export type sseIndexingTaskType = z.infer<typeof sseIndexingTaskSchema>;
+export type sseImportTaskType = z.infer<typeof sseImportTaskSchema>;
+export type itemViewSelectedType = z.infer<typeof itemViewSelectedSchema>;

@@ -5,22 +5,25 @@ import { Stack } from "@chakra-ui/react";
 import { MultiTaggerFile } from "./MultiTaggerFile";
 import { MultiTaggerFolder } from "./MultiTaggerFolder";
 import { ItemContainer } from "../ItemContainer/ItemContainer";
-import { selectedItemType, tagType } from "../../types/types";
+import { selectedItemType, tagWithCountType } from "../../types/types";
 import { ItemContainerActionBar } from "../ItemContainer/ItemContainerActionBar";
 import { MultiTaggerBreadCrumb } from "./MultiTaggerBreadCrumb";
-import { getTags } from "../../utils/queries/tagsApi";
 import { MultiTaggerImport } from "./MultiTaggerImport";
 import { useLocation } from "react-router-dom";
+import { useTags } from "../../utils/Hooks/TagsHook";
 
 export default function MultiTagger() {
   const location = useLocation();
-  const [dirs, setDir] = useState<string[]>(location.state?.split("/") || [""]);
-  const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
+  const [dirs, setDir] = useState<string[]>(
+    location.state?.at(0).split("/") || [""]
+  );
+  const [selectedItems, setSelectedItems] = useState<selectedItemType[]>(
+    location.state?.at(1) ? [{ path: location.state?.at(1), type: "file" }] : []
+  );
   const [unSelectedItems, setUnSelectedItems] = useState<selectedItemType[]>(
     []
   );
-  const tags = useQuery({ queryKey: ["tags"], queryFn: getTags })
-    .data as tagType[];
+  const tags = useTags() as tagWithCountType[];
   const data = useQuery({
     queryKey: ["Dirs&files", dirs],
     queryFn: ({ queryKey }) => {

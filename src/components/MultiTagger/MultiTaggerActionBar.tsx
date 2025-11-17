@@ -35,7 +35,6 @@ function MultiTaggerActionBarInput(props: {
       <Button
         onClick={(e) => {
           e.preventDefault();
-
           props.moveClickHandler(input);
         }}
       >
@@ -123,6 +122,7 @@ export function MultiTaggerActionBar(props: {
           }
         );
       });
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
     },
   });
   const moveMutation = useMutation({

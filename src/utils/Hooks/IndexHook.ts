@@ -14,6 +14,7 @@ export function useIndexTag() {
   });
   return mutate;
 }
+
 export function useDeleteIndex() {
   const { mutate } = useMutation({
     mutationFn: (args: { name: string }) => {

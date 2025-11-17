@@ -1,5 +1,9 @@
 import { FC } from "react";
-import { selectedItemType, tagType } from "../../types/types";
+import {
+  listItemViewQueryDataType,
+  selectedItemType,
+  tagType,
+} from "../../types/types";
 import { clearSelected } from "../../utils/itemContainerUtils";
 import { ActionBar, CloseButton, Portal } from "@chakra-ui/react";
 
@@ -14,6 +18,7 @@ export function ItemContainerActionBar(props: {
   tags: tagType[];
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
   dirs: string[];
+  queryData?: listItemViewQueryDataType;
 }) {
   type actionProps = { ItemContainerParent: string };
   const Actions: FC<actionProps> = (prop: actionProps) => {
@@ -34,6 +39,7 @@ export function ItemContainerActionBar(props: {
         <ItemViewActionBar
           selectedItems={props.selectedItems}
           setSelectedItems={props.setSelectedItems}
+          queryData={props.queryData!}
         />
       );
     }

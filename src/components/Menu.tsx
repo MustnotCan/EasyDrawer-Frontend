@@ -44,7 +44,7 @@ export default function ItemViewMenu(props: itemViewMenuPropsType) {
               onClick={() => {
                 if (props.path && props.path != "/") {
                   navigate("/multiTagger", {
-                    state: props.path,
+                    state: [props.path, props.path + "/" + props.name],
                   });
                 } else {
                   navigate("/multiTagger");
@@ -125,8 +125,9 @@ export default function ItemViewMenu(props: itemViewMenuPropsType) {
                     <TagList
                       itemTags={props.itemTags}
                       tags={tags}
-                      name={props.name}
+                      path={props.path+"/"+props.name}
                       queryData={props.queryData}
+                      
                     />
                   </Menu.Content>
                 </Menu.Positioner>

@@ -13,7 +13,8 @@ For more details about the app refer to the backend repository: [EasyDrawer back
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Set environment variable `VITE_API_MAIN` to your backend URL (e.g., `http://localhost:3001`)
-4. Run locally: `npm run dev`
+4. Set environment variable `VITE_MEILISEARCH_URI` to your backend URL (e.g., `http://localhost:7701`)
+5. Run locally: `npm run dev`
 
 ## Contribution
 
