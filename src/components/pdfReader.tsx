@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { VITE_API_MAIN } from "../utils/envVar";
-export default function PdfReader() {
+
+export default function PdfjsReader() {
   const params = useParams();
 
   useEffect(() => {
@@ -16,21 +16,12 @@ export default function PdfReader() {
 
     document.title = title;
   }, [params]);
-
   return (
-    <div style={{ width: "100vw", height: "100vh", margin: 0, padding: 0 }}>
+    <div style={{ width: "100vw" }}>
       <iframe
-        src={`${VITE_API_MAIN}pdfs/${params.path}${
-          params.page ? `#page=${params.page}` : ""
-        }`}
-        width="100%"
-        height="100%"
-        title="PDF Viewer"
-        style={{
-          width: "100%",
-          border: "none",
-        }}
-      />
+        src={`/pdfjs/web/viewer.html?pathId=${params.path}${params.page ? `#page=${params.page}` : ""}`}
+        style={{ width: "100vw", height: "100vh" }}
+      ></iframe>
     </div>
   );
 }

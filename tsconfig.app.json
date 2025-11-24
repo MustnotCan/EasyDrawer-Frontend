@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "public/pdfjs", "public/pdfjs/pdf-lib.js", "public/readerCustomization.js"]
 }

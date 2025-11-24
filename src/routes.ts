@@ -12,5 +12,5 @@ export default [
     }),
     route("/fts", "components/FullTextSearch/FullTextSearch.tsx"),
   ]),
-  route("/pdfreader/:path/:page?", "components/PdfReader.tsx"),
+  route("/pdfreader/:path/:page?", "components/pdfReader.tsx"),
 ] satisfies RouteConfig;
