@@ -19,7 +19,6 @@ For more details about the app refer to the backend repository: [EasyDrawer back
 ## Contribution
 
 Issues and feedback are welcome!
-**Note:** Code contributions are currently not accepted.
 
 ## License
 
