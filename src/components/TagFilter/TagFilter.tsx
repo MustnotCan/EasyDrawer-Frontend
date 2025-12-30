@@ -78,28 +78,43 @@ export default function TagFilter(props: {
         <List.Root
           variant={"plain"}
           overflowX={"auto"}
-          maxHeight={"175px"}
+          maxHeight={"50vh"}
           alignContent={"space-evenly"}
           marginBottom={"5px"}
+          width={"10vw"}
         >
-          {(props.tags ? props.tags : tags).map((tag) => (
-            <List.Item key={tag.id} >
-              {!(tag.name.toLowerCase() == "favorite" && props.isFavorite) &&
-                !(tag.name.toLowerCase() == "unclassified") &&
-                (searchInput.toLocaleLowerCase() != ""
-                  ? tag.name.toLocaleLowerCase().includes(searchInput)
-                  : true) && (
-                  <CheckBoxTagFilter
-                    cBoxes={cBoxes}
-                    onChangeHandler={onChangeHandler}
-                    tag={tag}
-                    renameTagMutation={props.renameTagMutation}
-                    deleteTagMutation={props.deleteTagMutation}
-                    filterKey={props.filterKey}
-                  />
-                )}
-            </List.Item>
-          ))}
+          {(props.tags ? props.tags : tags)
+            .sort((a, b) => {
+              const priority: Record<string, number> = {
+                bin: 0,
+                favorite: 1,
+              };
+              const aPriority = priority[a.name] ?? 2;
+              const bPriority = priority[b.name] ?? 2;
+
+              if (aPriority !== bPriority) {
+                return aPriority - bPriority;
+              }
+              return a.name.localeCompare(b.name);
+            })
+            .map((tag) => (
+              <List.Item key={tag.id}>
+                {!(tag.name.toLowerCase() == "favorite" && props.isFavorite) &&
+                  !(tag.name.toLowerCase() == "unclassified") &&
+                  (searchInput.toLocaleLowerCase() != ""
+                    ? tag.name.toLocaleLowerCase().includes(searchInput)
+                    : true) && (
+                    <CheckBoxTagFilter
+                      cBoxes={cBoxes}
+                      onChangeHandler={onChangeHandler}
+                      tag={tag}
+                      renameTagMutation={props.renameTagMutation}
+                      deleteTagMutation={props.deleteTagMutation}
+                      filterKey={props.filterKey}
+                    />
+                  )}
+              </List.Item>
+            ))}
         </List.Root>
         <Stack direction={"row"} justifyContent={"space-between"}>
           <Button variant={"outline"} type="submit">

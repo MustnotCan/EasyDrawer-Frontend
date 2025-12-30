@@ -1,4 +1,5 @@
 import {
+  bookmarkWithIdType,
   itemViewPropsType,
   orderByType,
   selectedItemType,
@@ -15,6 +16,7 @@ import {
   returnedFilesSchema,
 } from "../../types/schemas.ts";
 import z from "zod";
+import { type PdfAnnotationObject } from "@embedpdf/models";
 
 export async function getBooks(args: {
   spt: number;
@@ -253,5 +255,67 @@ export async function removeBooksWithTag(tag: string) {
     return response;
   } catch (e) {
     console.error(e);
+  }
+}
+export async function saveBookAnnotations(args: {
+  bookId: string;
+  annotations: { annotation: PdfAnnotationObject; status: string }[];
+}) {
+  try {
+    const response = await fetch(BOOKS_URL + "annotation", {
+      method: "POST",
+      body: JSON.stringify({
+        bookId: args.bookId,
+        annotations: args.annotations,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return response;
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function getBookAnnotations(args: { bookId: string }) {
+  try {
+    const response = await fetch(BOOKS_URL + "annotation/" + args.bookId);
+    return await response.json();
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function saveBookBookmarks(args: {
+  bookId: string;
+  bookmarks: bookmarkWithIdType[];
+}) {
+  try {
+    const response = await fetch(BOOKS_URL + "bookmark", {
+      method: "POST",
+      body: JSON.stringify({
+        bookId: args.bookId,
+        bookmarks: args.bookmarks,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    return await response.json();
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function getBookBookmarks(args: { bookId: string }) {
+  try {
+    const response = await fetch(BOOKS_URL + "bookmark/" + args.bookId);
+    return await response.json();
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function removeBookBookmark(args: { bookmarkId: string }) {
+  try {
+    const response = await fetch(BOOKS_URL + "bookmark/" + args.bookmarkId, {
+      method: "DELETE",
+    });
+    return await response.json();
+  } catch (e) {
+    console.log(e);
   }
 }

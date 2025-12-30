@@ -127,11 +127,9 @@ export default function Home() {
           duration: 3000,
         });
     });
-    eventSource.onerror = function (error) {
-      console.log("New error:", error);
-    };
+
     return () => eventSource.close();
-  }, [queryClient]);
+  }, [queryClient, updateCache]);
   const onClickNavigationHandler = () => setNavMenuOpen((prev) => !prev);
   return (
     <Stack margin={"10"}>

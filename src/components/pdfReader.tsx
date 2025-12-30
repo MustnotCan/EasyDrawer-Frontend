@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { VITE_API_MAIN } from "../utils/envVar.ts";
+import PDFViewer from "./PdfViewer/PDFViewer";
 
-export default function PdfjsReader() {
+export default function PdfReader() {
   const params = useParams();
-
   useEffect(() => {
     const defaultTitle = "Pdf reader";
 
@@ -16,12 +17,15 @@ export default function PdfjsReader() {
 
     document.title = title;
   }, [params]);
-  return (
-    <div style={{ width: "100vw" }}>
-      <iframe
-        src={`/pdfjs/web/viewer.html?pathId=${params.path}${params.page ? `#page=${params.page}` : ""}`}
-        style={{ width: "100vw", height: "100vh" }}
-      ></iframe>
-    </div>
-  );
+  if (params.path) {
+    return (
+      <PDFViewer
+        pdfId={params.path || ""}
+        pdfUrl={VITE_API_MAIN + "pdfs/" + params.path}
+        pdfPage={Number(params.page) || undefined}
+      />
+    );
+  } else {
+    return <div>No pdf id is provided</div>;
+  }
 }

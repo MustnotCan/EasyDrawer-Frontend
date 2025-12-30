@@ -19,6 +19,7 @@ import {
   sseImportTaskSchema,
   itemViewSelectedSchema,
 } from "./schemas";
+import { PdfLinkTarget } from "@embedpdf/models";
 
 export type tagType = z.infer<typeof tagSchema>;
 export type tagWithCountType = z.infer<typeof tagWithCountSchema>;
@@ -85,3 +86,13 @@ export type hitResultsType = z.infer<typeof hitResults>;
 export type sseIndexingTaskType = z.infer<typeof sseIndexingTaskSchema>;
 export type sseImportTaskType = z.infer<typeof sseImportTaskSchema>;
 export type itemViewSelectedType = z.infer<typeof itemViewSelectedSchema>;
+export type bookmarkWithIdType = {
+  id?: string;
+  bookmarkDetails: bookmarkDetails;
+  parentId: string | null;
+  preSibId: string | null;
+};
+type bookmarkDetails = {
+  title: string;
+  target?: PdfLinkTarget | undefined;
+};
