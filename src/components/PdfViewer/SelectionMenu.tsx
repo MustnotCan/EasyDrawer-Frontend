@@ -5,7 +5,6 @@ import {
 import { useContext } from "react";
 import {
   PdfAnnotationSubtype,
-  PdfPopupAnnoObject,
   PdfZoomMode,
 } from "@embedpdf/models";
 import { Button, Stack } from "@chakra-ui/react";
@@ -149,13 +148,7 @@ export default function SelectionMenu(
                     color: color!,
                     opacity: opacity!,
                     id: highlightId,
-                  });
-                  annotationApi.createAnnotation(select.pageIndex, {
-                    type: PdfAnnotationSubtype.POPUP,
-                    contents: "zzzzzzzzz",
-                    rect: select.rect,
-                    id: uuidv4(),
-                  } as PdfPopupAnnoObject);
+                  });                  
                 });
             });
           }}

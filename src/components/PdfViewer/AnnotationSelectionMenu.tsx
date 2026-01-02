@@ -11,17 +11,15 @@ import { annotationContext } from "./Store/AnnotationContext";
 import { Tooltip } from "../../ui/tooltip";
 import { bookmarkContext } from "./Store/BookmarkContext";
 import { useZoomCapability } from "@embedpdf/plugin-zoom/react";
-import { useScrollCapability } from "@embedpdf/plugin-scroll/react";
 import { getLastAddedItem } from "./tools";
 export default function AnnotationSelectionMenu(
   props: SelectionMenuPropsBase<AnnotationSelectionContext>
 ) {
-  const { menuWrapperProps, selected, rect } = props;
+  const { menuWrapperProps, selected, rect,context } = props;
   const { provides: annotationApi } = useAnnotationCapability();
   const { provides: zoomApi } = useZoomCapability();
   const { removeAnnot } = useContext(annotationContext);
   const { setBookmarks, bookmarks } = useContext(bookmarkContext);
-  const { provides: scrollApi } = useScrollCapability();
   const zoomlevel = zoomApi?.getState().currentZoomLevel || 1;
 
   if (!annotationApi) return <p>Annotation api unavailable</p>;
@@ -79,7 +77,7 @@ export default function AnnotationSelectionMenu(
                     target: {
                       type: "destination",
                       destination: {
-                        pageIndex: scrollApi?.getCurrentPage() as number,
+                        pageIndex:context.pageIndex +1,
                         view: [rect.origin.x, rect.origin.y],
                         zoom: {
                           mode: PdfZoomMode.XYZ,

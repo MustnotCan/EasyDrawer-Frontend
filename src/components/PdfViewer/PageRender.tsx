@@ -42,7 +42,6 @@ export default function PageRender(props: {
       >
         <RenderLayer
           pageIndex={props.pageIndex}
-          scale={0.5}
           documentId={props.documentId}
         />
         <TilingLayer
