@@ -1,55 +1,93 @@
-import { Button, Input, Span, Stack } from "@chakra-ui/react";
+import { Button, Input, Span, Spinner, Stack } from "@chakra-ui/react";
 import {
   SearchDocumentState,
   useSearchCapability,
 } from "@embedpdf/plugin-search/react";
 import { useEffect, useRef, useState } from "react";
-import { MatchFlag, SearchAllPagesResult } from "@embedpdf/models";
+import {
+  MatchFlag,
+  SearchAllPagesResult,
+  SearchResult,
+} from "@embedpdf/models";
 import { HiSearch } from "react-icons/hi";
-import { useScrollCapability } from "@embedpdf/plugin-scroll/react";
+import {
+  ScrollCapability,
+  useScrollCapability,
+} from "@embedpdf/plugin-scroll/react";
 import { GrNext, GrPrevious } from "react-icons/gr";
 import { MdOutlineCancel } from "react-icons/md";
+const findIndex = (
+  results: SearchResult[],
+  scrollApi: ScrollCapability | null
+) => {
+  if (!scrollApi) return 0;
+  let firstResIndex: number = results.findIndex(
+    (res) => res.pageIndex >= scrollApi?.getCurrentPage() - 1
+  );
+  if (firstResIndex == -1) {
+    firstResIndex = 0;
+  }
+  return firstResIndex;
+};
 export default function SearchBar() {
   const { provides: searchApi } = useSearchCapability();
   const { provides: scrollApi } = useScrollCapability();
   const [found, setFound] = useState<SearchAllPagesResult>();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [searchState, setSearchState] = useState<SearchDocumentState>();
+
   useEffect(() => {
     if (!searchApi || !scrollApi) return;
-    searchApi.setFlags([MatchFlag.MatchConsecutive]);
-    const unsub1 = searchApi.onActiveResultChange((ar) => {
-      if (found && found.results[ar.index]) {
-        const x = found?.results[ar.index].rects[0].origin.x;
-        const y = found?.results[ar.index].rects[0].origin.y;
-        scrollApi?.scrollToPage({
-          pageNumber: found?.results[ar.index].pageIndex + 1,
-          behavior: "instant",
-          pageCoordinates: {
-            x: x > 0 ? x : 0,
-            y: y > 0 ? y : 0,
-          },
-        });
-      }
-    });
     const unsub = searchApi.onSearchResult((ev) => {
       if (ev.results.total > 0) {
-        searchApi.goToResult(0);
+        const firstResIndex = findIndex(ev.results.results, scrollApi);
+        searchApi.goToResult(firstResIndex);
       }
     });
-    return () => {
-      unsub();
-      unsub1();
-    };
-  }, [found, scrollApi, searchApi]);
+    return unsub;
+  }, [scrollApi, searchApi]);
   useEffect(() => {
-    if (!searchApi) return;
+    if (!searchApi || !scrollApi) return;
     return searchApi.onStateChange((ev) => {
+      setSearchState(ev.state);
       if (ev.state.loading == false) {
-        setSearchState(ev.state);
+        const activeResultIndex = ev.state.activeResultIndex;
+        const ar = { index: activeResultIndex };
+        if (found && found.results[ar.index]) {
+          const x = found?.results[ar.index].rects[0].origin.x;
+          const y = found?.results[ar.index].rects[0].origin.y;
+          scrollApi?.scrollToPage({
+            pageNumber: found?.results[ar.index].pageIndex + 1,
+            behavior: "instant",
+            pageCoordinates: {
+              x: x > 0 ? x : 0,
+              y: y > 0 ? y : 0,
+            },
+          });
+        }
       }
     });
-  }, [searchApi]);
+  }, [found, scrollApi, searchApi]);
+
+  const startSearch = () => {
+    if (!searchApi) return;
+    if (!searchApi.getFlags().includes(MatchFlag.MatchConsecutive)) {
+      searchApi.setFlags([MatchFlag.MatchConsecutive]);
+    }
+    const input = inputRef.current?.value;
+    if (input) {
+      searchApi
+        ?.searchAllPages(input)
+        .toPromise()
+        .then((res) => {
+          setFound(res);
+          if (res.total > 0) {
+            const firstResIndex = findIndex(res.results, scrollApi);
+            searchApi.goToResult(firstResIndex);
+          }
+        });
+    }
+  };
 
   return (
     <Stack direction={"row"} justify={"center"} align={"center"}>
@@ -66,8 +104,18 @@ export default function SearchBar() {
             ref={inputRef}
             maxHeight={6}
             background={
-              searchState?.active && searchState.total == 0 ? "red.200" : ""
+              searchState?.active &&
+              !searchState?.loading &&
+              searchState.query == inputRef.current?.value &&
+              searchState.total == 0
+                ? "red.200"
+                : ""
             }
+            onKeyDown={(e) => {
+              if (e.key == "Enter") {
+                startSearch();
+              }
+            }}
           />
           {searchState &&
             searchState.activeResultIndex != -1 &&
@@ -77,9 +125,9 @@ export default function SearchBar() {
               </Span>
             )}
         </Stack>
-
+        {searchState?.loading && <Spinner size={"xs"} />}
         {searchState?.active && (
-          <MdOutlineCancel
+          <Button
             onClick={() => {
               searchApi?.stopSearch();
               if (inputRef.current) {
@@ -87,33 +135,38 @@ export default function SearchBar() {
               }
             }}
             cursor={"pointer"}
-          />
+            variant={"outline"}
+            size={"2xs"}
+          >
+            <MdOutlineCancel />
+          </Button>
         )}
-        <GrPrevious
+        <Button
           cursor={"pointer"}
           onClick={() => {
             searchApi?.previousResult();
           }}
-        />
-        <GrNext
+          variant={"outline"}
+          size={"2xs"}
+        >
+          <GrPrevious />
+        </Button>
+        <Button
           cursor={"pointer"}
           onClick={() => {
             searchApi?.nextResult();
           }}
-        />
+          variant={"outline"}
+          size={"2xs"}
+        >
+          <GrNext />
+        </Button>
       </Stack>
       <Button
         variant={"outline"}
         size={"2xs"}
         onClick={() => {
-          if (inputRef.current?.value) {
-            searchApi
-              ?.searchAllPages(inputRef.current?.value)
-              .toPromise()
-              .then((res) => {
-                setFound(res);
-              });
-          }
+          startSearch();
         }}
       >
         <HiSearch />

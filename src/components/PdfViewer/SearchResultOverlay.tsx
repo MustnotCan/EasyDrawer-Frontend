@@ -1,18 +1,33 @@
 import { Span } from "@chakra-ui/react";
-import { useSearch } from "@embedpdf/plugin-search/react";
+import {
+  SearchDocumentState,
+  useSearchCapability,
+} from "@embedpdf/plugin-search/react";
 import { useZoom } from "@embedpdf/plugin-zoom/react";
 import { useActiveDocument } from "@embedpdf/plugin-document-manager/react";
+import { useEffect, useState } from "react";
 export default function SearchResultOverlay(props: { pageIndex: number }) {
   const { activeDocumentId } = useActiveDocument();
-  const { state: searchState } = useSearch(activeDocumentId!);
+  const { provides: searchApi } = useSearchCapability();
   const { state: zoomState } = useZoom(activeDocumentId!);
-  const { loading, activeResultIndex, results } = searchState;
+  const [searchState, setSearchState] = useState<SearchDocumentState | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!searchApi) return;
+    searchApi.onStateChange((state) => {
+      setSearchState(state.state);
+    });
+  }, [searchApi]);
+  if (!searchState) return;
+  const { loading, activeResultIndex, results, active } = searchState;
   const actualZoom = zoomState.currentZoomLevel;
   if (
-    !loading &&
     results.length > 0 &&
     props.pageIndex == results[activeResultIndex].pageIndex &&
-    searchState.active
+    !loading &&
+    active
   ) {
     const initial_x = results[activeResultIndex].rects[0].origin.x;
     const initial_y = results[activeResultIndex].rects[0].origin.y;

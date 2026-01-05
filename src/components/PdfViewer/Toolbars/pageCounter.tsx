@@ -7,11 +7,12 @@ import { useParams } from "react-router-dom";
 
 export default function PageCounter() {
   const { activeDocumentId } = useActiveDocument();
-  const { state, provides: scrollApi } = useScroll(activeDocumentId!);
-  const [input, setInput] = useState<number | null>();
+  const { provides: scrollApi } = useScroll(activeDocumentId!);
+  const [input, setInput] = useState<number | null>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedInput = useDebounce(input);
   const params = useParams();
+
   useEffect(() => {
     if (
       debouncedInput === null ||
@@ -38,7 +39,9 @@ export default function PageCounter() {
       }
     });
   }, [params.page, params.path, scrollApi]);
-  if (state.totalPages && state.totalPages != 0)
+  const totalPages = scrollApi?.getTotalPages();
+  const curPage = scrollApi?.getCurrentPage();
+  if (totalPages != 0)
     return (
       <Stack direction={"row"} align={"center"} justify={"center"}>
         <Input
@@ -46,7 +49,7 @@ export default function PageCounter() {
           size={"xs"}
           maxHeight={"2.5vh"}
           fontSize={"md"}
-          placeholder={String(currentPage)}
+          placeholder={String(curPage)}
           onKeyDown={(e) => {
             if (e.key == "Enter") {
               setInput(Number(e.currentTarget.value));
@@ -54,7 +57,7 @@ export default function PageCounter() {
             }
           }}
         />
-        <Span>/ {state.totalPages}</Span>
+        <Span>/ {totalPages}</Span>
       </Stack>
     );
 }
