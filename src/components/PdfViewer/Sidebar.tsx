@@ -12,7 +12,8 @@ import {
 import { AiOutlineEdit } from "react-icons/ai";
 import AnnotationEditer from "./Sidebars/AnnotationEditer";
 import UserBookMarks from "./Sidebars/UserBookmarks";
-import { CiBookmark } from "react-icons/ci";
+import { CiBookmark, CiSettings } from "react-icons/ci";
+import Settings from "./Sidebars/Settings";
 export default function Sidebar() {
   const { activeDocumentId } = useActiveDocument();
   const { engine, isLoading } = useEngineContext();
@@ -30,16 +31,16 @@ export default function Sidebar() {
   }, [loaderApi, engine, isLoading]);
   const [activeSideBar, setActiveSideBar] = useState("");
   if (!activeDocumentId) return <p>document not loaded</p>;
-
+  const toggleOption = (opt: string) => {
+    setActiveSideBar((prev) => (prev != opt ? opt : ""));
+  };
   return (
     <Stack direction={"row"}>
       <Stack direction={"column"}>
         <Button
           variant={"outline"}
           size="sm"
-          onClick={() =>
-            setActiveSideBar((prev) => (prev != "TOC" ? "TOC" : ""))
-          }
+          onClick={() => toggleOption("TOC")}
         >
           <Tooltip content="Table of contents">
             <LuTableOfContents />
@@ -48,7 +49,7 @@ export default function Sidebar() {
         <Button
           variant={"outline"}
           size="sm"
-          onClick={() => setActiveSideBar((prev) => (prev != "AE" ? "AE" : ""))}
+          onClick={() => toggleOption("AE")}
         >
           <Tooltip content="Annotation editer">
             <AiOutlineEdit />
@@ -57,16 +58,26 @@ export default function Sidebar() {
         <Button
           variant={"outline"}
           size="sm"
-          onClick={() => setActiveSideBar((prev) => (prev != "UB" ? "UB" : ""))}
+          onClick={() => toggleOption("UB")}
         >
           <Tooltip content="User bookmarks">
             <CiBookmark />
+          </Tooltip>
+        </Button>
+        <Button
+          variant={"outline"}
+          size="sm"
+          onClick={() => toggleOption("Settings")}
+        >
+          <Tooltip content="Viewer Settings">
+            <CiSettings />
           </Tooltip>
         </Button>
       </Stack>
       {activeSideBar == "TOC" && <TableOfContents bookmarks={bookmarks} />}
       {activeSideBar == "AE" && <AnnotationEditer />}
       {activeSideBar == "UB" && <UserBookMarks />}
+      {activeSideBar == "Settings" && <Settings />}
     </Stack>
   );
 }

@@ -27,11 +27,16 @@ export default function LinksClicker(props: { pageIndex: number }) {
       });
   }, [annotationApi, props.pageIndex]);
   const zoomlevel = zoomApi?.getState().currentZoomLevel || 1;
+  if (!activeDocumentId) return null;
+  const Xkey = activeDocumentId + "linkXOffset";
+  const Ykey = activeDocumentId + "linkYOffset";
+  const linkXOffset = Number(localStorage.getItem(Xkey) ?? 0);
+  const linkYOffset = Number(localStorage.getItem(Ykey) ?? 0);
   return (
     <>
       {links.map((link) => {
-        const top = link.rect.origin.y;
-        const left = link.rect.origin.x;
+        const top = link.rect.origin.y + linkYOffset;
+        const left = link.rect.origin.x + linkXOffset;
         return (
           <Span
             key={link.id}
