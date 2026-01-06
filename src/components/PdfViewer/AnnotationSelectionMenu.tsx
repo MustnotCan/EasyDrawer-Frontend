@@ -15,13 +15,12 @@ import { getLastAddedItem } from "./tools";
 export default function AnnotationSelectionMenu(
   props: SelectionMenuPropsBase<AnnotationSelectionContext>
 ) {
-  const { menuWrapperProps, selected, rect,context } = props;
+  const { menuWrapperProps, selected, context } = props;
   const { provides: annotationApi } = useAnnotationCapability();
   const { provides: zoomApi } = useZoomCapability();
   const { removeAnnot } = useContext(annotationContext);
   const { setBookmarks, bookmarks } = useContext(bookmarkContext);
   const zoomlevel = zoomApi?.getState().currentZoomLevel || 1;
-
   if (!annotationApi) return <p>Annotation api unavailable</p>;
   const annotation = annotationApi.getSelectedAnnotation();
   if (!annotation) return;
@@ -67,6 +66,8 @@ export default function AnnotationSelectionMenu(
             size={"2xs"}
             variant={"subtle"}
             onClick={() => {
+              const x = context.annotation.object.rect.origin.x;
+              const y = context.annotation.object.rect.origin.y;
               setBookmarks([
                 {
                   bookmarkDetails: {
@@ -77,13 +78,13 @@ export default function AnnotationSelectionMenu(
                     target: {
                       type: "destination",
                       destination: {
-                        pageIndex:context.pageIndex +1,
-                        view: [rect.origin.x, rect.origin.y],
+                        pageIndex: context.pageIndex + 1,
+                        view: [x, y],
                         zoom: {
                           mode: PdfZoomMode.XYZ,
                           params: {
-                            x: rect.origin.x,
-                            y: rect.origin.y,
+                            x: x,
+                            y: y,
                             zoom: zoomlevel,
                           },
                         },
