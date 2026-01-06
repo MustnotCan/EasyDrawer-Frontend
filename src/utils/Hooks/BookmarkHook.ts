@@ -43,8 +43,15 @@ export function useBookmarks(args: { bookId: string }) {
     onSuccess(removedBookmark: bookmarkWithIdType) {
       queryClient.setQueryData(
         ["bookmarks", args.bookId],
-        (prev: bookmarkWithIdType[]) =>
-          prev.filter((bk) => bk.id != removedBookmark.id)
+        (prev: bookmarkWithIdType[]) => {
+          const newData = prev.filter((bk) => bk.id != removedBookmark.id);
+          newData.forEach((bk) => {
+            if (bk.parentId == removedBookmark.id) {
+              bk.parentId = removedBookmark.parentId;
+            }
+          });
+          return newData;
+        }
       );
     },
   });

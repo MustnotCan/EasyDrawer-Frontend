@@ -24,7 +24,11 @@ export default function UserBookMarks() {
     })
   );
   if (!bookmarks || bookmarks.length == 0) {
-    return <Span padding={5} width={200}>No user bookmarks found</Span>;
+    return (
+      <Span padding={5} width={200}>
+        No user bookmarks found
+      </Span>
+    );
   }
 
   return (
@@ -96,6 +100,21 @@ function UserBookmarksRecursiveAccordion(props: {
   isRoot?: boolean;
   activeId: string | null;
 }) {
+  let bookmarks: bookmarkWithIdType[];
+  if (props.isRoot) {
+    const bookmarksWithInvalidParentId = props.bookmarks.filter(
+      (bk) =>
+        bk.parentId && !props.bookmarks.map((bk) => bk.id).includes(bk.parentId)
+    );
+    bookmarks = props.bookmarks.filter(
+      (bk) =>
+        bk.parentId == props.parentId ||
+        bookmarksWithInvalidParentId.map((bk) => bk.id).includes(bk.id)
+    );
+  } else {
+    bookmarks = props.bookmarks.filter((bk) => bk.parentId == props.parentId);
+  }
+
   return (
     <Accordion.Root
       variant={"plain"}
@@ -111,9 +130,7 @@ function UserBookmarksRecursiveAccordion(props: {
           }
         : {})}
     >
-      {sortByPreSib(
-        props.bookmarks.filter((bk) => bk.parentId == props.parentId)
-      ).map((item) => {
+      {sortByPreSib(bookmarks).map((item) => {
         const children = props.bookmarks.filter((bk) => bk.parentId == item.id);
         return (
           <Box key={item.id}>
