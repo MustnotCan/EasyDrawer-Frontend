@@ -203,9 +203,15 @@ export default function AnnotationToolBar() {
               ?.commit()
               .toPromise()
               .then(() => {
+                const fallback = [...modifiedAnnotations];
+                setAnnotChanged(false);
+                modifiedAnnotations = [];
                 saveBookAnnotations({
                   bookId: activeDocumentId!,
-                  annotations: modifiedAnnotations,
+                  annotations: fallback,
+                }).catch(() => {
+                  modifiedAnnotations = [...modifiedAnnotations, ...fallback];
+                  setAnnotChanged(true);
                 });
               });
           }
