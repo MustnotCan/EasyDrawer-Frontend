@@ -1,35 +1,33 @@
 import { bookmarkWithIdType } from "../../../types/types";
-import { ReactElement, useCallback } from "react";
+import { ReactElement, useState } from "react";
 import { bookmarkContext, bookmarkContextType } from "./BookmarkContext";
+import { useBookmarks } from "../../../utils/Hooks/BookmarkHook";
+import { useActiveDocument } from "@embedpdf/plugin-document-manager/react";
 export default function BookmarkContextProvider(props: {
   children: ReactElement;
-  bookmarks: bookmarkWithIdType[];
-  setBookmarksMutation: (arg0: {
-    bookId: string;
-    bookmarks: bookmarkWithIdType[];
-  }) => void;
-  removeBookmarkMutation: (arg0: { bookmarkId: string }) => void;
-  bookId: string;
 }) {
-  const setBookmarks = useCallback(
-    (bookmarks: bookmarkWithIdType[]) => {
-      props.setBookmarksMutation({
-        bookId: props.bookId,
-        bookmarks: bookmarks,
-      });
-    },
-    [props]
-  );
-  const removeBookmark = useCallback(
-    (bookmarkId: string) => {
-      props.removeBookmarkMutation({ bookmarkId: bookmarkId });
-    },
-    [props]
-  );
+  const { activeDocumentId } = useActiveDocument();
+  const { data, setBookmarksMutation, removeBookmarkMutation } = useBookmarks({
+    bookId: activeDocumentId!,
+  });
+  const setBookmarks = (bookmarks: bookmarkWithIdType[]) => {
+    setBookmarksMutation({
+      bookId: activeDocumentId!,
+      bookmarks: bookmarks,
+    });
+  };
+  const removeBookmark = (bookmarkId: string) => {
+    removeBookmarkMutation({ bookmarkId: bookmarkId });
+  };
+
+  const [activeParent, setActiveParent] = useState<string | null>(null);
+
   const BookmarkContextValue: bookmarkContextType = {
-    bookmarks: props.bookmarks,
+    bookmarks: data,
     setBookmarks: setBookmarks,
     removeBookmark: removeBookmark,
+    activeParent: activeParent,
+    setActiveParent: setActiveParent,
   };
   return (
     <bookmarkContext.Provider value={BookmarkContextValue}>

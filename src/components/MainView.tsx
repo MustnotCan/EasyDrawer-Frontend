@@ -132,6 +132,7 @@ export default function View() {
           ]}
           orderBy={orderBy}
           setOrderBy={setOrderBy}
+          isForFTS={false}
         />
         {data?.data.length != 0 && (
           <Paginator pn={pn} setPn={setPn} count={data?.count || 1} />

@@ -16,7 +16,7 @@ import { SearchPluginPackage } from "@embedpdf/plugin-search/react";
 import { CapturePluginPackage } from "@embedpdf/plugin-capture/react";
 import { Rotation } from "@embedpdf/models";
 export const plugins = [
-  createPluginRegistration(DocumentManagerPluginPackage),
+  createPluginRegistration(DocumentManagerPluginPackage,),
   createPluginRegistration(RenderPluginPackage),
   createPluginRegistration(BookmarkPluginPackage),
   createPluginRegistration(ViewportPluginPackage),

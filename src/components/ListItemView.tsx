@@ -25,6 +25,7 @@ export default function ListItemView(props: {
       direction: string;
     }>
   >;
+  isForFTS: boolean;
 }) {
   const [selectedItems, setSelectedItems] = useState<selectedItemType[]>([]);
 
@@ -41,50 +42,54 @@ export default function ListItemView(props: {
           />
         )}
       </Stack>
-      <Stack>
-        <Stack direction={"row"} wrap={"wrap"}>
-          {props.books.map((IV: itemViewPropsType) => {
-            return (
-              <Box
-                key={IV.id}
-                width={"max-content"}
-                justifyItems={"center"}
-                marginRight={"10"}
-                marginTop={"3"}
-                marginLeft={"0"}
-                marginBottom={"5"}
-              >
-                <ItemContainer
-                  setSelectedItems={setSelectedItems}
-                  selectedItems={selectedItems}
-                  setUnSelectedItems={() => {}}
-                  unSelectedItems={[]}
-                  children={
-                    <ItemView
-                      itemView={{
-                        prop: IV,
-                        itemTags: IV.tags,
-                      }}
-                      queryData={props.queryData}
-                    />
-                  }
-                />
-              </Box>
-            );
-          })}
+      {props.books.length > 0 ? (
+        <Stack>
+          <Stack direction={"row"} wrap={"wrap"}>
+            {props.books.map((IV: itemViewPropsType) => {
+              return (
+                <Box
+                  key={IV.id}
+                  width={"max-content"}
+                  justifyItems={"center"}
+                  marginRight={"10"}
+                  marginTop={"3"}
+                  marginLeft={"0"}
+                  marginBottom={"5"}
+                >
+                  <ItemContainer
+                    setSelectedItems={setSelectedItems}
+                    selectedItems={selectedItems}
+                    setUnSelectedItems={() => {}}
+                    unSelectedItems={[]}
+                    children={
+                      <ItemView
+                        itemView={{
+                          prop: IV,
+                          itemTags: IV.tags,
+                        }}
+                        queryData={props.queryData}
+                      />
+                    }
+                  />
+                </Box>
+              );
+            })}
+          </Stack>
+          <ItemContainerActionBar
+            selectedItems={selectedItems}
+            setSelectedItems={setSelectedItems}
+            ItemContainerParent={"ListItemView"}
+            setUnselectedItems={() => {}}
+            unselectedItems={[]}
+            setDir={() => {}}
+            tags={[]}
+            dirs={[]}
+            queryData={props.queryData}
+          />
         </Stack>
-        <ItemContainerActionBar
-          selectedItems={selectedItems}
-          setSelectedItems={setSelectedItems}
-          ItemContainerParent={"ListItemView"}
-          setUnselectedItems={() => {}}
-          unselectedItems={[]}
-          setDir={() => {}}
-          tags={[]}
-          dirs={[]}
-          queryData={props.queryData}
-        />
-      </Stack>
+      ) : (
+        !props.isForFTS && <p>No book found</p>
+      )}
     </>
   );
 }

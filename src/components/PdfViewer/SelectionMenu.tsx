@@ -3,10 +3,7 @@ import {
   useSelectionCapability,
 } from "@embedpdf/plugin-selection/react";
 import { useContext } from "react";
-import {
-  PdfAnnotationSubtype,
-  PdfZoomMode,
-} from "@embedpdf/models";
+import { PdfAnnotationSubtype, PdfZoomMode } from "@embedpdf/models";
 import { Button, Stack } from "@chakra-ui/react";
 import { CiBookmarkPlus } from "react-icons/ci";
 import { BsClipboard2 } from "react-icons/bs";
@@ -26,10 +23,9 @@ export default function SelectionMenu(
   const { provides: annotationApi } = useAnnotationCapability();
   const { activeDocumentId } = useActiveDocument();
   const { provides: zoomApi } = useZoom(activeDocumentId!);
-  const { setBookmarks, bookmarks } = useContext(bookmarkContext);
+  const { setBookmarks, bookmarks, activeParent } = useContext(bookmarkContext);
   const { menuWrapperProps, selected } = props;
   const zoomlevel = zoomApi?.getState().currentZoomLevel || 1;
-
   if (selected) {
     return (
       <Stack
@@ -109,8 +105,14 @@ export default function SelectionMenu(
                       },
                     },
                     preSibId:
-                      bookmarks.length > 0 ? getLastAddedItem(bookmarks) : null,
-                    parentId: null,
+                      bookmarks.length > 0
+                        ? getLastAddedItem(
+                            bookmarks.filter(
+                              (bk) => bk.parentId == activeParent
+                            )
+                          )
+                        : null,
+                    parentId: activeParent,
                   },
                 ])
               );
@@ -148,7 +150,7 @@ export default function SelectionMenu(
                     color: color!,
                     opacity: opacity!,
                     id: highlightId,
-                  });                  
+                  });
                 });
             });
           }}

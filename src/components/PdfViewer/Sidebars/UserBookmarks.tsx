@@ -1,6 +1,14 @@
 import { ReactElement, useContext, useState } from "react";
 import { bookmarkContext } from "../Store/BookmarkContext";
-import { Accordion, Span, Stack, Box } from "@chakra-ui/react";
+import {
+  Accordion,
+  Span,
+  Stack,
+  Box,
+  Portal,
+  Select,
+  createListCollection,
+} from "@chakra-ui/react";
 import { bookmarkWithIdType } from "@/types/types";
 import UserBookMark from "./UserBookmark";
 import {
@@ -15,7 +23,8 @@ import {
 import { drag, dragAndReorder } from "../tools";
 
 export default function UserBookMarks() {
-  const { bookmarks, setBookmarks } = useContext(bookmarkContext);
+  const { bookmarks, setBookmarks, setActiveParent } =
+    useContext(bookmarkContext);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const sensors = useSensors(
@@ -30,66 +39,117 @@ export default function UserBookMarks() {
       </Span>
     );
   }
-
+  const bookmarksCollection = createListCollection({
+    items: [
+      { label: "root", value: "root" },
+      ...bookmarks.map((bk) => ({
+        label: bk.bookmarkDetails.title,
+        value: bk.id,
+      })),
+    ],
+  });
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={(e) => {
-        setActiveId(e.active.id as string);
-        setOverId(null);
-      }}
-      onDragOver={(e) => {
-        if (e.over && e.over.id) setOverId(e.over.id.toString());
-      }}
-      onDragEnd={({ active, over }) => {
-        if (!over) return;
-        const data = over.data.current;
-        if (!data) return;
-        if (data.type === "reorder") {
-          const targetId = data.id;
-          const activeId = active.id;
-          const { newDragged, newDraggedTo, newActiveNext, newOldNext } =
-            dragAndReorder(bookmarks, activeId.toString(), targetId);
-          const changedNodes = [
-            newDragged,
-            newDraggedTo,
-            newActiveNext,
-            newOldNext,
-          ].filter((bk) => bk != null);
-          if (changedNodes.length > 0) setBookmarks(changedNodes);
-        } else {
-          const targetId = data.targetId;
-          const activeId = active.id;
-          const { newActive, newOldNext } = drag(
-            bookmarks,
-            activeId.toString(),
-            targetId
-          );
-          const changedNodes = [newActive, newOldNext].filter(
-            (bk) => bk != null
-          );
-          if (changedNodes.length > 0) setBookmarks(changedNodes);
-        }
-        setActiveId(null);
-        setOverId(null);
-      }}
-      onDragCancel={() => {
-        setActiveId(null);
-        setOverId(null);
-      }}
-    >
-      <DropOnItem id="root">
-        <UserBookmarksRecursiveAccordion
-          bookmarks={bookmarks}
-          overId={overId}
-          isRoot
-          parentId={null}
-          activeId={activeId}
-        />
-      </DropOnItem>
+    <Stack direction={"column"} overflow={"auto"} width={"16rem"}>
+      <Stack direction={"column"}>
+        <Select.Root
+          collection={bookmarksCollection}
+          onValueChange={(e) => {
+            const newValue = e.value[0];
+            setActiveParent(newValue == "root" ? null : newValue);
+          }}
+          defaultValue={["root"]}
+          defaultChecked={true}
+          maxWidth={"15rem"}
+        >
+          <Select.HiddenSelect />{" "}
+          <Select.Label>Add next bookmark to:</Select.Label>
+          <Select.Control>
+            <Select.Trigger>
+              <Select.ValueText />
+            </Select.Trigger>
+            <Select.IndicatorGroup>
+              <Select.Indicator />
+            </Select.IndicatorGroup>
+          </Select.Control>
+          <Portal>
+            <Select.Positioner>
+              <Select.Content maxHeight={"20rem"}>
+                {bookmarksCollection.items.map((bk) => (
+                  <Select.Item
+                    item={bk}
+                    key={bk.value}
+                    overflow="hidden"
+                    textOverflow="clip"
+                    whiteSpace="nowrap"
+                    minHeight={"1.5rem"}
+                  >
+                    {bk.label} <Select.ItemIndicator />
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Positioner>
+          </Portal>
+        </Select.Root>
+      </Stack>
+      <DndContext
+        sensors={sensors}
+        onDragStart={(e) => {
+          setActiveId(e.active.id as string);
+          setOverId(null);
+        }}
+        onDragOver={(e) => {
+          if (e.over && e.over.id) setOverId(e.over.id.toString());
+        }}
+        onDragEnd={({ active, over }) => {
+          if (!over) return;
+          const data = over.data.current;
+          if (!data) return;
+          if (data.type === "reorder") {
+            const targetId = data.id;
+            const activeId = active.id;
+            const { newDragged, newDraggedTo, newActiveNext, newOldNext } =
+              dragAndReorder(bookmarks, activeId.toString(), targetId);
+            const changedNodes = [
+              newDragged,
+              newDraggedTo,
+              newActiveNext,
+              newOldNext,
+            ].filter((bk) => bk != null);
+            if (changedNodes.length > 0) setBookmarks(changedNodes);
+          } else {
+            const targetId = data.targetId;
+            const activeId = active.id;
+            const { newActive, newOldNext } = drag(
+              bookmarks,
+              activeId.toString(),
+              targetId
+            );
+            const changedNodes = [newActive, newOldNext].filter(
+              (bk) => bk != null
+            );
+            if (changedNodes.length > 0) setBookmarks(changedNodes);
+          }
+          setActiveId(null);
+          setOverId(null);
+        }}
+        onDragCancel={() => {
+          setActiveId(null);
+          setOverId(null);
+        }}
+      >
+        <DropOnItem id="root">
+          <UserBookmarksRecursiveAccordion
+            bookmarks={bookmarks}
+            overId={overId}
+            isRoot
+            parentId={null}
+            activeId={activeId}
+          />
+        </DropOnItem>
 
-      <DragOverlay />
-    </DndContext>
+        <DragOverlay />
+      </DndContext>
+    </Stack>
   );
 }
 
@@ -123,10 +183,8 @@ function UserBookmarksRecursiveAccordion(props: {
       {...(props.isRoot
         ? {
             maxHeight: "90vh",
-            overflowY: "auto",
             marginLeft: "0vw",
             marginRight: "0vw",
-            maxWidth: "20rem",
           }
         : {})}
     >

@@ -303,6 +303,8 @@ export async function saveBookBookmarks(args: {
 }
 export async function getBookBookmarks(args: { bookId: string }) {
   try {
+    if (!args.bookId) return [];
+    
     const response = await fetch(BOOKS_URL + "bookmark/" + args.bookId);
     return await response.json();
   } catch (e) {

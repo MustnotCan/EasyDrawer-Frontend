@@ -41,7 +41,6 @@ export default function Settings() {
           defaultValue={[linkYOffset]}
           onValueChangeEnd={(e) => {
             localStorage.setItem(Ykey, e.value[0].toString());
-            console.log(e.value);
           }}
         >
           <HStack justify="space-between">

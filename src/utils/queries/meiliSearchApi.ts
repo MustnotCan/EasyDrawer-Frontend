@@ -14,10 +14,12 @@ export async function search(args: {
   query: string;
   hitsPerPage: number;
   offset: number;
-}): Promise<
-  { data: hitResultsType[]; estimatedTotalHits: number | undefined } | undefined
-> {
-  if (!args.query) return;
+}): Promise<{
+  data: hitResultsType[];
+  estimatedTotalHits: number | undefined;
+}> {
+  if (!args.query)
+    return { data: [] as hitResultsType[], estimatedTotalHits: 0 };
   else {
     try {
       const searchOptions = {
@@ -97,6 +99,7 @@ export async function search(args: {
       };
     } catch (e) {
       console.log(e);
+      return { data: [] as hitResultsType[], estimatedTotalHits: 0 };
     }
   }
 }
@@ -118,9 +121,8 @@ export async function getIndexes() {
         id: res["uid"],
         name: res["uid"],
         booksCount: formatBytes(
-          (
-            await (await client.getIndex(res["uid"])).getStats()
-          ).rawDocumentDbSize
+          (await (await client.getIndex(res["uid"])).getStats())
+            .rawDocumentDbSize
         ),
       }))
     );

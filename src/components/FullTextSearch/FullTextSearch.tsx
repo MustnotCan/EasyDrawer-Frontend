@@ -11,6 +11,7 @@ import {
   useIndexes,
 } from "../../utils/Hooks/IndexHook";
 import TagAdder from "../TagAdder";
+import { hitResultsType } from "@/types/types";
 
 export default function FullTextSearch() {
   const [take, setTake] = useState(50);
@@ -49,6 +50,10 @@ export default function FullTextSearch() {
   const indexes = useIndexes();
   const addIndexMutation = useAddIndex();
   const deleteIndexMutation = useDeleteIndex();
+  const estimatedTotalHits = data.data?.estimatedTotalHits || 0;
+  const foundResults: hitResultsType[] | undefined = data.data
+    ? data.data.data
+    : [];
   return (
     <Stack direction={"row"}>
       <Stack direction={"column"}>
@@ -74,11 +79,13 @@ export default function FullTextSearch() {
       ) : (
         <Stack>
           <ListItemView
-            books={(searchName && data?.data?.data) || []}
+            books={foundResults}
             setTake={setTake}
             setSearchInput={alteredSetSearchName}
             queryData={[offset, take, undefined, searchName]}
+            isForFTS={true}
           />
+          {searchName && foundResults.length == 0 && <p> No result found</p>}
           {!searchName && (
             <Alert.Root status={"info"} maxW={"fit-content"} maxH={"8vh"}>
               <Alert.Indicator />
@@ -89,7 +96,7 @@ export default function FullTextSearch() {
               </Alert.Content>
             </Alert.Root>
           )}
-          {data?.data?.estimatedTotalHits && searchName && (
+          {estimatedTotalHits > 0 && searchName && (
             <Stack direction="row" placeContent={"center"}>
               <Button
                 disabled={offset == 0}
@@ -98,7 +105,7 @@ export default function FullTextSearch() {
                 <FaArrowLeft />
               </Button>
               <Button
-                disabled={offset * take + take >= data.data?.estimatedTotalHits}
+                disabled={offset * take + take >= estimatedTotalHits}
                 onClick={() => setOffset((prev) => prev + 1)}
               >
                 <FaArrowRight />
