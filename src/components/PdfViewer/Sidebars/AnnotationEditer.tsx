@@ -122,7 +122,7 @@ export default function AnnotationEditer() {
             defaultValue={selectedAnnot.fontSize!}
           />
         </Stack>
-        <Stack direction={"column"} align={"center"} >
+        <Stack direction={"column"} align={"center"}>
           Font family :{" "}
           <PropertySelecter
             type="fontFamily"

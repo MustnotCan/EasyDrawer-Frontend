@@ -14,6 +14,7 @@ import SearchBar from "./Toolbars/Search";
 import { Color, PropertySlider } from "./AnnotationProperties";
 import ZoneCapture from "./Toolbars/ZoneCapture";
 import { useActiveDocument } from "@embedpdf/plugin-document-manager/react";
+import SaveToLocal from "./Toolbars/SaveToLocal";
 
 export default function Toolbar() {
   const { activeDocumentId } = useActiveDocument();
@@ -27,7 +28,7 @@ export default function Toolbar() {
   }, [annotationApi]);
   if (!activeDocumentId) return <p>still waiting</p>;
   return (
-    <Stack direction={"column"} gap={"0"} background={"gray.100"}>
+    <Stack direction={"column"} gap={"0"} background={"#ffffff"}>
       <Stack
         direction={"row"}
         height={"4vh "}
@@ -41,6 +42,7 @@ export default function Toolbar() {
         <PageCounter />
         <RotateToolbar />
         <ExportToolbar />
+        <SaveToLocal />
       </Stack>
       <Stack
         direction={"row"}

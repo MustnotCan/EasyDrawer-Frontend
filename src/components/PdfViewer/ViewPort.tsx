@@ -10,6 +10,8 @@ import { useEngine } from "@embedpdf/engines/react";
 import { PdfAnnotationObject } from "@embedpdf/models";
 import PageRender from "./PageRender";
 import { getBookAnnotations } from "../../utils/queries/booksApi";
+import { getPdf } from "../db";
+import { GlobalPointerProvider } from "@embedpdf/plugin-interaction-manager/react";
 export default function ViewPort(props: {
   pdfUrl: string;
   pdfId: string;
@@ -20,15 +22,24 @@ export default function ViewPort(props: {
   const [annots, setAnnots] = useState<PdfAnnotationObject[]>([]);
   const engine = useEngine();
   const annotRef = useRef(false);
+  const [fetchingPdf, setFetchingPdf] = useState<boolean>(true);
   useEffect(() => {
     if (!loaderApi) return;
-    loaderApi
-      .openDocumentUrl({
-        url: props.pdfUrl,
-        documentId: props.pdfId,
-      })
-      .toPromise()
-      .then((doc) => {
+    getPdf(props.pdfId).then((pdfData) => {
+      let loadingPromise = null;
+      if (pdfData) {
+        loadingPromise = loaderApi.openDocumentBuffer({
+          documentId: props.pdfId,
+          buffer: pdfData.data,
+          name: props.pdfId,
+        });
+      } else {
+        loadingPromise = loaderApi.openDocumentUrl({
+          url: props.pdfUrl,
+          documentId: props.pdfId,
+        });
+      }
+      loadingPromise.toPromise().then((doc) => {
         loaderApi.setActiveDocument(doc.documentId);
         getBookAnnotations({ bookId: doc.documentId }).then((annots) => {
           setAnnots(
@@ -41,68 +52,76 @@ export default function ViewPort(props: {
           );
         });
       });
+      setFetchingPdf(false);
+    });
   }, [engine, loaderApi, props.pdfId, props.pdfPage, props.pdfUrl]);
-  return (
-    <DocumentContent documentId={props.pdfId}>
-      {({ isLoaded, isLoading, isError }) => (
-        <>
-          {isError && <p>error</p>}
-          {isLoading && <p> Loading</p>}
-          {isLoaded && (
+  if (fetchingPdf) {
+    return <p> Pdf Is being fetched, Please Wait </p>;
+  } else {
+    return (
+      <GlobalPointerProvider documentId={props.pdfId}>
+        <DocumentContent documentId={props.pdfId}>
+          {({ isLoaded, isLoading, isError }) => (
             <>
-              <ScrollToPageOnLoad
-                documentId={props.pdfId}
-                initialPage={
-                  props.pdfPage
-                    ? props.pdfPage > 1
-                      ? props.pdfPage
-                      : 1
-                    : localStorage.getItem("LP_" + props.pdfId)
-                      ? Number(localStorage.getItem("LP_" + props.pdfId))
-                      : 1
-                }
-              />
-              <Viewport
-                documentId={props.pdfId}
-                style={{
-                  overflowY: "auto",
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: "#f1f3f5",
-                }}
-                onClick={() => {
-                  if (annotationApi && annotRef.current) {
-                    if (annotationApi.getSelectedAnnotation()) {
-                      annotationApi.deselectAnnotation();
-                      annotRef.current = false;
+              {isError && <p>Error opening pdf file</p>}
+              {isLoading && <p> PDF not found locally, fetching from remote</p>}
+              {isLoaded && (
+                <>
+                  <ScrollToPageOnLoad
+                    documentId={props.pdfId}
+                    initialPage={
+                      props.pdfPage
+                        ? props.pdfPage > 1
+                          ? props.pdfPage
+                          : 1
+                        : localStorage.getItem("LP_" + props.pdfId)
+                          ? Number(localStorage.getItem("LP_" + props.pdfId))
+                          : 1
                     }
-                  }
-                }}
-                draggable={false}
-                onDragStart={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <Scroller
-                  documentId={props.pdfId}
-                  renderPage={({ width, height, pageIndex }) => (
-                    <PageRender
+                  />
+                  <Viewport
+                    documentId={props.pdfId}
+                    style={{
+                      overflowY: "auto",
+                      width: "100%",
+                      height: "100%",
+                      backgroundColor: "#ededed",
+                    }}
+                    onClick={() => {
+                      if (annotationApi && annotRef.current) {
+                        if (annotationApi.getSelectedAnnotation()) {
+                          annotationApi.deselectAnnotation();
+                          annotRef.current = false;
+                        }
+                      }
+                    }}
+                    draggable={false}
+                    onDragStart={(e) => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <Scroller
                       documentId={props.pdfId}
-                      width={width}
-                      height={height}
-                      pageIndex={pageIndex}
-                      annotRef={annotRef}
-                      pageAnnots={{ annots: annots, setAnnots: setAnnots }}
+                      renderPage={({ width, height, pageIndex }) => (
+                        <PageRender
+                          documentId={props.pdfId}
+                          width={width}
+                          height={height}
+                          pageIndex={pageIndex}
+                          annotRef={annotRef}
+                          pageAnnots={{ annots: annots, setAnnots: setAnnots }}
+                        />
+                      )}
                     />
-                  )}
-                />
-              </Viewport>
+                  </Viewport>
+                </>
+              )}
             </>
           )}
-        </>
-      )}
-    </DocumentContent>
-  );
+        </DocumentContent>
+      </GlobalPointerProvider>
+    );
+  }
 }
 const ScrollToPageOnLoad = ({
   documentId,

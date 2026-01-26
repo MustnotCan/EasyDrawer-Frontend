@@ -57,11 +57,16 @@ export default function SelectionMenu(
           background={"gray.200"}
           onMouseDown={() => {
             if (selectionApi) {
-              selectionApi.copyToClipboard();
-              selectionApi
-                .getSelectedText()
-                .toPromise()
-                .then((text) => console.log("".concat(...text)));
+              if (window.isSecureContext) {
+                selectionApi.copyToClipboard();
+              } else {
+                selectionApi
+                  .getSelectedText()
+                  .toPromise()
+                  .then((text) => {
+                    console.log("".concat(...text));
+                  });
+              }
             }
           }}
         >

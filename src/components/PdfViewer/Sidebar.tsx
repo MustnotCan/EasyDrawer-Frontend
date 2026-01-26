@@ -1,5 +1,5 @@
 import { Button, Stack } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import TableOfContents from "./Sidebars/TOC";
 import { LuTableOfContents } from "react-icons/lu";
 import { Tooltip } from "../../ui/tooltip";
@@ -14,10 +14,15 @@ import AnnotationEditer from "./Sidebars/AnnotationEditer";
 import UserBookMarks from "./Sidebars/UserBookmarks";
 import { CiBookmark, CiSettings } from "react-icons/ci";
 import Settings from "./Sidebars/Settings";
+import { useScrollCapability } from "@embedpdf/plugin-scroll/react";
+
+const TocMemo = memo(TableOfContents);
+
 export default function Sidebar() {
   const { activeDocumentId } = useActiveDocument();
   const { engine, isLoading } = useEngineContext();
   const { provides: loaderApi } = useDocumentManagerCapability();
+  const { provides: scrollApi } = useScrollCapability();
   const [bookmarks, setbookmarks] = useState<PdfBookmarkObject[]>([]);
   useEffect(() => {
     if (!loaderApi || !engine || isLoading) return;
@@ -35,7 +40,7 @@ export default function Sidebar() {
     setActiveSideBar((prev) => (prev != opt ? opt : ""));
   };
   return (
-    <Stack direction={"row"}>
+    <Stack direction={"row"} background="#ffffff">
       <Stack direction={"column"}>
         <Button
           variant={"outline"}
@@ -74,7 +79,9 @@ export default function Sidebar() {
           </Tooltip>
         </Button>
       </Stack>
-      {activeSideBar == "TOC" && <TableOfContents bookmarks={bookmarks} />}
+      <Stack display={activeSideBar == "TOC" ? "block" : "none"}>
+        <TocMemo bookmarks={bookmarks} scrollApi={scrollApi} />
+      </Stack>
       {activeSideBar == "AE" && <AnnotationEditer />}
       {activeSideBar == "UB" && <UserBookMarks />}
       {activeSideBar == "Settings" && <Settings />}

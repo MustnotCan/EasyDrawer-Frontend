@@ -1,8 +1,9 @@
 import { Accordion, Span, Stack } from "@chakra-ui/react";
 import type { PdfBookmarkObject } from "@embedpdf/models";
-import { useScrollCapability } from "@embedpdf/plugin-scroll/react";
+import { ScrollCapability } from "@embedpdf/plugin-scroll";
 export default function TableOfContents(props: {
   bookmarks: PdfBookmarkObject[];
+  scrollApi: Readonly<ScrollCapability> | null;
 }) {
   if (props.bookmarks.length > 0) {
     return (
@@ -11,18 +12,26 @@ export default function TableOfContents(props: {
         borderRightColor={"black"}
         borderRightStyle={"solid"}
       >
-        <TOCRecursiveAccordion items={props.bookmarks} isRoot={true} />
+        <TOCRecursiveAccordion
+          items={props.bookmarks}
+          isRoot={true}
+          scrollApi={props.scrollApi}
+        />
       </Stack>
     );
   } else {
-    return <Span padding={5} width={200}>No bookmarks found</Span>;
+    return (
+      <Span padding={5} width={200}>
+        No bookmarks found
+      </Span>
+    );
   }
 }
 export function TOCRecursiveAccordion(props: {
   items: PdfBookmarkObject[];
   isRoot?: boolean;
+  scrollApi: Readonly<ScrollCapability> | null;
 }) {
-  const { provides: scrollApi } = useScrollCapability();
   return (
     <Accordion.Root
       multiple
@@ -43,14 +52,14 @@ export function TOCRecursiveAccordion(props: {
             <Span
               cursor={"pointer"}
               onClick={() => {
-                if (!scrollApi) return;
+                if (!props.scrollApi) return;
                 if (item.target?.type == "destination") {
-                  scrollApi.scrollToPage({
+                  props.scrollApi.scrollToPage({
                     pageNumber: item.target.destination.pageIndex + 1,
                     behavior: "instant",
                   });
                 } else {
-                  scrollApi.scrollToPage({
+                  props.scrollApi.scrollToPage({
                     pageNumber:
                       (item.target?.action.type == 1 &&
                         item.target.action.destination &&
@@ -85,7 +94,11 @@ export function TOCRecursiveAccordion(props: {
           </Stack>
           {item.children && item.children?.length > 0 && (
             <Accordion.ItemContent>
-              <TOCRecursiveAccordion items={item.children} isRoot={false} />
+              <TOCRecursiveAccordion
+                items={item.children}
+                isRoot={false}
+                scrollApi={props.scrollApi}
+              />
             </Accordion.ItemContent>
           )}
         </Accordion.Item>
