@@ -9,7 +9,10 @@ import { useEffect, useRef, useState } from "react";
 import { useEngine } from "@embedpdf/engines/react";
 import { PdfAnnotationObject } from "@embedpdf/models";
 import PageRender from "./PageRender";
-import { getBookAnnotations } from "../../utils/queries/booksApi";
+import {
+  getBookAnnotations,
+  updateBookLastAccess,
+} from "../../utils/queries/booksApi";
 import { getPdf } from "../db";
 import { GlobalPointerProvider } from "@embedpdf/plugin-interaction-manager/react";
 export default function ViewPort(props: {
@@ -33,6 +36,7 @@ export default function ViewPort(props: {
           buffer: pdfData.data,
           name: props.pdfId,
         });
+        updateBookLastAccess({ bookId: props.pdfId });
       } else {
         loadingPromise = loaderApi.openDocumentUrl({
           url: props.pdfUrl,

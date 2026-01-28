@@ -304,7 +304,7 @@ export async function saveBookBookmarks(args: {
 export async function getBookBookmarks(args: { bookId: string }) {
   try {
     if (!args.bookId) return [];
-    
+
     const response = await fetch(BOOKS_URL + "bookmark/" + args.bookId);
     return await response.json();
   } catch (e) {
@@ -315,6 +315,18 @@ export async function removeBookBookmark(args: { bookmarkId: string }) {
   try {
     const response = await fetch(BOOKS_URL + "bookmark/" + args.bookmarkId, {
       method: "DELETE",
+    });
+    return await response.json();
+  } catch (e) {
+    console.log(e);
+  }
+}
+export async function updateBookLastAccess(args: { bookId: string }) {
+  try {
+    const response = await fetch(BOOKS_URL + "update", {
+      method: "POST",
+      body: JSON.stringify({ bookId: args.bookId }),
+      headers: { "Content-Type": "application/json" },
     });
     return await response.json();
   } catch (e) {

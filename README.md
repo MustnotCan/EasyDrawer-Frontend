@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository contains the frontend for the EasyDrawer App. Built with React, it provides a user-friendly interface for managing, browsing, and tagging PDFs by communicating with the backend API. The frontend features client-side routing with React Router and efficient data handling with React Query, all styled with Chakra UI for an accessible and responsive experience.
+This repository contains the frontend for the EasyDrawer App. 
 
 For more details about the app refer to the backend repository: [EasyDrawer backend](https://github.com/MustnotCan/EasyDrawer-Backend)
 

@@ -2,7 +2,7 @@ import { search } from "../../utils/queries/meiliSearchApi";
 import { useQuery } from "@tanstack/react-query";
 import ListItemView from "../ListItemView";
 import { useState } from "react";
-import { Alert, Button, Stack } from "@chakra-ui/react";
+import { Alert, Box, Button, Stack } from "@chakra-ui/react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import TagFilter from "../TagFilter/TagFilter";
 import {
@@ -57,18 +57,35 @@ export default function FullTextSearch() {
   return (
     <Stack direction={"row"}>
       <Stack direction={"column"}>
-        <TagFilter
-          isFavorite={false}
-          setTFB={alteredSetTFB}
-          tags={indexes.data || []}
-          deleteTagMutation={deleteIndexMutation}
-          renameTagMutation={undefined}
-          filterKey="indexes"
-        />
+        <Box
+          display={
+            indexes.data?.length && indexes.data?.length > 0 ? "block" : "none"
+          }
+        >
+          <TagFilter
+            isFavorite={false}
+            setTFB={alteredSetTFB}
+            tags={indexes.data || []}
+            deleteTagMutation={deleteIndexMutation}
+            renameTagMutation={undefined}
+            filterKey="indexes"
+          />
+        </Box>
+
+        {!indexes.data?.length && (
+          <Alert.Root status={"error"} width={"10rem"} height={"8rem"}>
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>No index</Alert.Title>
+              <br />
+              Please Create an index
+            </Alert.Content>
+          </Alert.Root>
+        )}
         <TagAdder mutate={addIndexMutation} filterKey="Index" />
       </Stack>
       {selectedIndexes.length == 0 ? (
-        <Alert.Root status={"error"} maxH={"8vh"} justifySelf={"center"}>
+        <Alert.Root status={"error"} width={"15rem"} height={"8rem"}>
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title>No chosen index</Alert.Title>
@@ -87,7 +104,7 @@ export default function FullTextSearch() {
           />
           {searchName && foundResults.length == 0 && <p> No result found</p>}
           {!searchName && (
-            <Alert.Root status={"info"} maxW={"fit-content"} maxH={"8vh"}>
+            <Alert.Root status={"info"} width={"15rem"} height={"8rem"}>
               <Alert.Indicator />
               <Alert.Content>
                 <Alert.Title>Search input is empty</Alert.Title>

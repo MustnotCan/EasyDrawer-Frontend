@@ -112,7 +112,7 @@ export default function View() {
             renameTagMutation={renameTagMutation}
             filterKey="Tags"
           />
-          <MainViewSwitch isAnd={isAnd} setIsAnd={setIsAnd} />
+          <MainViewSwitch isAnd={!isAnd} setIsAnd={setIsAnd} />
 
           <AddTag mutate={addTagMutation} filterKey="Tag" />
         </Stack>
