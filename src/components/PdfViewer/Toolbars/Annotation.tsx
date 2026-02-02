@@ -1,15 +1,8 @@
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAnnotationCapability } from "@embedpdf/plugin-annotation/react";
-import { Button, Stack } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { LiaSave } from "react-icons/lia";
 import { type PdfAnnotationObject } from "@embedpdf/models";
-import {
-  PiHighlighter,
-  PiTextUnderline,
-  PiPen,
-  PiHighlighterThin,
-} from "react-icons/pi";
-import { PiScribble } from "react-icons/pi";
 import { Tooltip } from "../../../ui/tooltip";
 import {
   getBookAnnotations,
@@ -19,11 +12,6 @@ import {
   useActiveDocument,
   useDocumentManagerCapability,
 } from "@embedpdf/plugin-document-manager/react";
-import { IoSquareOutline, IoText } from "react-icons/io5";
-import { BiPolygon } from "react-icons/bi";
-import { MdOutlinePolyline } from "react-icons/md";
-import { HiOutlineArrowRight } from "react-icons/hi";
-import { TbCircle, TbLine } from "react-icons/tb";
 let modifiedAnnotations: { annotation: PdfAnnotationObject; status: string }[] =
   [];
 export default function AnnotationToolBar() {
@@ -123,126 +111,34 @@ export default function AnnotationToolBar() {
     return Unsub;
   }, [annotationApi, annots]);
 
-  function toggleTool(toolId: string) {
-    const activeTool = annotationApi?.getActiveTool()?.id;
-    if (activeTool == toolId) {
-      annotationApi?.setActiveTool(null);
-    } else {
-      if (
-        [
-          "circle",
-          "square",
-          "line",
-          "polyline",
-          "polygon",
-          "lineArrow",
-        ].includes(toolId)
-      ) {
-        annotationApi?.setToolDefaults(toolId, { strokeWidth: 3 });
-      }
-      annotationApi?.setActiveTool(toolId);
-    }
-  }
-  return (
-    <Stack justify={"center"} direction={"row"} align={"center"}>
-      <StyledButton
-        tooltip={"Highlight"}
-        onClick={() => toggleTool("highlight")}
-      >
-        <PiHighlighter />
-      </StyledButton>
-      <StyledButton tooltip={"Pen"} onClick={() => toggleTool("ink")}>
-        <PiPen />
-      </StyledButton>
-      <StyledButton
-        tooltip={"Underline"}
-        onClick={() => toggleTool("underline")}
-      >
-        <PiTextUnderline />
-      </StyledButton>
-      <StyledButton tooltip={"Squiggly"} onClick={() => toggleTool("squiggly")}>
-        <PiScribble />
-      </StyledButton>
-      <StyledButton
-        tooltip={"Ink Highlighter"}
-        onClick={() => toggleTool("inkHighlighter")}
-      >
-        <PiHighlighterThin />
-      </StyledButton>
-
-      <StyledButton
-        tooltip={"Free Text"}
-        onClick={() => toggleTool("freeText")}
-      >
-        <IoText />
-      </StyledButton>
-      <StyledButton tooltip={"Square"} onClick={() => toggleTool("square")}>
-        <IoSquareOutline />
-      </StyledButton>
-
-      <StyledButton tooltip={"Circle"} onClick={() => toggleTool("circle")}>
-        <TbCircle />
-      </StyledButton>
-      <StyledButton tooltip={"Line"} onClick={() => toggleTool("line")}>
-        <TbLine />
-      </StyledButton>
-      <StyledButton tooltip={"Arrow"} onClick={() => toggleTool("lineArrow")}>
-        <HiOutlineArrowRight />
-      </StyledButton>
-      <StyledButton tooltip={"Polygon"} onClick={() => toggleTool("polygon")}>
-        <BiPolygon />
-      </StyledButton>
-      <StyledButton tooltip={"Polyline"} onClick={() => toggleTool("polyline")}>
-        <MdOutlinePolyline />
-      </StyledButton>
-      <StyledButton
-        disabled={!annotChanged}
-        onClick={() => {
-          if (loaderApi) {
-            annotationApi
-              ?.commit()
-              .toPromise()
-              .then(() => {
-                const fallback = [...modifiedAnnotations];
-                setAnnotChanged(false);
-                modifiedAnnotations = [];
-                saveBookAnnotations({
-                  bookId: activeDocumentId!,
-                  annotations: fallback,
-                }).catch(() => {
-                  modifiedAnnotations = [...modifiedAnnotations, ...fallback];
-                  setAnnotChanged(true);
-                });
-              });
-          }
-        }}
-        tooltip="Save annotations"
-      >
-        <LiaSave />
-      </StyledButton>
-    </Stack>
-  );
-}
-function StyledButton(props: {
-  children: ReactElement;
-  onClick: () => void;
-  tooltip: string;
-  disabled?: boolean;
-}) {
-  const { provides: annotationApi } = useAnnotationCapability();
   return (
     <Button
-      disabled={props.disabled}
+      disabled={!annotChanged}
+      onClick={() => {
+        if (loaderApi) {
+          annotationApi
+            ?.commit()
+            .toPromise()
+            .then(() => {
+              const fallback = [...modifiedAnnotations];
+              setAnnotChanged(false);
+              modifiedAnnotations = [];
+              saveBookAnnotations({
+                bookId: activeDocumentId!,
+                annotations: fallback,
+              }).catch(() => {
+                modifiedAnnotations = [...modifiedAnnotations, ...fallback];
+                setAnnotChanged(true);
+              });
+            });
+        }
+      }}
       variant={"outline"}
       size={"2xs"}
-      backgroundColor={
-        annotationApi?.getActiveTool()?.name == props.tooltip ? "gray.400" : ""
-      }
-      onClick={() => {
-        props.onClick();
-      }}
     >
-      <Tooltip content={props.tooltip}>{props.children}</Tooltip>
+      <Tooltip content={"Save annotations"}>
+        <LiaSave />
+      </Tooltip>
     </Button>
   );
 }

@@ -26,7 +26,9 @@ export default function SelectionMenu(
   const { setBookmarks, bookmarks, activeParent } = useContext(bookmarkContext);
   const { menuWrapperProps, selected } = props;
   const zoomlevel = zoomApi?.getState().currentZoomLevel || 1;
-  if (selected) {
+  const selection = selectionApi?.getFormattedSelection()[0];
+
+  if (selected && selection) {
     return (
       <Stack
         position={"absolute"}
@@ -38,8 +40,9 @@ export default function SelectionMenu(
           "px"
         }
         left={
-          Number(menuWrapperProps.style.left) +
-          Number(menuWrapperProps.style.width) / 2 +
+          (selection.segmentRects.at(-1)!.origin.x +
+            selection.segmentRects.at(-1)!.size.width) *
+            zoomlevel +
           "px"
         }
         width={"fit-content"}
@@ -80,7 +83,6 @@ export default function SelectionMenu(
           variant={"subtle"}
           background={"gray.200"}
           onClick={() => {
-            const selection = selectionApi?.getFormattedSelection()[0];
             if (!selection) return;
             selectionApi
               ?.getSelectedText()

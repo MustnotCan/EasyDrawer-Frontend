@@ -3,8 +3,8 @@ import { PdfEngineProvider, usePdfiumEngine } from "@embedpdf/engines/react";
 import { plugins } from "./plugins";
 import ViewPort from "./ViewPort";
 import { Box, Stack } from "@chakra-ui/react";
-import Toolbar from "./Toolbar";
-import Sidebar from "./Sidebar";
+import Toolbar from "./Toolbars/Toolbar";
+import Sidebar from "./Sidebars/Sidebar";
 import BookmarkContextProvider from "./Store/BookmarkContextProvider";
 export default function PDFViewer(props: {
   pdfUrl: string;

@@ -56,8 +56,9 @@ export default function AnnotationEditer() {
         <Stack direction={"column"} align={"center"}>
           Blend mode :{" "}
           <PropertySelecter
-            type="blendMode"
+            property="blendMode"
             defaultValue={PdfBlendMode[selectedAnnot.blendMode!]}
+            type="update"
           />
         </Stack>
       </Stack>
@@ -125,16 +126,18 @@ export default function AnnotationEditer() {
         <Stack direction={"column"} align={"center"}>
           Font family :{" "}
           <PropertySelecter
-            type="fontFamily"
+            property="fontFamily"
             defaultValue={selectedAnnot.fontFamily.toString()}
+            type="update"
           />
         </Stack>
         <Stack direction={"column"} align={"center"}>
           Color type :
           <Transparent
-            type="backgroundColor"
+            transparentType="backgroundColor"
             defaultValue={selectedAnnot.backgroundColor ?? "transparent"}
             color={selectedAnnot.fontColor}
+            type="update"
           />
         </Stack>
         {selectedAnnot.backgroundColor != "transparent" && (
@@ -190,7 +193,7 @@ export default function AnnotationEditer() {
             property="opacity"
             defaultValue={selectedAnnot.opacity!}
           />
-        </Stack>{" "}
+        </Stack>
       </Stack>
     );
   } else if (selectedAnnot?.type == 4) {
@@ -246,11 +249,12 @@ export default function AnnotationEditer() {
         </Stack>
         {selectedAnnot.type != 8 && (
           <Stack direction={"column"} align={"center"}>
-            Color type :{" "}
+            Color type :
             <Transparent
-              type="color"
+              transparentType="color"
               defaultValue={annot.color}
               color={annot.strokeColor}
+              type="update"
             />
           </Stack>
         )}

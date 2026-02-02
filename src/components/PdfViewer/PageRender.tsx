@@ -7,23 +7,17 @@ import { TilingLayer } from "@embedpdf/plugin-tiling/react";
 import { MarqueeZoom } from "@embedpdf/plugin-zoom/react";
 import LinksClicker from "./LinksClicker";
 import AnnotationSelectionMenu from "./AnnotationSelectionMenu";
-
 import AnnotationLayerUpdated from "./AnnotationLayerUpdated";
 import AnnotationContextProvider from "./Store/AnnotationContextProvider";
 import SelectionMenu from "./SelectionMenu";
 import SearchResultOverlay from "./SearchResultOverlay";
 import { MarqueeCapture } from "@embedpdf/plugin-capture/react";
-import { PdfAnnotationObject } from "@embedpdf/models";
 
 export default function PageRender(props: {
   width: number;
   height: number;
   pageIndex: number;
   annotRef: { current: boolean };
-  pageAnnots: {
-    annots: PdfAnnotationObject[];
-    setAnnots: React.Dispatch<React.SetStateAction<PdfAnnotationObject[]>>;
-  };
   documentId: string;
 }) {
   return (
@@ -39,6 +33,7 @@ export default function PageRender(props: {
           height: props.height,
           pageIndex: props.pageIndex,
         }}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <RenderLayer
           pageIndex={props.pageIndex}
@@ -62,8 +57,6 @@ export default function PageRender(props: {
           selectionMenu={(props) => <SelectionMenu {...props} />}
         />
         <AnnotationContextProvider
-          annots={props.pageAnnots.annots}
-          setAnnots={props.pageAnnots.setAnnots}
         >
           <AnnotationLayer
             documentId={props.documentId}

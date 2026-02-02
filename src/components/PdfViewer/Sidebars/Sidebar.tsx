@@ -1,8 +1,8 @@
-import { Button, Stack } from "@chakra-ui/react";
+import { Button, Span, Stack } from "@chakra-ui/react";
 import { memo, useEffect, useState } from "react";
-import TableOfContents from "./Sidebars/TOC";
+import TableOfContents from "./TOC";
 import { LuTableOfContents } from "react-icons/lu";
-import { Tooltip } from "../../ui/tooltip";
+import { Tooltip } from "../../../ui/tooltip";
 import { useEngineContext } from "@embedpdf/engines/react";
 import { PdfBookmarkObject } from "@embedpdf/models";
 import {
@@ -10,11 +10,12 @@ import {
   useDocumentManagerCapability,
 } from "@embedpdf/plugin-document-manager/react";
 import { AiOutlineEdit } from "react-icons/ai";
-import AnnotationEditer from "./Sidebars/AnnotationEditer";
-import UserBookMarks from "./Sidebars/UserBookmarks";
+import AnnotationEditer from "./AnnotationEditer";
+import UserBookMarks from "./UserBookmarks";
 import { CiBookmark, CiSettings } from "react-icons/ci";
-import Settings from "./Sidebars/Settings";
+import Settings from "./Settings";
 import { useScrollCapability } from "@embedpdf/plugin-scroll/react";
+import AnnotationDefaults from "./AnnotationDefaults";
 
 const TocMemo = memo(TableOfContents);
 
@@ -78,6 +79,15 @@ export default function Sidebar() {
             <CiSettings />
           </Tooltip>
         </Button>
+        <Button
+          variant={"outline"}
+          size="sm"
+          onClick={() => toggleOption("AD")}
+        >
+          <Tooltip content="Annotation defaults">
+            <Span>AD</Span>
+          </Tooltip>
+        </Button>
       </Stack>
       <Stack display={activeSideBar == "TOC" ? "block" : "none"}>
         <TocMemo bookmarks={bookmarks} scrollApi={scrollApi} />
@@ -85,6 +95,9 @@ export default function Sidebar() {
       {activeSideBar == "AE" && <AnnotationEditer />}
       {activeSideBar == "UB" && <UserBookMarks />}
       {activeSideBar == "Settings" && <Settings />}
+      <Stack display={activeSideBar == "AD" ? "block" : "none"}>
+        <AnnotationDefaults />
+      </Stack>
     </Stack>
   );
 }

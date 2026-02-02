@@ -1,20 +1,32 @@
-import { useAnnotationCapability } from "@embedpdf/plugin-annotation/react";
+import {
+  AnnotationCapability,
+  useAnnotationCapability,
+} from "@embedpdf/plugin-annotation/react";
 import { Scroller, useScrollCapability } from "@embedpdf/plugin-scroll/react";
 import { Viewport } from "@embedpdf/plugin-viewport/react";
 import {
   DocumentContent,
   useDocumentManagerCapability,
 } from "@embedpdf/plugin-document-manager/react";
-import { useEffect, useRef, useState } from "react";
-import { useEngine } from "@embedpdf/engines/react";
-import { PdfAnnotationObject } from "@embedpdf/models";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import PageRender from "./PageRender";
-import {
-  getBookAnnotations,
-  updateBookLastAccess,
-} from "../../utils/queries/booksApi";
+import { updateBookLastAccess } from "../../utils/queries/booksApi";
 import { getPdf } from "../db";
 import { GlobalPointerProvider } from "@embedpdf/plugin-interaction-manager/react";
+import { Button, HStack, Menu, Portal } from "@chakra-ui/react";
+import {
+  PiHighlighter,
+  PiHighlighterThin,
+  PiPen,
+  PiScribble,
+  PiTextUnderline,
+} from "react-icons/pi";
+import { Tooltip } from "@/ui/tooltip";
+import { BiPolygon } from "react-icons/bi";
+import { HiOutlineArrowRight } from "react-icons/hi";
+import { IoText, IoSquareOutline } from "react-icons/io5";
+import { MdOutlinePolyline } from "react-icons/md";
+import { TbCircle, TbLine } from "react-icons/tb";
 export default function ViewPort(props: {
   pdfUrl: string;
   pdfId: string;
@@ -22,8 +34,6 @@ export default function ViewPort(props: {
 }) {
   const { provides: annotationApi } = useAnnotationCapability();
   const { provides: loaderApi } = useDocumentManagerCapability();
-  const [annots, setAnnots] = useState<PdfAnnotationObject[]>([]);
-  const engine = useEngine();
   const annotRef = useRef(false);
   const [fetchingPdf, setFetchingPdf] = useState<boolean>(true);
   useEffect(() => {
@@ -45,20 +55,10 @@ export default function ViewPort(props: {
       }
       loadingPromise.toPromise().then((doc) => {
         loaderApi.setActiveDocument(doc.documentId);
-        getBookAnnotations({ bookId: doc.documentId }).then((annots) => {
-          setAnnots(
-            annots.map(
-              (annot: {
-                annotationDetails: PdfAnnotationObject[];
-                id: string;
-              }) => annot.annotationDetails
-            )
-          );
-        });
       });
       setFetchingPdf(false);
     });
-  }, [engine, loaderApi, props.pdfId, props.pdfPage, props.pdfUrl]);
+  }, [loaderApi, props.pdfId, props.pdfPage, props.pdfUrl]);
   if (fetchingPdf) {
     return <p> Pdf Is being fetched, Please Wait </p>;
   } else {
@@ -107,14 +107,15 @@ export default function ViewPort(props: {
                     <Scroller
                       documentId={props.pdfId}
                       renderPage={({ width, height, pageIndex }) => (
-                        <PageRender
-                          documentId={props.pdfId}
-                          width={width}
-                          height={height}
-                          pageIndex={pageIndex}
-                          annotRef={annotRef}
-                          pageAnnots={{ annots: annots, setAnnots: setAnnots }}
-                        />
+                        <ContextMenu annotationApi={annotationApi!}>
+                          <PageRender
+                            documentId={props.pdfId}
+                            width={width}
+                            height={height}
+                            pageIndex={pageIndex}
+                            annotRef={annotRef}
+                          />
+                        </ContextMenu>
                       )}
                     />
                   </Viewport>
@@ -152,3 +153,132 @@ const ScrollToPageOnLoad = ({
 
   return null;
 };
+const ContextMenu = (props: {
+  children: ReactElement;
+  annotationApi: AnnotationCapability;
+}) => {
+  return (
+    <Menu.Root>
+      <Menu.ContextTrigger width="fit-content" height={"fit-content"}>
+        {props.children}
+      </Menu.ContextTrigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content width={"fit"} height={"fit"}>
+            <HStack gap={0}>
+              <StyledButton
+                tooltip={"Highlight"}
+                onClick={() => toggleTool("highlight", props.annotationApi)}
+                children={<PiHighlighter />}
+              />
+              <StyledButton
+                tooltip={"Underline"}
+                onClick={() => toggleTool("underline", props.annotationApi)}
+                children={<PiTextUnderline />}
+              />
+              <StyledButton
+                tooltip={"Squiggly"}
+                onClick={() => toggleTool("squiggly", props.annotationApi)}
+                children={<PiScribble />}
+              />
+            </HStack>
+            <HStack gap={0}>
+              <StyledButton
+                tooltip={"Pen"}
+                onClick={() => toggleTool("ink", props.annotationApi)}
+                children={<PiPen />}
+              />
+              <StyledButton
+                tooltip={"Ink Highlighter"}
+                onClick={() =>
+                  toggleTool("inkHighlighter", props.annotationApi)
+                }
+                children={<PiHighlighterThin />}
+              />
+            </HStack>
+
+            <StyledButton
+              tooltip={"Free Text"}
+              onClick={() => toggleTool("freeText", props.annotationApi)}
+              children={<IoText />}
+            />
+            <HStack gap={0}>
+              <StyledButton
+                tooltip={"Square"}
+                onClick={() => toggleTool("square", props.annotationApi)}
+                children={<IoSquareOutline />}
+              />
+
+              <StyledButton
+                tooltip={"Circle"}
+                onClick={() => toggleTool("circle", props.annotationApi)}
+                children={<TbCircle />}
+              />
+              <StyledButton
+                tooltip={"Polygon"}
+                onClick={() => toggleTool("polygon", props.annotationApi)}
+                children={<BiPolygon />}
+              />
+            </HStack>
+            <HStack gap={0}>
+              <StyledButton
+                tooltip={"Line"}
+                onClick={() => toggleTool("line", props.annotationApi)}
+                children={<TbLine />}
+              />
+              <StyledButton
+                tooltip={"Arrow"}
+                onClick={() => toggleTool("lineArrow", props.annotationApi)}
+                children={<HiOutlineArrowRight />}
+              />
+              <StyledButton
+                tooltip={"Polyline"}
+                onClick={() => toggleTool("polyline", props.annotationApi)}
+                children={<MdOutlinePolyline />}
+              />
+            </HStack>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  );
+};
+function toggleTool(toolId: string, annotationApi: AnnotationCapability) {
+  const activeTool = annotationApi?.getActiveTool()?.id;
+  if (activeTool == toolId) {
+    annotationApi?.setActiveTool(null);
+  } else {
+    annotationApi?.setActiveTool(toolId);
+  }
+}
+function StyledButton(props: {
+  children: ReactElement;
+  onClick: () => void;
+  tooltip: string;
+  disabled?: boolean;
+}) {
+  const { provides: annotationApi } = useAnnotationCapability();
+  return (
+    <Menu.Item
+      value={props.tooltip}
+      width={"fit-content"}
+      height={"fit-content"}
+    >
+      <Button
+        disabled={props.disabled}
+        variant={"outline"}
+        size={"2xs"}
+        backgroundColor={
+          annotationApi?.getActiveTool()?.name == props.tooltip
+            ? "gray.400"
+            : ""
+        }
+        onClick={() => {
+          props.onClick();
+        }}
+      >
+        <Tooltip content={props.tooltip}>{props.children}</Tooltip>
+      </Button>
+    </Menu.Item>
+  );
+}

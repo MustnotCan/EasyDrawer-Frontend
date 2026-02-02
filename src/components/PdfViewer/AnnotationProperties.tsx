@@ -25,7 +25,7 @@ export function Color(props: {
         if (props.type == "create") {
           annotationApi?.addColorPreset(color);
           annotationApi?.setToolDefaults(activeTool!.id, {
-            color: color,
+            [props.colorType]: color,
           });
         } else {
           const selected = annotationApi.getSelectedAnnotation()?.object;
@@ -55,28 +55,36 @@ export function Color(props: {
   );
 }
 export function Transparent(props: {
-  type: string;
+  transparentType: string;
   defaultValue: string;
   color: string;
+  type: "create" | "update";
+  toolId?: string;
 }) {
   const { provides: annotationApi } = useAnnotationCapability();
   if (!annotationApi) return;
-  const selected = annotationApi.getSelectedAnnotation()?.object;
   return (
     <NativeSelect.Root maxWidth={"10vw"}>
       <NativeSelect.Field
         maxH={"6"}
-        defaultValue={props.defaultValue}
+        defaultValue={
+          props.defaultValue == "transparent" ? "transparent" : "colored"
+        }
         onChange={(e) => {
           const newValue = e.currentTarget.value;
-          if (newValue == "transparent") {
+          if (props.type == "update") {
+            const selected = annotationApi.getSelectedAnnotation()?.object;
             annotationApi.updateAnnotation(selected!.pageIndex, selected!.id, {
-              [props.type]: newValue,
+              [props.transparentType]:
+                newValue == "transparent" ? newValue : props.color,
             });
           } else {
-            annotationApi.updateAnnotation(selected!.pageIndex, selected!.id, {
-              [props.type]: props.color,
-            });
+            console.log(props, newValue);
+            if (props.toolId)
+              annotationApi.setToolDefaults(props.toolId, {
+                [props.transparentType]:
+                  newValue == "transparent" ? newValue : props.color,
+              });
           }
         }}
       >
@@ -146,18 +154,20 @@ export function PropertySlider(props: {
   );
 }
 export function PropertySelecter(props: {
-  type: string;
+  property: string;
   defaultValue: string;
+  type: "create" | "update";
+  toolId?: string;
 }) {
   const { provides: annotationApi } = useAnnotationCapability();
   if (!annotationApi) return;
   const selected = annotationApi.getSelectedAnnotation()?.object;
   let selectKeys: string[] = [];
-  if (props.type == "blendMode") {
+  if (props.property == "blendMode") {
     selectKeys = Object.values(PdfBlendMode).filter(
       (v): v is string => typeof v === "string"
     );
-  } else if (props.type == "fontFamily") {
+  } else if (props.property == "fontFamily") {
     selectKeys = Object.values(PdfStandardFont).filter(
       (v): v is string => typeof v === "string"
     );
@@ -168,9 +178,16 @@ export function PropertySelecter(props: {
         defaultValue={props.defaultValue}
         onChange={(e) => {
           const newValue = e.currentTarget.value;
-          annotationApi.updateAnnotation(selected!.pageIndex, selected!.id, {
-            [props.type]: Number(newValue),
-          });
+          if (props.type == "update") {
+            annotationApi.updateAnnotation(selected!.pageIndex, selected!.id, {
+              [props.property]: Number(newValue),
+            });
+          } else {
+            if (props.toolId)
+              annotationApi.setToolDefaults(props.toolId, {
+                [props.property]: Number(newValue),
+              });
+          }
         }}
       >
         {selectKeys.map((pres: string, index) => (
