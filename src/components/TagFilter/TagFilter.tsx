@@ -2,48 +2,42 @@ import { FormEvent, useEffect, useState } from "react";
 import { tagWithCountType } from "../../types/types";
 import { List, Stack, Button, Input } from "@chakra-ui/react";
 import CheckBoxTagFilter from "./CheckBoxTagFilter";
-import { UseMutateFunction } from "@tanstack/react-query";
-import { EnqueuedTask } from "meilisearch";
 import { useTags } from "../../utils/Hooks/TagsHook";
+
+const TAG_FILTER_CLOSE_DIALOG_EVENT = "tag-filter-close-dialog";
+
 export default function TagFilter(props: {
   tags: tagWithCountType[];
   setTFB: (arg0: string[]) => void;
   isFavorite: boolean;
-  renameTagMutation?: UseMutateFunction<
-    { id: string; name: string },
-    Error,
-    { newName: string; prevName: string },
-    unknown
-  >;
-  deleteTagMutation:
-    | UseMutateFunction<
-        { id: string; name: string },
-        Error,
-        { name: string },
-        unknown
-      >
-    | UseMutateFunction<
-        EnqueuedTask | undefined,
-        Error,
-        {
-          name: string;
-        },
-        unknown
-      >;
+  selectedValues?: string[];
+  disableMenuPortal?: boolean;
+  deleteTagMutation: ({ name }: { name: string }) => void;
+  renameTagMutation?: ({
+    newName,
+    prevName,
+  }: {
+    newName: string;
+    prevName: string;
+  }) => void;
   filterKey: string;
 }) {
-  const [cBoxes, setCBoxes] = useState<string[]>(
-    props.isFavorite ? ["favorite"] : []
-  );
+  const initialSelected = props.selectedValues
+    ? [...props.selectedValues]
+    : props.isFavorite
+      ? ["favorite"]
+      : [];
+  const [cBoxes, setCBoxes] = useState<string[]>(initialSelected);
   const tags = useTags();
   const [searchInput, setSearchInput] = useState<string>("");
   useEffect(() => {
-    if (props.isFavorite) {
-      setCBoxes(["favorite"]);
-    } else {
-      setCBoxes([]);
+    if (props.selectedValues) {
+      setCBoxes([...props.selectedValues]);
+      return;
     }
-  }, [props.isFavorite]);
+    if (props.isFavorite) setCBoxes(["favorite"]);
+    else setCBoxes([]);
+  }, [props.isFavorite, props.selectedValues]);
   const onChangeHandler = (name: string) => {
     if (cBoxes?.includes(name)) {
       setCBoxes(cBoxes.filter((cb) => cb != name));
@@ -55,15 +49,27 @@ export default function TagFilter(props: {
   const formAction = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     props.setTFB(cBoxes);
+    window.dispatchEvent(new CustomEvent(TAG_FILTER_CLOSE_DIALOG_EVENT));
   };
-  const clearFilter = () => setCBoxes(props.isFavorite ? ["favorite"] : []);
+  const clearFilter = () => {
+    const next = props.isFavorite ? ["favorite"] : [];
+    setCBoxes(next);
+    props.setTFB(next);
+    window.dispatchEvent(new CustomEvent(TAG_FILTER_CLOSE_DIALOG_EVENT));
+  };
 
   return (
-    <Stack>
-      <Stack>
+    <Stack
+      maxWidth={"100%"}
+      minWidth={0}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      <Stack minWidth={0} onFocus={(e) => e.target.blur()}>
         <label>Filter {props.filterKey}:</label>
         <Input
-          className="border-4 border-black "
+          className=" border-4 border-black "
+          minWidth={0}
           placeholder="Type here..."
           onChange={(e) => {
             e.stopPropagation();
@@ -77,11 +83,14 @@ export default function TagFilter(props: {
         </label>
         <List.Root
           variant={"plain"}
-          overflowX={"auto"}
-          maxHeight={"50vh"}
-          alignContent={"space-evenly"}
-          marginBottom={"5px"}
-          width={"10vw"}
+          overflowX={"visible"}
+          overflowY={"auto"}
+          maxHeight={{ base: "25dvh", lg: "50dvh" }}
+          minHeight={"2.5rem"}
+          justifyItems={"center"}
+          flex={1}
+          scrollbar={{ base: "visible", lg: "hidden" }}
+          gap={1}
         >
           {(props.tags ? props.tags : tags)
             .sort((a, b) => {
@@ -108,7 +117,8 @@ export default function TagFilter(props: {
                       cBoxes={cBoxes}
                       onChangeHandler={onChangeHandler}
                       tag={tag}
-                      renameTagMutation={props.renameTagMutation}
+                      disableMenuPortal={props.disableMenuPortal}
+                      renameTagMutation={props.renameTagMutation!}
                       deleteTagMutation={props.deleteTagMutation}
                       filterKey={props.filterKey}
                     />
@@ -116,11 +126,16 @@ export default function TagFilter(props: {
               </List.Item>
             ))}
         </List.Root>
-        <Stack direction={"row"} justifyContent={"space-between"}>
-          <Button variant={"outline"} type="submit">
+        <Stack direction={"row"} justifyContent={"space-around"}>
+          <Button variant={"outline"} type="submit" size={"xs"}>
             Apply
           </Button>
-          <Button variant={"outline"} type="submit" onClick={clearFilter}>
+          <Button
+            variant={"outline"}
+            type="button"
+            size={"xs"}
+            onClick={clearFilter}
+          >
             Clear
           </Button>
         </Stack>

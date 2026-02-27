@@ -4,7 +4,17 @@ import {
   selectedItemType,
   tagType,
 } from "../../types/types";
-import { Button, Input, Menu, Portal, Spinner, Stack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Dialog,
+  IconButton,
+  Input,
+  Menu,
+  Portal,
+  Spinner,
+  Stack,
+} from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
@@ -52,14 +62,15 @@ export function MultiTaggerActionBar(props: {
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
   dirs: string[];
 }) {
+  type MobileView = "menu" | "move" | "move_new" | "tags";
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<onlyPathAndTagsType[]>([]);
+  const [mobileDialogStack, setMobileDialogStack] = useState<MobileView[]>([]);
   const queryClient = useQueryClient();
 
-  const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const loadSelectionDetails = async () => {
     setLoading(true);
 
     try {
@@ -76,7 +87,7 @@ export function MultiTaggerActionBar(props: {
       setData(response);
       const taggsWithLength = props.tags.map((tag) => {
         const count = response.filter((file) =>
-          file.tags.map((t) => t.name).includes(tag.name)
+          file.tags.map((t) => t.name).includes(tag.name),
         ).length;
 
         return { tag, length: count };
@@ -98,6 +109,10 @@ export function MultiTaggerActionBar(props: {
       setLoading(false);
     }
   };
+  const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    await loadSelectionDetails();
+  };
   const removeMutation = useMutation({
     mutationFn: (args: { files: string[] }) => {
       return multiDelete({
@@ -115,11 +130,11 @@ export function MultiTaggerActionBar(props: {
                   ...prev.filter(
                     (item) =>
                       typeof item == "string" ||
-                      item.title != splittedFile.at(splittedFile.length - 1)
+                      item.title != splittedFile.at(splittedFile.length - 1),
                   ),
                 ]
               : [];
-          }
+          },
         );
       });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
@@ -134,10 +149,10 @@ export function MultiTaggerActionBar(props: {
     },
     onSuccess: (
       addedFiles: multiTaggerFilePropsType[],
-      variables: { files: string[]; newPath: string }
+      variables: { files: string[]; newPath: string },
     ) => {
       const pathsToUpdate = Array.from(
-        new Set(addedFiles.map((af) => (af.path != "/" ? af.path : "")))
+        new Set(addedFiles.map((af) => (af.path != "/" ? af.path : ""))),
       );
       pathsToUpdate.forEach((pto) => {
         const fullArray = pto.split("/");
@@ -150,7 +165,7 @@ export function MultiTaggerActionBar(props: {
             fullArray[index + 1] &&
             (!existingCache ||
               !existingCache.find(
-                (el) => typeof el == "string" && el == fullArray[index + 1]
+                (el) => typeof el == "string" && el == fullArray[index + 1],
               ))
           ) {
             queryClient.setQueryData(
@@ -161,7 +176,7 @@ export function MultiTaggerActionBar(props: {
                 } else {
                   return [...prev, fullArray[index + 1]];
                 }
-              }
+              },
             );
           }
         });
@@ -178,11 +193,11 @@ export function MultiTaggerActionBar(props: {
                   ...prev.filter(
                     (item) =>
                       typeof item == "string" ||
-                      item.title != splittedFile.at(splittedFile.length - 1)
+                      item.title != splittedFile.at(splittedFile.length - 1),
                   ),
                 ]
               : [];
-          }
+          },
         );
       });
 
@@ -197,11 +212,11 @@ export function MultiTaggerActionBar(props: {
             return [
               ...prev,
               ...addedFiles.filter(
-                (file) => !existingFiles.includes(file.title)
+                (file) => !existingFiles.includes(file.title),
               ),
             ].sort();
           }
-        }
+        },
       );
     },
   });
@@ -230,7 +245,7 @@ export function MultiTaggerActionBar(props: {
     const files = data
       .filter(
         (file) =>
-          file.fullpath.slice(0, file.fullpath.lastIndexOf("/")) != actualDir
+          file.fullpath.slice(0, file.fullpath.lastIndexOf("/")) != actualDir,
       )
       .map((file) => file.fullpath);
     moveMutation.mutate({
@@ -241,8 +256,186 @@ export function MultiTaggerActionBar(props: {
     props.setSelectedItems([]);
     props.setUnselectedItems([]);
   };
+  const openMobileDialog = (view: MobileView) =>
+    setMobileDialogStack((prev) => [...prev, view]);
+  const closeOneMobileDialog = () =>
+    setMobileDialogStack((prev) => prev.slice(0, -1));
+  const closeAllMobileDialogs = () => setMobileDialogStack([]);
+  const currentMobileDialog = mobileDialogStack[mobileDialogStack.length - 1];
   return (
     <>
+      <Box display={{ base: "inline-flex", lg: "none" }}>
+        <IconButton
+          onClick={async (e) => {
+            e.stopPropagation();
+            setMobileDialogStack(["menu"]);
+            await loadSelectionDetails();
+          }}
+          onDoubleClick={(e) => e.stopPropagation()}
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+          minW="2.25rem"
+          minH="2.25rem"
+          variant={"ghost"}
+        >
+          <CiMenuBurger size="25" />
+        </IconButton>
+      </Box>
+
+      <Dialog.Root
+        open={mobileDialogStack.length > 0}
+        onOpenChange={(e) => {
+          if (!e.open) closeOneMobileDialog();
+        }}
+        placement={{ base: "top", md: "center" }}
+        size={{ base: "sm", md: "lg" }}
+        scrollBehavior="inside"
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner padding={{ base: 4, md: 4 }}>
+            <Dialog.Content
+              display={{ base: "flex", lg: "none" }}
+              borderRadius="xl"
+              maxH={{ base: "80svh", md: "75vh" }}
+            >
+              <Dialog.Header>
+                <Stack
+                  direction="row"
+                  align="center"
+                  justify="space-between"
+                  width="full"
+                >
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    visibility={
+                      mobileDialogStack.length > 1 ? "visible" : "hidden"
+                    }
+                    onClick={closeOneMobileDialog}
+                  >
+                    Back
+                  </Button>
+                  <Dialog.Title>
+                    {currentMobileDialog === "move"
+                      ? "Move"
+                      : currentMobileDialog === "move_new"
+                        ? "Move to a New Folder"
+                        : currentMobileDialog === "tags"
+                          ? "Change Tags"
+                          : "Actions"}
+                  </Dialog.Title>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={closeAllMobileDialogs}
+                  >
+                    Close
+                  </Button>
+                </Stack>
+              </Dialog.Header>
+              <Dialog.Body overflowY="auto">
+                {currentMobileDialog === "menu" && (
+                  <Stack gap={2}>
+                    <Button
+                      variant="outline"
+                      justifyContent="flex-start"
+                      disabled={loading}
+                      onClick={() => {
+                        removeClickHandler();
+                        closeAllMobileDialogs();
+                      }}
+                    >
+                      Remove Selected Files
+                    </Button>
+                    <Button
+                      variant="outline"
+                      justifyContent="space-between"
+                      disabled={loading}
+                      onClick={() => openMobileDialog("move")}
+                    >
+                      <span>Move</span>
+                      <LuChevronRight />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      justifyContent="space-between"
+                      disabled={loading}
+                      onClick={() => openMobileDialog("tags")}
+                    >
+                      <span>Change Tags</span>
+                      <LuChevronRight />
+                    </Button>
+                    {loading && <Spinner size="sm" />}
+                  </Stack>
+                )}
+                {currentMobileDialog === "move" && (
+                  <Stack gap={2}>
+                    {dirNames.map((item) => (
+                      <Button
+                        key={item}
+                        variant="outline"
+                        justifyContent="flex-start"
+                        onClick={() => {
+                          moveClickHandler(item);
+                          closeAllMobileDialogs();
+                        }}
+                      >
+                        Move to : {item}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="outline"
+                      justifyContent="flex-start"
+                      onClick={() => {
+                        moveClickHandler();
+                        closeAllMobileDialogs();
+                      }}
+                    >
+                      Move Here
+                    </Button>
+                    <Button
+                      variant="outline"
+                      justifyContent="space-between"
+                      onClick={() => openMobileDialog("move_new")}
+                    >
+                      <span>Move to a new folder</span>
+                      <LuChevronRight />
+                    </Button>
+                  </Stack>
+                )}
+                {currentMobileDialog === "move_new" && (
+                  <MultiTaggerActionBarInput
+                    moveClickHandler={(newDir) => {
+                      moveClickHandler(newDir);
+                      closeAllMobileDialogs();
+                    }}
+                  />
+                )}
+                {currentMobileDialog === "tags" &&
+                  (loading ? (
+                    <Spinner />
+                  ) : (
+                    <TagList
+                      tags={props.tags}
+                      sharedTags={sharedTags}
+                      unsharedTags={unsharedTags}
+                      data={data.map((dt) => dt.fullpath)}
+                      queryData={[
+                        "multiTagger",
+                        props.selectedItems,
+                        props.unselectedItems,
+                      ]}
+                      isMultiTag={true}
+                    />
+                  ))}
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
       <Menu.Root>
         <Menu.Trigger
           asChild
@@ -251,7 +444,16 @@ export function MultiTaggerActionBar(props: {
             e.stopPropagation();
           }}
         >
-          <CiMenuBurger size="25" />
+          <IconButton
+            display={{ base: "none", lg: "inline-flex" }}
+            alignItems="center"
+            justifyContent="center"
+            minW="2.25rem"
+            minH="2.25rem"
+            variant={"subtle"}
+          >
+            <CiMenuBurger size="25" />
+          </IconButton>
         </Menu.Trigger>
 
         <Portal>

@@ -1,29 +1,8 @@
 import { FormEvent } from "react";
 import { Button, Input, Stack } from "@chakra-ui/react";
-import { UseMutateFunction } from "@tanstack/react-query";
-import { EnqueuedTask } from "meilisearch";
 
 export default function TagAdder(props: {
-  mutate:
-    | UseMutateFunction<
-        {
-          id: string;
-          name: string;
-        },
-        Error,
-        {
-          name: string;
-        },
-        unknown
-      >
-    | UseMutateFunction<
-        EnqueuedTask | undefined,
-        Error,
-        {
-          name: string;
-        },
-        unknown
-      >;
+  mutate: ({ name }: { name: string }) => void;
   filterKey: string;
 }) {
   const addTagFormAction = (e: FormEvent<HTMLFormElement>) => {

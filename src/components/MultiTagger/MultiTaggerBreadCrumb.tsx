@@ -6,7 +6,7 @@ export function MultiTaggerBreadCrumb(props: {
   setDir: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   return (
-    <Breadcrumb.Root variant={"plain"}>
+    <Breadcrumb.Root marginLeft={"1rem"} variant={"plain"}>
       <Breadcrumb.List>
         {props.dirs.map((dir, index) => (
           <Fragment key={dir + index}>

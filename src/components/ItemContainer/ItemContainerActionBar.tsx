@@ -5,7 +5,7 @@ import {
   tagType,
 } from "../../types/types";
 import { clearSelected } from "../../utils/itemContainerUtils";
-import { ActionBar, CloseButton, Portal } from "@chakra-ui/react";
+import { ActionBar, Box, CloseButton, Portal } from "@chakra-ui/react";
 
 import { MultiTaggerActionBar } from "../MultiTagger/MultiTaggerActionBar";
 import { ItemViewActionBar } from "../ItemViewActionBar";
@@ -54,14 +54,38 @@ export function ItemContainerActionBar(props: {
       closeOnInteractOutside={false}
     >
       <Portal>
-        <ActionBar.Positioner className="z-1">
-          <ActionBar.Content>
-            <Actions ItemContainerParent={props.ItemContainerParent} />
-            <ActionBar.CloseTrigger asChild onClick={closeClickHandler}>
-              <CloseButton size="sm" />
-            </ActionBar.CloseTrigger>
-          </ActionBar.Content>
-        </ActionBar.Positioner>
+        <Box
+          position={{ base: "fixed", lg: "static" }}
+          insetX={0}
+          top={{ base: 0, lg: "auto" }}
+          height={{ base: "100dvh", lg: "auto" }}
+          pointerEvents={"none"}
+        >
+          <ActionBar.Positioner
+            zIndex={110}
+            position={{ base: "absolute", lg: "fixed" }}
+            insetX={{ base: 0, lg: undefined }}
+            bottom={{ base: 0, lg: undefined }}
+            paddingBottom={{ base: "env(safe-area-inset-bottom)", lg: 0 }}
+            pointerEvents={"none"}
+          >
+            <ActionBar.Content
+              pointerEvents={"auto"}
+              borderTopWidth={{ base: "1px", lg: 0 }}
+              borderColor={{ base: "gray.200", lg: "transparent" }}
+              borderRadius={{ base: 0, lg: "md" }}
+              boxShadow={{ base: "0 -8px 24px rgba(0,0,0,0.12)", lg: "md" }}
+              background={{ base: "white", lg: undefined }}
+              justifyContent={"center"}
+              padding={{ base: "0.5rem" }}
+            >
+              <Actions ItemContainerParent={props.ItemContainerParent} />
+              <ActionBar.CloseTrigger asChild onClick={closeClickHandler}>
+                <CloseButton size="sm" />
+              </ActionBar.CloseTrigger>
+            </ActionBar.Content>
+          </ActionBar.Positioner>
+        </Box>
       </Portal>
     </ActionBar.Root>
   );

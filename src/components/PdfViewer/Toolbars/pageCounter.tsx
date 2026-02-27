@@ -41,13 +41,22 @@ export default function PageCounter() {
   }, [params.page, params.path, scrollApi]);
   const totalPages = scrollApi?.getTotalPages();
   const curPage = scrollApi?.getCurrentPage();
-  if (totalPages != 0)
+  if (totalPages && totalPages != 0)
     return (
       <Stack direction={"row"} align={"center"} justify={"center"}>
         <Input
-          width={"4vw"}
-          size={"xs"}
-          maxHeight={"2.5vh"}
+          width={
+            totalPages < 10
+              ? "1.3rem"
+              : totalPages < 100
+                ? "2.3rem"
+                : totalPages < 1000
+                  ? "3.3rem"
+                  : totalPages < 10000
+                    ? "4.3rem"
+                    : "5.3rem"
+          }
+          height={"1.5rem"}
           fontSize={"md"}
           placeholder={String(curPage)}
           onKeyDown={(e) => {

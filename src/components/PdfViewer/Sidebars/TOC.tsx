@@ -35,20 +35,22 @@ export function TOCRecursiveAccordion(props: {
   return (
     <Accordion.Root
       multiple
-      paddingLeft={"0.5vw"}
+      paddingLeft={"0.5dvw"}
       {...(props.isRoot
         ? {
-            maxHeight: "90vh",
+            height: { base: "100dvh", lg: "95dvh" },
             overflowY: "auto",
             marginLeft: "0vw",
             marginRight: "0vw",
-            maxWidth: "15rem",
+            width: "15dvw",
+            scrollbar: "hidden",
           }
         : {})}
+      fontSize={{ base: "0.60rem", md: "0.75rem", lg: "0.99em" }}
     >
       {props.items.map((item, index) => (
         <Accordion.Item key={index} value={item.title || ""}>
-          <Stack padding={2} fontSize={"sm"} direction={"row"} align={"center"}>
+          <Stack padding={"0.45rem"} direction={"row"} align={"center"}>
             <Span
               cursor={"pointer"}
               onClick={() => {

@@ -15,8 +15,9 @@ export default function PanToolbar() {
       onClick={pan.togglePan}
       variant={"outline"}
       background={isPanning ? "gray.400" : "transparent"}
+      display={{ base: "none", lg: "block" }}
     >
-      <MdPanTool  />
+      <MdPanTool />
     </Button>
   );
 }

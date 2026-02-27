@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   listItemViewQueryDataType,
   multiTaggerQueryDataType,
@@ -16,7 +16,7 @@ export default function TagList(props: tagAdderPropsType) {
   const [cBoxes, setCBoxes] = useState<string[]>(
     props.itemTags
       ? props.itemTags.map((iT) => iT.id)
-      : props.sharedTags?.map((iT) => iT.id) || []
+      : props.sharedTags?.map((iT) => iT.id) || [],
   );
   const [searchInput, setSearchInput] = useState<string>("");
   const [toRemTags, setToRemTags] = useState<string[]>([]);
@@ -35,15 +35,15 @@ export default function TagList(props: tagAdderPropsType) {
   };
   const mutateItemView = useItemViewBookTagsMutation(
     props.queryData as listItemViewQueryDataType,
-    setIsSaved
+    setIsSaved,
   );
   const multiMutateItemView = useChangeTagsBarMutation(
     props.queryData as listItemViewQueryDataType,
-    setIsSaved
+    setIsSaved,
   );
   const mutateMultiTager = useMultiTaggerBookTagsMutation(
     props.queryData as multiTaggerQueryDataType,
-    setIsSaved
+    setIsSaved,
   );
   const formAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,13 +69,16 @@ export default function TagList(props: tagAdderPropsType) {
   };
   return (
     <Stack
+      maxWidth={"100%"}
+      minWidth={0}
       onClick={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
     >
-      <Stack>
+      <Stack minWidth={0}>
         <label>Find tag:</label>
         <Input
           className="border-4 border-black "
+          minWidth={0}
           placeholder="Type here..."
           onChange={(e) => {
             e.stopPropagation();
@@ -83,14 +86,29 @@ export default function TagList(props: tagAdderPropsType) {
           }}
         />
       </Stack>
-      <form method="post" onSubmit={formAction} id="tagAddingForm">
+      <form
+        method="post"
+        onSubmit={formAction}
+        id="tagAddingForm"
+        style={{ width: "100%", minWidth: 0 }}
+      >
         <label htmlFor="tags">Tags:</label>
-        <Stack overflow={"auto"} maxHeight={"170px"}>
+        <Stack
+          overflow={"auto"}
+          height={"17vh"}
+          width={"full"}
+          minWidth={0}
+          overscrollBehaviorY={"contain"}
+          overscrollBehaviorX={"contain"}
+          css={{ WebkitOverflowScrolling: "touch" }}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {props.tags
             .filter((tag) =>
               searchInput.toLocaleLowerCase() != ""
                 ? tag.name.toLocaleLowerCase().includes(searchInput)
-                : true
+                : true,
             )
             .map(
               (tag) =>
@@ -98,30 +116,45 @@ export default function TagList(props: tagAdderPropsType) {
                 (!props.isMultiTag ? tag.name != "favorite" : true) && (
                   <Checkbox.Root
                     id={tag.id}
-                    onClick={() => onChangeHandler(tag.id)}
                     checked={cBoxes.includes(tag.id)}
                     variant={"subtle"}
                     key={tag.id}
+                    width={"full"}
+                    minWidth={0}
                   >
-                    <Checkbox.Control />
+                    <Checkbox.Control
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChangeHandler(tag.id);
+                      }}
+                    />
                     <Checkbox.Label
                       height={"30px"}
-                      width={"80px"}
-                      maxWidth="100px"
+                      minWidth={0}
+                      maxWidth="100%"
                       overflow="hidden"
                       textOverflow="ellipsis"
                       whiteSpace="nowrap"
+                      flex={1}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChangeHandler(tag.id);
+                      }}
                     >
                       <Tooltip
                         content={tag.name[0].toUpperCase() + tag.name.slice(1)}
                       >
-                        <Box>
+                        <Box
+                          maxWidth={"100%"}
+                          overflow={"hidden"}
+                          textOverflow={"ellipsis"}
+                        >
                           {tag.name[0].toUpperCase() + tag.name.slice(1)}
                         </Box>
                       </Tooltip>
                     </Checkbox.Label>
                   </Checkbox.Root>
-                )
+                ),
             )}
         </Stack>
         <Button

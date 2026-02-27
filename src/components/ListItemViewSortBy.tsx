@@ -18,12 +18,12 @@ const orderByValues = createListCollection({
       icon: <HiOutlineSortDescending />,
     },
     {
-      label: "Last added",
+      label: "added Date",
       value: "addedDate asc",
       icon: <HiOutlineSortAscending />,
     },
     {
-      label: "Last added",
+      label: "added Date",
       value: "addedDate desc",
       icon: <HiOutlineSortDescending />,
     },

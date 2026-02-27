@@ -19,19 +19,15 @@ export default function PDFViewer(props: {
       <PdfEngineProvider engine={engine} isLoading={isLoading} error={error}>
         <EmbedPDF engine={engine} plugins={plugins}>
           <BookmarkContextProvider>
-            <Stack
-              position={"absolute"}
-              left={0}
-              right={0}
-              top={0}
-              bottom={0}
-              direction={"column"}
-              gap={0}
-            >
-              <Toolbar />
-              <Stack minHeight={0} direction={"row"} gap={0}>
-                <Sidebar />
-                <Box flex={1} minWidth={0} overflowX="auto">
+            <Stack position={"absolute"} inset={0} direction={"column"} gap={0}>
+              <Box display={{ base: "none", lg: "block" }}>
+                <Toolbar />
+              </Box>
+              <Stack direction={"row"} flex={1} minHeight={0} gap={0}>
+                <Box display={{ base: "none", md: "block" }}>
+                  <Sidebar />
+                </Box>
+                <Box flex={1} minWidth={0}>
                   <ViewPort
                     pdfId={props.pdfId}
                     pdfUrl={props.pdfUrl}

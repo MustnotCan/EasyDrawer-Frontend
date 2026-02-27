@@ -6,15 +6,14 @@ type BoxProps = {
 export default function Navigation({ children }: BoxProps) {
   return (
     <Stack
+      position={"fixed"}
       direction={"column"}
-      maxWidth={"180px"}
-      marginLeft={"1"}
-      marginTop={"2"}
-      marginRight={"5"}
-      width={"1/2"}
-      height={"max-content"}
-      borderColor={"black"}
-      borderWidth="thick"
+      background={"whitesmoke"}
+      margin={0}
+      padding={"1rem"}
+      flex={1}
+      height={"full"}
+      width={{base:"100dvw",lg:"10dvw"}}
     >
       {children}
     </Stack>

@@ -182,7 +182,7 @@ function UserBookmarksRecursiveAccordion(props: {
       paddingLeft="0.5vw"
       {...(props.isRoot
         ? {
-            maxHeight: "90vh",
+            maxHeight: "86vh",
             marginLeft: "0vw",
             marginRight: "0vw",
           }

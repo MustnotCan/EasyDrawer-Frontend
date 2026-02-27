@@ -45,7 +45,6 @@ export function Color(props: {
           <ColorPicker.Content>
             <ColorPicker.Area />
             <HStack>
-              <ColorPicker.EyeDropper size="xs" variant="outline" />
               <ColorPicker.Sliders />
             </HStack>
           </ColorPicker.Content>
@@ -165,11 +164,11 @@ export function PropertySelecter(props: {
   let selectKeys: string[] = [];
   if (props.property == "blendMode") {
     selectKeys = Object.values(PdfBlendMode).filter(
-      (v): v is string => typeof v === "string"
+      (v): v is string => typeof v === "string",
     );
   } else if (props.property == "fontFamily") {
     selectKeys = Object.values(PdfStandardFont).filter(
-      (v): v is string => typeof v === "string"
+      (v): v is string => typeof v === "string",
     );
   }
   return (
@@ -190,8 +189,8 @@ export function PropertySelecter(props: {
           }
         }}
       >
-        {selectKeys.map((pres: string, index) => (
-          <option key={pres} value={index}>
+        {selectKeys.map((pres: string) => (
+          <option key={pres} value={pres}>
             {pres}
           </option>
         ))}

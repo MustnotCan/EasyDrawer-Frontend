@@ -1,19 +1,19 @@
 import Menu from "./Menu";
 import { ItemViewPropsType } from "../types/types";
-import { useState } from "react";
 import { THUMBS_URL } from "../utils/envVar";
-import { FaHeart } from "react-icons/fa";
-import { CiHeart } from "react-icons/ci";
 import { Stack } from "@chakra-ui/react";
 import { Tooltip } from "../ui/tooltip";
-import { useItemViewChangeTagsMutation } from "../utils/Hooks/ItemViewHook.ts";
-import { useTags } from "../utils/Hooks/TagsHook.ts";
 import { VITE_API_MAIN } from "../utils/envVar";
+import { useItemViewChangeTagsMutation } from "@/utils/Hooks/ItemViewHook";
+import { useTags } from "@/utils/Hooks/TagsHook";
+import { useState } from "react";
+import { CiHeart } from "react-icons/ci";
+import { FaHeart } from "react-icons/fa6";
 export default function ItemView(props: ItemViewPropsType) {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     props.itemView.prop.tags
       .map((tag) => tag.name.toLowerCase())
-      .includes("favorite")
+      .includes("favorite"),
   );
   const tags = useTags();
   const mutate = useItemViewChangeTagsMutation(props.queryData, tags);
@@ -23,17 +23,25 @@ export default function ItemView(props: ItemViewPropsType) {
   }
   return (
     <Stack>
-      <Stack>
-        <img
-          src={THUMBS_URL + props.itemView.prop.thumbnail}
-          alt={props.itemView.prop.title}
-          loading="lazy"
-        />
-      </Stack>
+      <img
+        src={THUMBS_URL + props.itemView.prop.thumbnail}
+        alt={props.itemView.prop.title}
+        loading="lazy"
+      />
       <Tooltip content={props.itemView.prop.title}>
-        <p className="truncate w-50">{props.itemView.prop.title}</p>
+        <p
+          className="line-clamp-2 w-[20vw] sm:w-[13vw] lg:w-[11vw] text-center"
+          style={{ lineHeight: "1.25rem", minHeight: "2.5rem" }}
+        >
+          {props.itemView.prop.title}
+        </p>
       </Tooltip>
-      <Stack direction={"row"}>
+
+      <Stack
+        direction={"row"}
+        display={{ base: "none", lg: "flex" }}
+        gap={"10rem"}
+      >
         {isFavorite ? (
           <FaHeart
             color="red"
@@ -41,7 +49,7 @@ export default function ItemView(props: ItemViewPropsType) {
             onClick={() => {
               favoriteToggleHandler(
                 isFavorite,
-                props.itemView.prop.path + "/" + props.itemView.prop.title
+                props.itemView.prop.path + "/" + props.itemView.prop.title,
               );
             }}
           />
@@ -52,12 +60,11 @@ export default function ItemView(props: ItemViewPropsType) {
             onClick={() => {
               favoriteToggleHandler(
                 isFavorite,
-                props.itemView.prop.path + "/" + props.itemView.prop.title
+                props.itemView.prop.path + "/" + props.itemView.prop.title,
               );
             }}
           />
         )}
-
         <Menu
           name={props.itemView.prop.title}
           itemTags={props.itemView.itemTags}

@@ -1,4 +1,4 @@
-import { Stack } from "@chakra-ui/react";
+import { Box, IconButton, Span, Stack } from "@chakra-ui/react";
 import Navigation from "./Navigation";
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
@@ -8,37 +8,69 @@ import { useQueryClient } from "@tanstack/react-query";
 import TaskStatus from "./TaskStatus";
 import { useMultiTaggerImport } from "@/utils/Hooks/MultiTaggerHooks";
 import { sseImportTaskSchema, sseIndexingTaskSchema } from "@/types/schemas";
+import { IoMenu } from "react-icons/io5";
 export default function Home() {
-  const [navMenuOpen, setNavMenuOpen] = useState(true);
+  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+
+  const [navMenuOpen, setNavMenuOpen] = useState(isTouchDevice ? false : true);
   useSSE();
   const onClickNavigationHandler = () => setNavMenuOpen((prev) => !prev);
+
   return (
-    <Stack margin={"10"}>
-      <header>
-        <h1 className="text-center">Pdf Management App</h1>
-        <button onClick={onClickNavigationHandler}>Navigation Menu</button>
+    <Stack gap={0} height={"100dvh"} width={"100dvw"} direction={"column"}>
+      <header className="bg-red-200  fixed h-12 w-full z-10 block lg:hidden">
+        <IconButton
+          onClick={onClickNavigationHandler}
+          size={"xl"}
+          backgroundColor={"transparent"}
+        >
+          <IoMenu color="black" />
+        </IconButton>
       </header>
-      <Stack direction={"row"}>
+      <Stack
+        direction={"row"}
+        flex={1}
+        marginTop={{ base: "3rem", lg: 0 }}
+        align={{ base: navMenuOpen ? "normal" : "center", lg: "normal" }}
+        alignItems={"start"}
+      >
         {navMenuOpen && (
           <Navigation>
-            <Link to="/browse">
-              <span className="bg-amber-300">Browse Books</span>
-            </Link>
-            <Link to="/favorite">
-              <span className="bg-blue-300">Favorite Books</span>
-            </Link>
-            <Link to="/unclassified">
-              <span className="bg-green-300">Unclassified Books</span>
-            </Link>
-            <Link to="/multitagger">
-              <span className="bg-red-300">Multi tagger</span>
-            </Link>
-            <Link to="/fts">
-              <span className="bg-violet-300">Full-text Search</span>
-            </Link>
+            <NavLink
+              setNavMenu={setNavMenuOpen}
+              to="/browse"
+              title="Browse Books"
+            />
+            <NavLink
+              setNavMenu={setNavMenuOpen}
+              to="/favorite"
+              title="Favorite Books"
+            />
+            <NavLink
+              setNavMenu={setNavMenuOpen}
+              to="/unclassified"
+              title="Unclassified Books"
+            />
+            <NavLink
+              setNavMenu={setNavMenuOpen}
+              to="/multitagger"
+              title="Multi tagger"
+            />
+
+            <NavLink
+              setNavMenu={setNavMenuOpen}
+              to="/fts"
+              title="Full-text Search"
+            />
           </Navigation>
         )}
-        <Outlet />
+        <Box
+          display={{ base: navMenuOpen ? "none" : "block", lg: "block" }}
+          marginLeft={{ base: 0, lg: "9.8dvw" }}
+          height={"full"}
+        >
+          <Outlet />
+        </Box>
         <Toaster />
       </Stack>
     </Stack>
@@ -166,3 +198,27 @@ const useSSE = () => {
     return () => eventSource.close();
   }, [queryClient, updateCache]);
 };
+function NavLink(props: {
+  to: string;
+  className?: string;
+  title: string;
+  setNavMenu: (bool: boolean) => void;
+}) {
+  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+
+  return (
+    <Link
+      to={props.to}
+      onClick={() => {
+        if (isTouchDevice) props.setNavMenu(false);
+      }}
+    >
+      <Span
+        fontSize={{ base: "2xl", md: "xl", lg: "md" }}
+        className={props.className ?? "text-wrap "}
+      >
+        {props.title}
+      </Span>
+    </Link>
+  );
+}

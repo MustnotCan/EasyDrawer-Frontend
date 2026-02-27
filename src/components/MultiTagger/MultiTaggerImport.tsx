@@ -18,7 +18,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
   });
 
   return (
-    <Stack direction={"column"} width={"200px"}>
+    <Stack direction={"column"} marginLeft={"1rem"} marginTop={"1rem"}>
       <FileUpload.Root
         maxFiles={Infinity}
         accept={"application/pdf"}
@@ -41,7 +41,7 @@ export function MultiTaggerImport(props: { dirs: string[] }) {
         <FileUpload.HiddenInput />
         <Stack direction={"row"}>
           <FileUpload.Trigger asChild>
-            <Button variant="outline" size="sm" margin={"0px"}>
+            <Button variant="outline" size="sm" margin={0}>
               <HiUpload /> Select file
             </Button>
           </FileUpload.Trigger>

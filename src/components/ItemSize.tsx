@@ -2,10 +2,10 @@ import { createListCollection, Portal, Select } from "@chakra-ui/react";
 
 const values = createListCollection({
   items: [
-    { label: 25, value: "25" },
-    { label: 50, value: "50" },
-    { label: 75, value: "75" },
-    { label: 100, value: "100" },
+    { label: 48, value: "48" },
+    { label: 72, value: "72" },
+    { label: 96, value: "96" },
+    { label: 120, value: "120" },
   ],
 });
 export default function ItemSize(props: {
@@ -16,13 +16,13 @@ export default function ItemSize(props: {
     <Select.Root
       collection={values}
       flexDir={"row"}
-      width={"300px"}
+      width={"fit"}
       onValueChange={(e) => props.setTake(Number.parseInt(e.value[0]))}
       defaultValue={[props.take.toString()]}
     >
       <Select.HiddenSelect />
       <Select.Label alignContent={"center"}>Results per page :</Select.Label>
-      <Select.Control width={"100px"}>
+      <Select.Control width={"5rem"}>
         <Select.Trigger>
           <Select.ValueText placeholder={props.take.toString()} />
         </Select.Trigger>

@@ -1,4 +1,13 @@
-import { Menu, Portal, Spinner } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Dialog,
+  IconButton,
+  Menu,
+  Portal,
+  Spinner,
+  Stack,
+} from "@chakra-ui/react";
 import { CiMenuBurger } from "react-icons/ci";
 import { LuChevronRight } from "react-icons/lu";
 import TagList from "./ItemViewTagList";
@@ -18,15 +27,17 @@ export function ItemViewActionBar(props: {
   setSelectedItems: React.Dispatch<React.SetStateAction<selectedItemType[]>>;
   queryData: listItemViewQueryDataType;
 }) {
+  type MobileView = "menu" | "tags";
   const [sharedTags, setSharedTags] = useState<tagType[]>([]);
   const [unsharedTags, setUnsharedTags] = useState<tagType[]>([]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<itemViewSelectedType[]>([]);
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<MobileView>("menu");
 
   const tags = useTags();
   const queryClient = useQueryClient();
-  const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const loadSelectionDetails = async () => {
     setLoading(true);
     try {
       const response = await queryClient.fetchQuery({
@@ -40,7 +51,7 @@ export function ItemViewActionBar(props: {
       setData(response);
       const taggsWithLength = tags.map((tag) => {
         const count = response.filter((file) =>
-          file.tags.map((t) => t.name).includes(tag.name)
+          file.tags.map((t) => t.name).includes(tag.name),
         ).length;
 
         return { tag, length: count };
@@ -62,9 +73,108 @@ export function ItemViewActionBar(props: {
       setLoading(false);
     }
   };
+  const clickHandler = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    await loadSelectionDetails();
+  };
 
   return (
     <>
+      <Box display={{ base: "inline-flex", lg: "none" }}>
+        <IconButton
+          onClick={async (e) => {
+            e.stopPropagation();
+            setMobileView("menu");
+            setIsMobileDialogOpen(true);
+            await loadSelectionDetails();
+          }}
+          onDoubleClick={(e) => e.stopPropagation()}
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+          minW="2.25rem"
+          minH="2.25rem"
+        >
+          <CiMenuBurger size="25" />
+        </IconButton>
+      </Box>
+
+      <Dialog.Root
+        open={isMobileDialogOpen}
+        onOpenChange={(e) => {
+          setIsMobileDialogOpen(e.open);
+          if (!e.open) setMobileView("menu");
+        }}
+        placement={{ base: "top", md: "center" }}
+        size={{ base: "sm", md: "lg" }}
+        scrollBehavior="inside"
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner padding={{ base: 4, md: 4 }}>
+            <Dialog.Content
+              display={{ base: "flex", lg: "none" }}
+              borderRadius="xl"
+              maxH={{ base: "80svh", md: "70vh" }}
+            >
+              <Dialog.Header>
+                <Stack
+                  direction="row"
+                  width="full"
+                  justify="space-between"
+                  align="center"
+                >
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    visibility={mobileView === "tags" ? "visible" : "hidden"}
+                    onClick={() => setMobileView("menu")}
+                  >
+                    Back
+                  </Button>
+                  <Dialog.Title>
+                    {mobileView === "tags" ? "Change Tags" : "Actions"}
+                  </Dialog.Title>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsMobileDialogOpen(false);
+                      setMobileView("menu");
+                    }}
+                  >
+                    Close
+                  </Button>
+                </Stack>
+              </Dialog.Header>
+              <Dialog.Body overflowY="auto">
+                {mobileView === "menu" ? (
+                  <Button
+                    justifyContent="space-between"
+                    variant="outline"
+                    width="full"
+                    onClick={() => setMobileView("tags")}
+                  >
+                    <span>Change Tags</span>
+                    <LuChevronRight />
+                  </Button>
+                ) : loading ? (
+                  <Spinner />
+                ) : (
+                  <TagList
+                    tags={tags}
+                    sharedTags={sharedTags}
+                    unsharedTags={unsharedTags}
+                    data={data.map((dt) => dt.path + "/" + dt.title)}
+                    queryData={[...props.queryData]}
+                  />
+                )}
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
       <Menu.Root>
         <Menu.Trigger
           asChild
@@ -73,38 +183,52 @@ export function ItemViewActionBar(props: {
             e.stopPropagation();
           }}
         >
-          <CiMenuBurger size="25" />
+          <IconButton
+            display={{ base: "none", lg: "inline-flex" }}
+            alignItems="center"
+            justifyContent="center"
+            minW="2.25rem"
+            minH="2.25rem"
+          >
+            <CiMenuBurger size="25" />
+          </IconButton>
         </Menu.Trigger>
 
         <Portal>
           <Menu.Positioner>
             <Menu.Content>
-              <>
-                <Menu.Root
-                  positioning={{ placement: "right-start", gutter: 2 }}
-                >
-                  <Menu.TriggerItem onDoubleClick={(e) => e.stopPropagation()}>
-                    Change Tags <LuChevronRight />
-                  </Menu.TriggerItem>
-                  <Portal>
-                    <Menu.Positioner>
-                      <Menu.Content>
-                        {loading ? (
-                          <Spinner />
-                        ) : (
-                          <TagList
-                            tags={tags}
-                            sharedTags={sharedTags}
-                            unsharedTags={unsharedTags}
-                            data={data.map((dt) => dt.path + "/" + dt.title)}
-                            queryData={[...props.queryData]}
-                          />
-                        )}
-                      </Menu.Content>
-                    </Menu.Positioner>
-                  </Portal>
-                </Menu.Root>
-              </>
+              <Menu.Root positioning={{ placement: "top" }}>
+                <Menu.TriggerItem onDoubleClick={(e) => e.stopPropagation()}>
+                  Change Tags <LuChevronRight />
+                </Menu.TriggerItem>
+                <Portal>
+                  <Menu.Positioner
+                    zIndex={120}
+                    maxWidth={{ base: "100vw", md: "auto" }}
+                  >
+                    <Menu.Content
+                      minWidth={0}
+                      maxWidth={{ base: "92vw", md: "sm" }}
+                      width={{ base: "35vw", md: "auto" }}
+                      maxHeight={{ base: "55svh", md: "70vh" }}
+                      overflowX={"hidden"}
+                      overflowY={"auto"}
+                    >
+                      {loading ? (
+                        <Spinner />
+                      ) : (
+                        <TagList
+                          tags={tags}
+                          sharedTags={sharedTags}
+                          unsharedTags={unsharedTags}
+                          data={data.map((dt) => dt.path + "/" + dt.title)}
+                          queryData={[...props.queryData]}
+                        />
+                      )}
+                    </Menu.Content>
+                  </Menu.Positioner>
+                </Portal>
+              </Menu.Root>
             </Menu.Content>
           </Menu.Positioner>
         </Portal>

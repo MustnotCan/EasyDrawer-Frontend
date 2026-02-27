@@ -1,5 +1,5 @@
 import { Button, Span, Stack } from "@chakra-ui/react";
-import { memo, useEffect, useState } from "react";
+import { memo, ReactElement, useEffect, useState } from "react";
 import TableOfContents from "./TOC";
 import { LuTableOfContents } from "react-icons/lu";
 import { Tooltip } from "../../../ui/tooltip";
@@ -25,6 +25,8 @@ export default function Sidebar() {
   const { provides: loaderApi } = useDocumentManagerCapability();
   const { provides: scrollApi } = useScrollCapability();
   const [bookmarks, setbookmarks] = useState<PdfBookmarkObject[]>([]);
+  const [activeSideBar, setActiveSideBar] = useState("");
+
   useEffect(() => {
     if (!loaderApi || !engine || isLoading) return;
 
@@ -35,59 +37,38 @@ export default function Sidebar() {
         .then((bm) => setbookmarks(bm.bookmarks));
     });
   }, [loaderApi, engine, isLoading]);
-  const [activeSideBar, setActiveSideBar] = useState("");
-  if (!activeDocumentId) return <p>document not loaded</p>;
+  if (!activeDocumentId) return;
   const toggleOption = (opt: string) => {
     setActiveSideBar((prev) => (prev != opt ? opt : ""));
   };
   return (
-    <Stack direction={"row"} background="#ffffff">
+    <Stack direction={"row"} background="#ffffff" width="fit">
       <Stack direction={"column"}>
-        <Button
-          variant={"outline"}
-          size="sm"
-          onClick={() => toggleOption("TOC")}
-        >
-          <Tooltip content="Table of contents">
-            <LuTableOfContents />
-          </Tooltip>
-        </Button>
-        <Button
-          variant={"outline"}
-          size="sm"
-          onClick={() => toggleOption("AE")}
-        >
-          <Tooltip content="Annotation editer">
-            <AiOutlineEdit />
-          </Tooltip>
-        </Button>
-        <Button
-          variant={"outline"}
-          size="sm"
-          onClick={() => toggleOption("UB")}
-        >
-          <Tooltip content="User bookmarks">
-            <CiBookmark />
-          </Tooltip>
-        </Button>
-        <Button
-          variant={"outline"}
-          size="sm"
-          onClick={() => toggleOption("Settings")}
-        >
-          <Tooltip content="Viewer Settings">
-            <CiSettings />
-          </Tooltip>
-        </Button>
-        <Button
-          variant={"outline"}
-          size="sm"
-          onClick={() => toggleOption("AD")}
-        >
-          <Tooltip content="Annotation defaults">
-            <Span>AD</Span>
-          </Tooltip>
-        </Button>
+        <SidebarButton
+          tooltip={"Table of contents"}
+          toggleOption={"TOC"}
+          children={<LuTableOfContents />}
+        />
+        <SidebarButton
+          tooltip={"Annotation editer"}
+          toggleOption={"AE"}
+          children={<AiOutlineEdit />}
+        />
+        <SidebarButton
+          tooltip={"User bookmarks"}
+          toggleOption={"UB"}
+          children={<CiBookmark />}
+        />
+        <SidebarButton
+          tooltip={"Viewer Settings"}
+          toggleOption={"Settings"}
+          children={<CiSettings />}
+        />
+        <SidebarButton
+          tooltip={"Annotation defaults"}
+          toggleOption={"AD"}
+          children={<Span>AD</Span>}
+        />
       </Stack>
       <Stack display={activeSideBar == "TOC" ? "block" : "none"}>
         <TocMemo bookmarks={bookmarks} scrollApi={scrollApi} />
@@ -100,4 +81,22 @@ export default function Sidebar() {
       </Stack>
     </Stack>
   );
+
+  function SidebarButton(props: {
+    children: ReactElement;
+    toggleOption: string;
+    tooltip: string;
+  }) {
+    return (
+      <Button
+        variant={"outline"}
+        width={"2.5rem"}
+        height={"2.5rem"}
+        size={"2xs"}
+        onClick={() => toggleOption(props.toggleOption)}
+      >
+        <Tooltip content={props.tooltip}>{props.children}</Tooltip>
+      </Button>
+    );
+  }
 }

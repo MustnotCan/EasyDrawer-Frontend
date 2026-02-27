@@ -1,4 +1,4 @@
-import { Stack } from "@chakra-ui/react";
+import {  HStack, Stack } from "@chakra-ui/react";
 import AnnotationToolBar from "./Annotation";
 import ZoomToolbar from "./Zoom";
 import RotateToolbar from "./Rotate";
@@ -12,27 +12,48 @@ import SaveToLocal from "./SaveToLocal";
 
 export default function Toolbar() {
   const { activeDocumentId } = useActiveDocument();
-
-  if (!activeDocumentId) return <p>still waiting</p>;
+  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+  if (!activeDocumentId) return null;
   return (
     <Stack
-      direction={"row"}
-      justify={"center"}
-      align={"center"}
-      gap={"1"}
+      direction={{ base: "column", lg: "row" }}
+      gap={"1rem"}
       background={"#ffffff"}
-      marginTop="1"
-      marginBottom={"2"}
+      margin={"0.5rem"}
+      overflowY={"scroll"}
+      maxH={"10rem"}
+      align={"center"}
+      justify={{ base: "normal", lg: "center" }}
     >
-      <SearchBar />
-      <ZoomToolbar />
-      <PanToolbar />
-      <ZoneCapture />
-      <PageCounter />
-      <RotateToolbar />
-      <ExportToolbar />
-      <SaveToLocal />
-      <AnnotationToolBar />
+      {isTouchDevice ? (
+        <>
+          <SearchBar />
+          <ZoomToolbar />
+          <HStack>
+            <AnnotationToolBar />
+            <SaveToLocal />
+          </HStack>
+          <PageCounter />
+          <HStack>
+            <ExportToolbar />
+            <PanToolbar />
+            <ZoneCapture />
+          </HStack>
+          <RotateToolbar />
+        </>
+      ) : (
+        <>
+          <SearchBar />
+          <ZoomToolbar />
+          <PanToolbar />
+          <RotateToolbar />
+          <PageCounter />
+          <ZoneCapture />
+          <ExportToolbar />
+          <SaveToLocal />
+          <AnnotationToolBar />
+        </>
+      )}
     </Stack>
   );
 }

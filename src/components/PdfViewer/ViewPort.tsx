@@ -13,7 +13,7 @@ import PageRender from "./PageRender";
 import { updateBookLastAccess } from "../../utils/queries/booksApi";
 import { getPdf } from "../db";
 import { GlobalPointerProvider } from "@embedpdf/plugin-interaction-manager/react";
-import { Button, HStack, Menu, Portal } from "@chakra-ui/react";
+import { Box, Button, HStack, Menu, Portal } from "@chakra-ui/react";
 import {
   PiHighlighter,
   PiHighlighterThin,
@@ -27,6 +27,8 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 import { IoText, IoSquareOutline } from "react-icons/io5";
 import { MdOutlinePolyline } from "react-icons/md";
 import { TbCircle, TbLine } from "react-icons/tb";
+import Toolbar from "./Toolbars/Toolbar";
+import MobileMenu from "./MobileMenu";
 export default function ViewPort(props: {
   pdfUrl: string;
   pdfId: string;
@@ -36,61 +38,48 @@ export default function ViewPort(props: {
   const { provides: loaderApi } = useDocumentManagerCapability();
   const annotRef = useRef(false);
   const [fetchingPdf, setFetchingPdf] = useState<boolean>(true);
+  const doneRecall = useRef<boolean>(false);
   useEffect(() => {
-    if (!loaderApi) return;
-    getPdf(props.pdfId).then((pdfData) => {
-      let loadingPromise = null;
+    if (!loaderApi||!fetchingPdf) return;
+    getPdf(props.pdfId).then(async (pdfData) => {
+      let doc = null;
       if (pdfData) {
-        loadingPromise = loaderApi.openDocumentBuffer({
-          documentId: props.pdfId,
-          buffer: pdfData.data,
-          name: props.pdfId,
-        });
+        doc = await loaderApi
+          .openDocumentBuffer({
+            documentId: props.pdfId,
+            buffer: pdfData.data,
+            name: props.pdfId,
+          })
+          .toPromise();
         updateBookLastAccess({ bookId: props.pdfId });
       } else {
-        loadingPromise = loaderApi.openDocumentUrl({
-          url: props.pdfUrl,
-          documentId: props.pdfId,
-        });
+        doc = await loaderApi
+          .openDocumentUrl({
+            url: props.pdfUrl,
+            documentId: props.pdfId,
+          })
+          .toPromise();
       }
-      loadingPromise.toPromise().then((doc) => {
-        loaderApi.setActiveDocument(doc.documentId);
-      });
+
+      loaderApi.setActiveDocument(doc.documentId);
       setFetchingPdf(false);
     });
   }, [loaderApi, props.pdfId, props.pdfPage, props.pdfUrl]);
+
   if (fetchingPdf) {
     return <p> Pdf Is being fetched, Please Wait </p>;
   } else {
     return (
       <GlobalPointerProvider documentId={props.pdfId}>
         <DocumentContent documentId={props.pdfId}>
-          {({ isLoaded, isLoading, isError }) => (
-            <>
-              {isError && <p>Error opening pdf file</p>}
-              {isLoading && <p> PDF not found locally, fetching from remote</p>}
-              {isLoaded && (
-                <>
-                  <ScrollToPageOnLoad
-                    documentId={props.pdfId}
-                    initialPage={
-                      props.pdfPage
-                        ? props.pdfPage > 1
-                          ? props.pdfPage
-                          : 1
-                        : localStorage.getItem("LP_" + props.pdfId)
-                          ? Number(localStorage.getItem("LP_" + props.pdfId))
-                          : 1
-                    }
-                  />
+          {({ isLoading, isError, isLoaded }) => {
+            if (isLoading) return <p> Pdf fetched, loading...</p>;
+            if (isError) return <p>Error opening pdf file</p>;
+            if (isLoaded)
+              return (
+                <Box className="relative h-full w-full overflow-hidden bg-[#ededed]">
                   <Viewport
                     documentId={props.pdfId}
-                    style={{
-                      overflowY: "auto",
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: "#ededed",
-                    }}
                     onClick={() => {
                       if (annotationApi && annotRef.current) {
                         if (annotationApi.getSelectedAnnotation()) {
@@ -119,10 +108,25 @@ export default function ViewPort(props: {
                       )}
                     />
                   </Viewport>
-                </>
-              )}
-            </>
-          )}
+                  {!doneRecall.current && (
+                    <ScrollToPageOnLoad
+                      documentId={props.pdfId}
+                      initialPage={
+                        props.pdfPage
+                          ? props.pdfPage > 1
+                            ? props.pdfPage
+                            : 1
+                          : localStorage.getItem("LP_" + props.pdfId)
+                            ? Number(localStorage.getItem("LP_" + props.pdfId))
+                            : 1
+                      }
+                      doneRecall={doneRecall}
+                    />
+                  )}
+                  <MobileMenu children={<Toolbar />} />
+                </Box>
+              );
+          }}
         </DocumentContent>
       </GlobalPointerProvider>
     );
@@ -131,20 +135,25 @@ export default function ViewPort(props: {
 const ScrollToPageOnLoad = ({
   documentId,
   initialPage,
+  doneRecall,
 }: {
   documentId: string;
   initialPage: number;
+  doneRecall: React.MutableRefObject<boolean>;
 }) => {
   const { provides: scrollCapability } = useScrollCapability();
 
   useEffect(() => {
     if (!scrollCapability) return;
     const unsubscribe = scrollCapability.onLayoutReady((event) => {
+      if (doneRecall.current) return;
       if (event.documentId === documentId) {
         scrollCapability.forDocument(documentId).scrollToPage({
           pageNumber: initialPage,
           behavior: "instant",
         });
+        doneRecall.current = true;
+        unsubscribe();
       }
     });
 
@@ -196,12 +205,14 @@ const ContextMenu = (props: {
                 children={<PiHighlighterThin />}
               />
             </HStack>
+            <HStack gap={0}>
+              <StyledButton
+                tooltip={"Free Text"}
+                onClick={() => toggleTool("freeText", props.annotationApi)}
+                children={<IoText />}
+              />
+            </HStack>
 
-            <StyledButton
-              tooltip={"Free Text"}
-              onClick={() => toggleTool("freeText", props.annotationApi)}
-              children={<IoText />}
-            />
             <HStack gap={0}>
               <StyledButton
                 tooltip={"Square"}

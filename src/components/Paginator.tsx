@@ -12,8 +12,12 @@ export default function Paginator(props: {
       pageSize={1}
       page={props.pn}
       onPageChange={(e) => props.setPn(e.page)}
-      siblingCount={2}
+      siblingCount={1}
       alignSelf={"center"}
+      alignContent={"end"}
+      marginBottom={{ base: "4rem", lg: 0 }}
+      paddingBottom={{ base: "env(safe-area-inset-bottom)", lg: 0 }}
+      gap={0}
     >
       <ButtonGroup variant="ghost" size="sm">
         <Pagination.PrevTrigger asChild>
@@ -24,7 +28,10 @@ export default function Paginator(props: {
 
         <Pagination.Items
           render={(page) => (
-            <IconButton variant={{ base: "ghost", _selected: "outline" }}>
+            <IconButton
+              variant={{ base: "ghost", _selected: "outline" }}
+              size={{base:"2xs","md":"xs",lg:"sm"}}
+            >
               {page.value}
             </IconButton>
           )}

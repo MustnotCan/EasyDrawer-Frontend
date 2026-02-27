@@ -3,8 +3,7 @@ import { useZoomCapability } from "@embedpdf/plugin-zoom/react";
 import { useState } from "react";
 export default function ZoomToolbar() {
   const { provides: zoomProvides } = useZoomCapability();
-  const [, setIsMarqueeZoomActive] =
-    useState<boolean>(false);
+  const [, setIsMarqueeZoomActive] = useState<boolean>(false);
   if (!zoomProvides) return;
   const presets = zoomProvides.getPresets();
   return (
@@ -16,18 +15,18 @@ export default function ZoomToolbar() {
       >
         -
       </Button>
-      <NativeSelect.Root size="sm">
+      <NativeSelect.Root size="sm" display={{ base: "none", lg: "block" }}>
         <NativeSelect.Field
           maxH={"6"}
           placeholder="Actual size"
           value={
             presets.find(
-              (pres) => pres.value == zoomProvides.getState().zoomLevel
+              (pres) => pres.value == zoomProvides.getState().zoomLevel,
             )?.name || zoomProvides.getState().currentZoomLevel.toString()
           }
           onChange={(e) => {
             zoomProvides.requestZoom(
-              presets.find((pres) => pres.name == e.currentTarget.value)!.value
+              presets.find((pres) => pres.name == e.currentTarget.value)!.value,
             );
           }}
         >

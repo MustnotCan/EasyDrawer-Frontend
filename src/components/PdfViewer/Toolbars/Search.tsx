@@ -18,11 +18,11 @@ import { GrNext, GrPrevious } from "react-icons/gr";
 import { MdOutlineCancel } from "react-icons/md";
 const findIndex = (
   results: SearchResult[],
-  scrollApi: ScrollCapability | null
+  scrollApi: ScrollCapability | null,
 ) => {
   if (!scrollApi) return 0;
   let firstResIndex: number = results.findIndex(
-    (res) => res.pageIndex >= scrollApi?.getCurrentPage() - 1
+    (res) => res.pageIndex >= scrollApi?.getCurrentPage() - 1,
   );
   if (firstResIndex == -1) {
     firstResIndex = 0;
@@ -90,12 +90,12 @@ export default function SearchBar() {
   };
 
   return (
-    <Stack direction={"row"} justify={"center"} align={"center"}>
+    <Stack direction={"row"} justify={"center"} align={"center"} width={"15rem"}>
       <Stack
         direction="row"
         justify="center"
         align="center"
-        border={2}
+        border={"0.01rem"}
         borderColor={"black"}
         borderStyle={"groove"}
       >

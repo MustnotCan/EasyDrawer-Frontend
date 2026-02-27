@@ -20,7 +20,6 @@ export default function UserBookMark(props: { bookmark: bookmarkWithIdType }) {
       <Stack
         direction={"row"}
         borderColor={"black"}
-        padding={"1"}
         borderRadius={"2xs"}
         borderWidth={"thin"}
       >
